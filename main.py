@@ -13,7 +13,6 @@ if machine.startswith('arm'):
 else:
     from third_party.RPi_emu import GPIO
 
-#from EmulatorGUI import GPIO
 IS_MEASURE = 'is_measure'
 TIME_start = 'time_start'
 TIME_stop = 'time_stop'
