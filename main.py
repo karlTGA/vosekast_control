@@ -4,9 +4,15 @@ Stand: 1.08
 
 import os
 import time
-
 import serial
+from lib.Vosekast import Vosekast
+from lib.Log import setup_custom_logger, LOGGER
 
+# add logger
+logger = setup_custom_logger(LOGGER)
+logger.debug('main message')
+
+# if on raspberry pi then with real GPIO. Alternative with emulator
 (sysname, nodename, release, version, machine) = os.uname()
 if machine.startswith('arm'):
     import RPi.GPIO as GPIO
@@ -21,7 +27,7 @@ WEIGHT_start = 'weight_start'
 WEIGHT_stop = 'weight_stop'
 #----------------------GPIO Setup and Assignment-------------------------------
 
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
 
 #GPIO Assignment
 PIN_PUMP_1 = 17
@@ -33,20 +39,20 @@ PIN_Level_Scale_Low = 25
 PIN_Level_Const_Low = 5
 
 #GPIO setup
-GPIO.setup(PIN_PUMP_1, GPIO.OUT)
-GPIO.setup(PIN_PUMP_2, GPIO.OUT)
-GPIO.setup(PIN_Switch_Valve, GPIO.OUT)  # Switch between Valves. Bypass Valve initially open!
-GPIO.setup(PIN_Drain_Valve, GPIO.OUT)
-GPIO.setup(PIN_Level_Scale_Up, GPIO.IN)
-GPIO.setup(PIN_Level_Scale_Low, GPIO.IN)
-GPIO.setup(PIN_Level_Const_Low, GPIO.IN)
+# GPIO.setup(PIN_PUMP_1, GPIO.OUT)
+# GPIO.setup(PIN_PUMP_2, GPIO.OUT)
+# GPIO.setup(PIN_Switch_Valve, GPIO.OUT)  # Switch between Valves. Bypass Valve initially open!
+# GPIO.setup(PIN_Drain_Valve, GPIO.OUT)
+# GPIO.setup(PIN_Level_Scale_Up, GPIO.IN)
+# GPIO.setup(PIN_Level_Scale_Low, GPIO.IN)
+# GPIO.setup(PIN_Level_Const_Low, GPIO.IN)
 
 #--------------------------------Open Serial Port----------------------------------------
-ser = serial.Serial()
-ser.port = '/dev/ttyS0'
-ser.baudrate = 9600
-ser.bytesize = serial.SEVENBITS
-ser.timeout = 1
+# ser = serial.Serial()
+# ser.port = '/dev/ttyS0'
+# ser.baudrate = 9600
+# ser.bytesize = serial.SEVENBITS
+# ser.timeout = 1
 
 #----------------------------Exceptions--------------------------------------------------
 class Tank_Level_Error(Exception):
@@ -75,14 +81,14 @@ def new_measurement():
     #  hier Drossel einstellen
     time.sleep(t_stabilize) # zur Stabilisierung der Stoemung nach dem Drosseln
 
-    get_weight()
+    #get_weight()
     start_filling()
 
     #burst() # Vorgang zur Bestimmung von Messfehlern der Umschalteinrichtung (provisorisch)
 
     wait_for_full_tank()
     stop_filling()
-    get_weight()
+    #get_weight()
 
     display_results()
     time.sleep(t_after)
@@ -185,25 +191,25 @@ def const_tank_low():
     raise Tank_Level_Error('Fuellstand Konstant-Fass zu niedrig')
 
 
-def get_weight():
-    time.sleep(10)
-    print('Waegevorgang - bitte stillhalten')
-    ser.open()
-    while True:
-        line = ser.readline()  # Zeile einlesen
-        #print(line)
-        sline = line.split() # Zeile fuer Weiterverarbeitung auftrennen
-        if len(sline) == 3:      # Wenn stabil (Waage sendet Kg, Zeichen wenn stabil), dann Speicherung
-            print('Wert stabil')
-            result = ''.join(sline[:2])
-            break
-    print('Waegevorgang beendet')
-    print('Das gemessene Gewicht betraegt: '+ str(line))
-    if state[WAS_MEASURE] == False:
-        state[WEIGHT_start] = float(result)
-    else:
-        state[WEIGHT_stop] = float(result)
-    ser.close()
+# def get_weight():
+#     time.sleep(10)
+#     print('Waegevorgang - bitte stillhalten')
+#     ser.open()
+#     while True:
+#         line = ser.readline()  # Zeile einlesen
+#         #print(line)
+#         sline = line.split() # Zeile fuer Weiterverarbeitung auftrennen
+#         if len(sline) == 3:      # Wenn stabil (Waage sendet Kg, Zeichen wenn stabil), dann Speicherung
+#             print('Wert stabil')
+#             result = ''.join(sline[:2])
+#             break
+#     print('Waegevorgang beendet')
+#     print('Das gemessene Gewicht betraegt: '+ str(line))
+#     if state[WAS_MEASURE] == False:
+#         state[WEIGHT_start] = float(result)
+#     else:
+#         state[WEIGHT_stop] = float(result)
+#     ser.close()
 
 
 def turn_off():
@@ -222,7 +228,7 @@ def burst():
         i +=1
         time.sleep(1)
         stop_filling()
-        get_weight()
+        #get_weight()
         print('Messzeit: '+str(state[TIME_stop]-state[TIME_start])+ '  '+str(i))
         time.sleep(4)
         start_filling()
@@ -250,23 +256,27 @@ state = {
 
 
 # -------------------------General procedure-------------------------------
+# def main():
+#     try:
+#         start_station()
+#
+#         new_measurement()
+#
+#         #Ende oder neue Messung
+#
+#     except Tank_Level_Error as ex:
+#         print(ex)
+#     except KeyboardInterrupt:
+#         print('Stopped by user.')
+#     except Exception:
+#         print('Unknown error.')
+#         raise
+#
+#     turn_off()
+
 def main():
-    try:
-        start_station()
-
-        new_measurement()
-
-        #Ende oder neue Messung
-
-    except Tank_Level_Error as ex:
-        print(ex)
-    except KeyboardInterrupt:
-        print('Stopped by user.')
-    except Exception:
-        print('Unknown error.')
-        raise
-
-    turn_off()
+    # add vorsecast instance
+    vorsekast = Vosekast(GPIO)
 
 if __name__ == "__main__":
     main()
