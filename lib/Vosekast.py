@@ -12,14 +12,14 @@ WAS_MEASURE = 'was_measure'
 WEIGHT_start = 'weight_start'
 WEIGHT_stop = 'weight_stop'
 
-#GPIO Assignment
-PIN_PUMP_BASE = 11
-PIN_PUMP_MEASURING = 13
-PIN_VALVE_MEASURING_SWITCH = 15
-PIN_VALVE_MEASURING_DRAIN = 12
-PIN_LEVEL_MEASURING_HIGH = 18
-PIN_LEVEL_MEASURING_LOW = 22
-PIN_LEVEL_BASE_LOW = 29
+# GPIO Assignment
+PIN_PUMP_BASE = 17
+PIN_PUMP_MEASURING = 27
+PIN_VALVE_MEASURING_SWITCH = 12
+PIN_VALVE_MEASURING_DRAIN = 18
+PIN_LEVEL_MEASURING_HIGH = 24
+PIN_LEVEL_MEASURING_LOW = 25
+PIN_LEVEL_BASE_LOW = 5
 
 
 class Vosekast:
@@ -28,12 +28,15 @@ class Vosekast:
         try:
             self._gpio_controller = gpio_controller
             # define how the pins a numbered on the board
-            self._gpio_controller.setmode(self._gpio_controller.BOARD)
+            self._gpio_controller.setmode(self._gpio_controller.BCM)
 
             # valves
             self.measuring_drain_valve = Valve('MEASURING_TANK_VALVE', PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller)
-            self.measuring_tank_switch = Valve('MEASURING_TANK_SWITCH', PIN_VALVE_MEASURING_SWITCH, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller)
-            self.volume_flow_throttle = Valve('MEASURING_TANK_VALVE', PIN_VALVE_MEASURING_DRAIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
+            self.measuring_tank_switch = Valve('MEASURING_TANK_SWITCH', PIN_VALVE_MEASURING_SWITCH, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
+            self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
+
+            # throttle
+            # self.volume_flow_throttle = Valve('VOLUME_FLOW_THROTTLE', PIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
 
             # level_sensors
             self.level_measuring_high = LevelSensor('LEVEL_MEASURING_UP', PIN_LEVEL_MEASURING_HIGH, bool, LevelSensor.HIGH, self._gpio_controller)
@@ -56,6 +59,14 @@ class Vosekast:
         except NoGPIOControllerError:
             print('You have to add a gpio controller to control or simulate the components.')
 
+    def clean(self):
+        # shutdown pumps
+        for pump in self.pumps:
+            pump.stop()
+
+        # close valves
+        for valve in self.valves:
+            valve.close()
 
 class NoGPIOControllerError(Exception):
     pass

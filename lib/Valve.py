@@ -1,3 +1,5 @@
+import logging
+from lib.Log import LOGGER
 
 class Valve:
     # regulations
@@ -15,6 +17,15 @@ class Valve:
         self.valve_type = valve_type
         self.regulation = regulation
         self._gpio_controller = gpio_controller
+        self.logger = logging.getLogger(LOGGER)
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
+
+    def close(self):
+        """
+        function close the valve or switch
+        :return:
+        """
+        self.logger.debug(F"Close valve {self.name}")
+        self._gpio_controller.output(self._pin, self._gpio_controller.LOW)

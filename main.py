@@ -10,7 +10,6 @@ from lib.Log import setup_custom_logger, LOGGER
 
 # add logger
 logger = setup_custom_logger(LOGGER)
-logger.debug('main message')
 
 # if on raspberry pi then with real GPIO. Alternative with emulator
 (sysname, nodename, release, version, machine) = os.uname()
@@ -275,8 +274,13 @@ state = {
 #     turn_off()
 
 def main():
-    # add vorsecast instance
-    vorsekast = Vosekast(GPIO)
+    try:
+        # add vorsecast instance
+        vk = Vosekast(GPIO)
+        vk.clean()
+
+    finally:
+        GPIO.cleanup()
 
 if __name__ == "__main__":
     main()
