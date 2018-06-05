@@ -2,10 +2,16 @@
 Stand: 1.08
 """
 
-import sys
-import RPi.GPIO as GPIO
+import os
 import time
+
 import serial
+
+(sysname, nodename, release, version, machine) = os.uname()
+if machine.startswith('arm'):
+    import RPi.GPIO as GPIO
+else:
+    from third_party.RPi_emu import GPIO
 
 #from EmulatorGUI import GPIO
 IS_MEASURE = 'is_measure'
@@ -243,6 +249,7 @@ state = {
     WEIGHT_stop: None  # Endgewicht
 }
 
+
 # -------------------------General procedure-------------------------------
 def main():
     try:
@@ -268,7 +275,7 @@ if __name__ == "__main__":
 """
 Todo  
 Thread zur Fehlerueberwachung: P2 darf nur laufen, wenn Schalter in Konnstantfass geschlossen, Timeout 
-Start einfacher machen;  python ./python_vosekast2/control.py    
+Start einfacher machen;  python ./python_vosekast2/main.py    
 GUI
 Einbindung Sensoren: Drossel, Temperatur, Pruefling
 """
