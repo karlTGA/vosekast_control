@@ -2,11 +2,13 @@ from lib.Pump import Pump
 from lib.Tank import Tank
 from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
+import logging
+from lib.Log import LOGGER
 
 # Vorsekast States
 INITED = 'INITED'
 MEASURING = 'MEASURING'
-TIME_start = 'time_start'
+PREPARING_MEASURMENT = 'PREPARING_MEASURMENT'
 TIME_stop = 'time_stop'
 WAS_MEASURE = 'was_measure'
 WEIGHT_start = 'weight_start'
@@ -43,21 +45,50 @@ class Vosekast:
             self.level_measuring_low = LevelSensor('LEVEL_MEASURING_LOW', PIN_LEVEL_MEASURING_LOW, bool, LevelSensor.LOW, self._gpio_controller)
             self.level_base_low = LevelSensor('LEVEL_BASE_LOW', PIN_LEVEL_BASE_LOW, bool, LevelSensor.LOW, self._gpio_controller)
 
+            # pumps
+            self.pump_base_tank = Pump('BASE_PUMP', PIN_PUMP_BASE, self._gpio_controller)
+            self.pump_measuring_tank = Pump('MEASURING_PUMP', PIN_PUMP_MEASURING, self._gpio_controller)
+            self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
+
             # tanks
-            self.stock_tank = Tank('STOCK_TANK', 100, None, None, None, None)
-            self.base_tank = Tank('BASE_TANK', 100, None, self.level_base_low, None, None)
-            self.measuring_tank = Tank('MEASURING_TANK', 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve)
+            self.stock_tank = Tank('STOCK_TANK', 100, None, None, None, None, None)
+            self.base_tank = Tank('BASE_TANK', 100, None, self.level_base_low, None, None, self.pump_base_tank, protect_overflow=False)
+            self.measuring_tank = Tank('MEASURING_TANK', 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve, self.pump_measuring_tank, protect_draining=False)
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
-            # pumps
-            self.pump_stock_tank = Pump('STOCK_PUMP', PIN_PUMP_BASE, self.stock_tank, self.base_tank, self._gpio_controller)
-            self.pump_measuring_tank = Pump('MEASURING_PUMP', PIN_PUMP_MEASURING, self.base_tank, self.measuring_tank, self._gpio_controller)
-            self.pumps = [self.pump_measuring_tank, self.pump_stock_tank]
-
+            self.logger = logging.getLogger(LOGGER)
             self.state = INITED
 
         except NoGPIOControllerError:
             print('You have to add a gpio controller to control or simulate the components.')
+
+    def prepare_measuring(self):
+        """
+        before we can measur we have to prepare the station
+        :return:
+        """
+        # fill the base tank
+        self.base_tank.prepare_to_fill()
+        self.pump_base_tank.start()
+        self.state = PREPARING_MEASURMENT
+
+    def ready_to_measure(self):
+        """
+        is vosekast ready to measure
+        :return: measuring ready
+        """
+        base_tank_ready = self.base_tank.state == self.base_tank.FILLED
+        measuring_tank_ready = self.measuring_drain_valve == self.measuring_drain_valve.CLOSED and self.measuring_tank.state != self.measuring_tank.FILLED
+        base_pump_running = self.pump_base_tank.state == self.pump_base_tank.RUNNING
+
+        return base_tank_ready and measuring_tank_ready and base_pump_running
+
+    def shutdown(self):
+        # drain the measuring tank
+        self.measuring_tank.drain_tank()
+        self.logger.info("Measuring tank is emptied.")
+        self.clean()
+        self.logger.info("Vosekast is ready to shutdown.")
 
     def clean(self):
         # shutdown pumps

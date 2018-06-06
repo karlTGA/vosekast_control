@@ -277,9 +277,18 @@ def main():
     try:
         # add vorsecast instance
         vk = Vosekast(GPIO)
-        vk.clean()
+        vk.prepare_measuring()
 
+        while not vk.ready_to_measure():
+            logger.info("Wait that vosekast is ready...")
+            time.sleep(10)
+
+        logger.info("Ready to rumble")
+    except KeyboardInterrupt:
+        logger.info("User stopped program")
     finally:
+        if 'vk' in vars():
+            vk.shutdown()
         GPIO.cleanup()
 
 if __name__ == "__main__":
