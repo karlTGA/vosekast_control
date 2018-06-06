@@ -5,7 +5,7 @@ import os
 import time
 from lib.Vosekast import Vosekast
 from lib.Log import setup_custom_logger, LOGGER
-from multiprocessing import Pool
+from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
 from lib.UI.MainWindow import MainWindow
@@ -21,17 +21,20 @@ else:
 logger = setup_custom_logger(LOGGER)
 
 
-def core_vorsekast():
+def core_vorsekast(app_control):
     try:
         # add vorsecast instance
         vk = Vosekast(GPIO)
         vk.prepare_measuring()
 
         while not vk.ready_to_measure():
+            if app_control.is_terminating():
+                break
             logger.info("Wait that vosekast is ready...")
             time.sleep(10)
+        else:
+            logger.info("Ready to rumble")
 
-        logger.info("Ready to rumble")
     except KeyboardInterrupt:
         logger.info("User stopped program")
     finally:
@@ -39,14 +42,19 @@ def core_vorsekast():
             vk.shutdown()
         GPIO.cleanup()
 
-
-def gui_vorsekast():
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-
-    sys.exit(app.exec_())
-
 if __name__ == "__main__":
+    # process state
+    app_control = AppControl()
+
+    # add gui
+    app = QApplication(sys.argv)
+    main_window = MainWindow(app)
+
+    # start separate thread with core methods
     pool = ThreadPool()
-    pool.apply(gui_vorsekast)
-    pool.apply(core_vorsekast)
+    pool.apply_async(core_vorsekast, [app_control])
+
+    app_control.start()
+    res = app.exec_()
+    app_control.shutdown()
+    sys.exit(res)

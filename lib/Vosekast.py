@@ -88,7 +88,7 @@ class Vosekast:
         self.measuring_tank.drain_tank()
         self.logger.info("Measuring tank is emptied.")
         self.clean()
-        self.logger.info("Vosekast is ready to shutdown.")
+        self.logger.info("Vosekast is shutdown.")
 
     def clean(self):
         # shutdown pumps
