@@ -1,15 +1,14 @@
-"""
-Stand: 1.08
-"""
+#!/usr/bin/python3
 
+import sys
 import os
 import time
-import serial
 from lib.Vosekast import Vosekast
 from lib.Log import setup_custom_logger, LOGGER
-
-# add logger
-logger = setup_custom_logger(LOGGER)
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
+from PyQt5.QtWidgets import QApplication, QWidget
+from lib.UI.MainWindow import MainWindow
 
 # if on raspberry pi then with real GPIO. Alternative with emulator
 (sysname, nodename, release, version, machine) = os.uname()
@@ -18,8 +17,11 @@ if machine.startswith('arm'):
 else:
     from third_party.RPi_emu import GPIO
 
+# add logger
+logger = setup_custom_logger(LOGGER)
 
-def main():
+
+def core_vorsekast():
     try:
         # add vorsecast instance
         vk = Vosekast(GPIO)
@@ -37,13 +39,14 @@ def main():
             vk.shutdown()
         GPIO.cleanup()
 
-if __name__ == "__main__":
-    main()
 
-"""
-Todo  
-Thread zur Fehlerueberwachung: P2 darf nur laufen, wenn Schalter in Konnstantfass geschlossen, Timeout 
-Start einfacher machen;  python ./python_vosekast2/main.py    
-GUI
-Einbindung Sensoren: Drossel, Temperatur, Pruefling
-"""
+def gui_vorsekast():
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
+
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    pool = ThreadPool()
+    pool.apply(gui_vorsekast)
+    pool.apply(core_vorsekast)
