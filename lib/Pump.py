@@ -11,7 +11,7 @@ class Pump(QObject):
     # signals
     state_changed = pyqtSignal(int, name="PumpStateChanged")
 
-    def __init__(self, name, control_pin, gpio_controller, button):
+    def __init__(self, name, control_pin, gpio_controller, gui_element):
         super().__init__()
 
         self._pin = control_pin
@@ -19,16 +19,16 @@ class Pump(QObject):
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
         self.state = None
-        self.gui_button = button
+        self.gui_element = gui_element
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
         # signals for gui
-        self.state_changed.connect(self.gui_button .state_change)
+        self.state_changed.connect(self.gui_element.state_change)
 
         # add to the button instance the pump instance
-        self.gui_button.set_pump(self)
+        self.gui_element.set_pump(self)
 
     def stop(self):
         """

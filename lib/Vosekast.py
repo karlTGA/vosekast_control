@@ -31,6 +31,10 @@ MEASURING_PUMP = 'MEASURING_PUMP'
 MEASURING_TANK_VALVE = 'MEASURING_TANK_VALVE'
 MEASURING_TANK_SWITCH = 'MEASURING_TANK_SWITCH'
 
+# TANK IDS
+STOCK_TANK = 'STOCK_TANK'
+BASE_TANK = 'BASE_TANK'
+MEASURING_TANK = 'MEASURING_TANK'
 
 class Vosekast:
 
@@ -66,9 +70,11 @@ class Vosekast:
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
             # tanks
-            self.stock_tank = Tank('STOCK_TANK', 100, None, None, None, None, None)
-            self.base_tank = Tank('BASE_TANK', 100, None, self.level_base_low, None, None, self.pump_base_tank, protect_overflow=False)
-            self.measuring_tank = Tank('MEASURING_TANK', 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve, self.pump_measuring_tank, protect_draining=False)
+            self.stock_tank = Tank(STOCK_TANK, 100, None, None, None, None, None, None)
+            base_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[BASE_TANK]
+            self.base_tank = Tank(BASE_TANK, 100, None, self.level_base_low, None, None, self.pump_base_tank, base_tank_gui, protect_overflow=False)
+            measuring_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[MEASURING_TANK]
+            self.measuring_tank = Tank(MEASURING_TANK, 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve, self.pump_measuring_tank, measuring_tank_gui, protect_draining=False)
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
             self.logger = logging.getLogger(LOGGER)

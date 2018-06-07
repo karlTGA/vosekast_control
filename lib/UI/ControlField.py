@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QToolButton, QLabel
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QSize, Qt, pyqtSlot
 import logging
 from lib.Log import LOGGER
 

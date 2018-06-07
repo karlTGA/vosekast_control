@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPus
 from lib.UI.PumpControl import PumpControl
 from lib.UI.ValveControl import ValveControl
 from lib.UI.TankStatus import TankStatus
-from lib.Vosekast import BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE
+from lib.Vosekast import BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE, BASE_TANK, MEASURING_TANK
 
 class TabStatus(QWidget):
 
@@ -10,6 +10,7 @@ class TabStatus(QWidget):
         super().__init__()
         self.pump_buttons = {}
         self.valve_buttons = {}
+        self.tank_statuses = {}
 
         self.initUI()
 
@@ -71,13 +72,19 @@ class TabStatus(QWidget):
     def create_tank_measurement(self):
         tank_measurement_box = QGroupBox('Measurement')
         layout = QGridLayout()
-        layout.addWidget(TankStatus(), 0, 0)
+        tank_status = TankStatus(MEASURING_TANK)
+        layout.addWidget(tank_status, 0, 0)
         tank_measurement_box.setLayout(layout)
+
+        self.tank_statuses[MEASURING_TANK] = tank_status
         return tank_measurement_box
 
     def create_tank_base(self):
         tank_base_box = QGroupBox('Base')
         layout = QGridLayout()
-        layout.addWidget(TankStatus(), 0, 0)
+        tank_status = TankStatus(BASE_TANK)
+        layout.addWidget(tank_status, 0, 0)
         tank_base_box.setLayout(layout)
+
+        self.tank_statuses[BASE_TANK] = tank_status
         return tank_base_box
