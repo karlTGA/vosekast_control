@@ -2,21 +2,19 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QToolButton, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtCore import pyqtSlot
-from lib.Pump import Pump
 import logging
 from lib.Log import LOGGER
-import os
 
 
-class PumpButton(QWidget):
+class ControlField(QWidget):
 
-    def __init__(self, text):
+    def __init__(self, text, default_state=None):
         super().__init__()
         self.text = text
-        self.state = None
+        self.state = default_state
         self.button = None
         self.label = None
-        self.pump = None
+        self.control_instance = None
         self.logger = logging.getLogger(LOGGER)
 
         self.initUI()
@@ -26,7 +24,7 @@ class PumpButton(QWidget):
         self.button.setText(self.text)
 
         # search for icon
-        icon_path = self.get_icon(Pump.STOPPED)
+        icon_path = self.get_icon(self.state)
 
         self.button.setIcon(QIcon(icon_path))
         self.button.setIconSize(QSize(128, 128))
@@ -46,41 +44,34 @@ class PumpButton(QWidget):
 
         self.setLayout(layout)
 
-    def set_pump(self, pump_instance):
-        self.pump = pump_instance
+    def set_control_instance(self, instance):
+        """
+        the button should control this instance
+        :return:
+        """
+        self.control_instance = instance
 
     def handle_click(self):
-        if self.pump is None:
+        if self.control_instance is None:
             self.logger.warning(F"To the button {self.text} was no pump instance added.")
             return
 
-        if self.state == Pump.RUNNING:
-            self.pump.stop()
-        else:
-            self.pump.start()
+        self.toggle_control_instance()
 
-    @pyqtSlot(int)
-    def state_change(self, new_state):
-        self.handle_state_change(new_state)
+    def toggle_control_instance(self):
+        pass
 
     def handle_state_change(self, new_state):
         self.button.setIcon(QIcon(self.get_icon(new_state)))
         self.state = new_state
 
+    @pyqtSlot(int)
+    def state_change(self, new_state):
+        self.handle_state_change(new_state)
+
     @staticmethod
     def get_icon(state):
-        # search for icon
-        path = os.path.dirname(os.path.abspath(__file__))
-
-        if state == Pump.RUNNING:
-            icon_path = os.path.join(path, 'icons/pump_icons/pump_color_1.png')
-        else:
-            icon_path = os.path.join(path, 'icons/pump_icons/pump_sw.png')
-
-        if not os.path.isfile(icon_path):
-            raise NoImageForIconError
-
-        return icon_path
+        return ""
 
 
 class NoImageForIconError(Exception):

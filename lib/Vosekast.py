@@ -27,6 +27,10 @@ PIN_LEVEL_BASE_LOW = 5
 BASE_PUMP = 'BASE_PUMP'
 MEASURING_PUMP = 'MEASURING_PUMP'
 
+# VALVE IDS
+MEASURING_TANK_VALVE = 'MEASURING_TANK_VALVE'
+MEASURING_TANK_SWITCH = 'MEASURING_TANK_SWITCH'
+
 
 class Vosekast:
 
@@ -40,8 +44,10 @@ class Vosekast:
             self._main_window = gui_main_window
 
             # valves
-            self.measuring_drain_valve = Valve('MEASURING_TANK_VALVE', PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller)
-            self.measuring_tank_switch = Valve('MEASURING_TANK_SWITCH', PIN_VALVE_MEASURING_SWITCH, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
+            valve_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[MEASURING_TANK_VALVE]
+            self.measuring_drain_valve = Valve(MEASURING_TANK_VALVE, PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller, valve_measuring_button)
+            switch_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[MEASURING_TANK_SWITCH]
+            self.measuring_tank_switch = Valve(MEASURING_TANK_SWITCH, PIN_VALVE_MEASURING_SWITCH, Valve.SWITCH, Valve.BINARY, self._gpio_controller, switch_measuring_button)
             self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
 
             # throttle

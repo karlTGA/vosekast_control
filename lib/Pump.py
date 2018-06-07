@@ -25,7 +25,7 @@ class Pump(QObject):
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
         # signals for gui
-        self.state_changed.connect(button.state_change)
+        self.state_changed.connect(self.gui_button .state_change)
 
         # add to the button instance the pump instance
         self.gui_button.set_pump(self)

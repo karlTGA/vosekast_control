@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox
-from lib.UI.PumpButton import PumpButton
-from lib.Vosekast import BASE_PUMP, MEASURING_PUMP
+from lib.UI.PumpControl import PumpControl
+from lib.UI.ValveControl import ValveControl
+from lib.Vosekast import BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE
 
 class TabStatus(QWidget):
 
@@ -29,11 +30,11 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        pump_base = PumpButton('Pump Base')
+        pump_base = PumpControl('Pump Base')
         self.pump_buttons[BASE_PUMP] = pump_base
         layout.addWidget(pump_base, 0, 0)
 
-        pump_measuring = PumpButton('Pump Measuring')
+        pump_measuring = PumpControl('Pump Measuring')
         self.pump_buttons[MEASURING_PUMP] = pump_measuring
         layout.addWidget(pump_measuring, 0, 1)
 
@@ -46,8 +47,13 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        layout.addWidget(QPushButton('Switch Measuring'), 0, 0)
-        layout.addWidget(QPushButton('Valve Measuring'), 0, 2)
+        valve_measuring = ValveControl('Valve Measuring')
+        self.valve_buttons[MEASURING_TANK_VALVE] = valve_measuring
+        layout.addWidget(valve_measuring, 0, 0)
+
+        valve_switch = ValveControl('Valve Switch Measuring')
+        self.valve_buttons[MEASURING_TANK_SWITCH] = valve_switch
+        layout.addWidget(valve_switch, 0, 2)
 
         valves_group_box.setLayout(layout)
         return valves_group_box
