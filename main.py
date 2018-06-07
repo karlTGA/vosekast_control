@@ -4,7 +4,7 @@ import sys
 import os
 import time
 from lib.Vosekast import Vosekast
-from lib.Log import setup_custom_logger, LOGGER
+from lib.Log import setup_custom_logger, add_status_box_handler
 from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -18,7 +18,7 @@ else:
     from third_party.RPi_emu import GPIO
 
 # add logger
-logger = setup_custom_logger(LOGGER)
+logger = setup_custom_logger()
 
 
 def core_vorsekast(app_control):
@@ -48,7 +48,10 @@ if __name__ == "__main__":
 
     # add gui
     app = QApplication(sys.argv)
-    main_window = MainWindow(app)
+    main_window = MainWindow(app, app_control)
+
+    # route log messages to status box of main window
+    add_status_box_handler(main_window)
 
     # start separate thread with core methods
     pool = ThreadPool()
@@ -56,5 +59,6 @@ if __name__ == "__main__":
 
     app_control.start()
     res = app.exec_()
+    logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
-    sys.exit(res)
+    sys.exit(0)

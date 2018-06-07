@@ -1,32 +1,41 @@
-from PyQt5.QtWidgets import QWidget, QToolTip, QPushButton, QApplication, QMessageBox
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtWidgets import QMainWindow, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QDesktopWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot
+from lib.UI.Tabs import Tabs
 
 
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
     # Process States
     GUI_RUNNING = 'GUI_RUNNING'
     GUI_TERMINATED = 'GUI_TERMINATED'
 
-    def __init__(self, app):
+    def __init__(self, app, app_control):
         super().__init__()
         self.main_app = app
+        self.app_control = app_control
+        self.status_bar = None
+        self.tabs = None
+        self.layout = None
         self.initUI()
         self.state = self.GUI_RUNNING
 
     def initUI(self):
-        QToolTip.setFont(QFont('SansSerif', 10))
+        self.resize(1024, 600)
+        self.center()
 
-        self.setToolTip('This is a <b>QWidget</b> widget')
+        # init status bar
+        self.status_bar = self.statusBar()
 
-        btn = QPushButton('Quit', self)
-        btn.resize(btn.sizeHint())
-        btn.move(50, 50)
-
-        self.setGeometry(600, 600, 300, 220)
-        self.setWindowTitle('Tooltips')
-        self.setWindowIcon(QIcon('web.png'))
+        # tabs with different informations and control
+        self.tabs = Tabs()
+        self.setCentralWidget(self.tabs)
 
         self.show()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def closeEvent(self, event):
 
@@ -37,6 +46,15 @@ class MainWindow(QWidget):
         if reply == QMessageBox.Yes:
             event.accept()
             self.state = self.GUI_TERMINATED
+            self.app_control.shutdown()
             self.main_app.quit()
         else:
             event.ignore()
+
+    @pyqtSlot(str)
+    def send_status_message(self, message):
+        # TODO: Access this per signal
+        if not self.app_control.is_terminating() and self.state == self.GUI_RUNNING:
+            self.status_bar.showMessage(message)
+            self.show()
+
