@@ -1,10 +1,14 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox
 from lib.UI.PumpButton import PumpButton
+from lib.Vosekast import BASE_PUMP, MEASURING_PUMP
 
 class TabStatus(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.pump_buttons = {}
+        self.valve_buttons = {}
+
         self.initUI()
 
     def initUI(self):
@@ -25,8 +29,13 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        layout.addWidget(PumpButton('Pump Stock'), 0, 0)
-        layout.addWidget(PumpButton('Pump Measuring'), 0, 1)
+        pump_base = PumpButton('Pump Base')
+        self.pump_buttons[BASE_PUMP] = pump_base
+        layout.addWidget(pump_base, 0, 0)
+
+        pump_measuring = PumpButton('Pump Measuring')
+        self.pump_buttons[MEASURING_PUMP] = pump_measuring
+        layout.addWidget(pump_measuring, 0, 1)
 
         pumps_group_box.setLayout(layout)
         return pumps_group_box

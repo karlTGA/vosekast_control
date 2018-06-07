@@ -53,8 +53,6 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(str)
     def send_status_message(self, message):
-        # TODO: Access this per signal
         if not self.app_control.is_terminating() and self.state == self.GUI_RUNNING:
             self.status_bar.showMessage(message)
-            self.show()
 

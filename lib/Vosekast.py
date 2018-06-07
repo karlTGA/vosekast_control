@@ -23,14 +23,21 @@ PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
 PIN_LEVEL_BASE_LOW = 5
 
+# PUMP IDS
+BASE_PUMP = 'BASE_PUMP'
+MEASURING_PUMP = 'MEASURING_PUMP'
+
 
 class Vosekast:
 
-    def __init__(self, gpio_controller):
+    def __init__(self, gpio_controller, gui_main_window):
         try:
             self._gpio_controller = gpio_controller
             # define how the pins a numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
+
+            # main window of the gui
+            self._main_window = gui_main_window
 
             # valves
             self.measuring_drain_valve = Valve('MEASURING_TANK_VALVE', PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller)
@@ -46,8 +53,10 @@ class Vosekast:
             self.level_base_low = LevelSensor('LEVEL_BASE_LOW', PIN_LEVEL_BASE_LOW, bool, LevelSensor.LOW, self._gpio_controller)
 
             # pumps
-            self.pump_base_tank = Pump('BASE_PUMP', PIN_PUMP_BASE, self._gpio_controller)
-            self.pump_measuring_tank = Pump('MEASURING_PUMP', PIN_PUMP_MEASURING, self._gpio_controller)
+            pump_base_button = self._main_window.tabs.tabStatus.pump_buttons[BASE_PUMP]
+            self.pump_base_tank = Pump(BASE_PUMP, PIN_PUMP_BASE, self._gpio_controller, pump_base_button)
+            pump_measuring_button = self._main_window.tabs.tabStatus.pump_buttons[MEASURING_PUMP]
+            self.pump_measuring_tank = Pump(MEASURING_PUMP, PIN_PUMP_MEASURING, self._gpio_controller, pump_measuring_button)
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
             # tanks

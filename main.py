@@ -21,10 +21,10 @@ else:
 logger = setup_custom_logger()
 
 
-def core_vorsekast(app_control):
+def core_vorsekast(app_control, gui_main_window):
     try:
         # add vorsecast instance
-        vk = Vosekast(GPIO)
+        vk = Vosekast(GPIO, gui_main_window)
         vk.prepare_measuring()
 
         while not vk.ready_to_measure():
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # start separate thread with core methods
     pool = ThreadPool()
-    pool.apply_async(core_vorsekast, [app_control])
+    pool.apply_async(core_vorsekast, [app_control, main_window])
 
     app_control.start()
     res = app.exec_()
