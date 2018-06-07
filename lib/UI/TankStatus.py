@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QProgressBar
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QProgressBar, QLineEdit
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QSize, Qt, pyqtSlot
 
@@ -14,6 +14,7 @@ class TankStatus(QWidget):
         self.fill_state = None
         self.label = None
         self.tank = None
+        self.fill_text = None
         self.initUI()
 
     def initUI(self):
@@ -25,15 +26,19 @@ class TankStatus(QWidget):
         self.fill_state.setMinimum(0)
         self.fill_state.setMaximum(100)
 
+        self.fill_text = QLabel()
+
         layout = QGridLayout()
         layout.addWidget(self.tank, 0, 0, Qt.AlignHCenter)
         layout.addWidget(self.fill_state, 0, 1, Qt.AlignHCenter)
+        layout.addWidget(self.fill_text, 0, 2, Qt.AlignCenter)
 
         self.setLayout(layout)
 
     def handle_state_change(self, new_state):
         self.fill_state.setValue(new_state*100)
         self.tank.setPixmap(QPixmap(self.get_icon(new_state)))
+        self.fill_text.setText(F"{str(new_state*100)} %")
 
 
     @pyqtSlot(float)
