@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox
 from lib.UI.PumpControl import PumpControl
 from lib.UI.ValveControl import ValveControl
+from lib.UI.TankStatus import TankStatus
 from lib.Vosekast import BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE
 
 class TabStatus(QWidget):
@@ -16,11 +17,16 @@ class TabStatus(QWidget):
         pumps_group_box = self.create_pumps()
         valves_group_box = self.create_valves()
         scale_box = self.create_scale()
+        measurement_tank = self.create_tank_measurement()
+        base_tank = self.create_tank_base()
 
         windowLayout = QGridLayout()
-        windowLayout.addWidget(pumps_group_box, 0, 0, 1, 3)
-        windowLayout.addWidget(valves_group_box, 1, 0, 1, 3)
-        windowLayout.addWidget(scale_box, 0, 3, 1, 3)
+        windowLayout.addWidget(pumps_group_box, 0, 0, 1, 2)
+        windowLayout.addWidget(valves_group_box, 1, 0, 1, 2)
+        windowLayout.addWidget(scale_box, 0, 3, 1, 4)
+        windowLayout.addWidget(measurement_tank, 1, 3, 1, 2)
+        windowLayout.addWidget(base_tank, 1, 5, 1, 2)
+
 
         self.setLayout(windowLayout)
 
@@ -61,3 +67,17 @@ class TabStatus(QWidget):
     def create_scale(self):
         scale_box = QGroupBox('Scale')
         return scale_box
+
+    def create_tank_measurement(self):
+        tank_measurement_box = QGroupBox('Measurement')
+        layout = QGridLayout()
+        layout.addWidget(TankStatus(), 0, 0)
+        tank_measurement_box.setLayout(layout)
+        return tank_measurement_box
+
+    def create_tank_base(self):
+        tank_base_box = QGroupBox('Base')
+        layout = QGridLayout()
+        layout.addWidget(TankStatus(), 0, 0)
+        tank_base_box.setLayout(layout)
+        return tank_base_box

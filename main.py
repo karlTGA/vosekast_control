@@ -31,7 +31,7 @@ def core_vorsekast(app_control, gui_main_window):
             if app_control.is_terminating():
                 break
             logger.info("Wait that vosekast is ready...")
-            time.sleep(10)
+            time.sleep(1)
         else:
             logger.info("Ready to rumble")
 
