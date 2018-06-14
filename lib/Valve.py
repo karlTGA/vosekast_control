@@ -46,7 +46,7 @@ class Valve(QObject):
         function close the valve or switch
         :return:
         """
-        self.logger.debug(F"Close valve {self.name}")
+        self.logger.debug("Close valve {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = self.CLOSED
         self.state_changed.emit(self.CLOSED)
@@ -56,7 +56,7 @@ class Valve(QObject):
         open the valve
         :return:
         """
-        self.logger.debug(F"Open valve {self.name}")
+        self.logger.debug("Open valve {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = self.OPEN
         self.state_changed.emit(self.OPEN)

@@ -58,14 +58,14 @@ class Tank(QObject):
             self.drain_valve.open()
             self.progress = self.IS_DRAINING
         else:
-            self.logger.warning(F"No valve to drain the tank {self.name}")
+            self.logger.warning("No valve to drain the tank {}".format(self.name))
 
     def prepare_to_fill(self):
         if self.drain_valve is not None:
             self.drain_valve.close()
         else:
-            self.logger.debug(F"No drain valve on the tank {self.name}")
-        self.logger.info(F"Ready to fill the tank {self.name}")
+            self.logger.debug("No drain valve on the tank {}".format(self.name))
+        self.logger.info("Ready to fill the tank {}".format(self.name))
 
     def _tank_is_full(self, pin):
         """
@@ -73,7 +73,7 @@ class Tank(QObject):
         :return:
         """
         self.state = self.FILLED
-        self.logger.warning(F"Tank {self.name} is filled.")
+        self.logger.warning("Tank {} is filled.".format(self.name))
 
         if self.gui_element is not None:
             self.state_changed.emit(self.FILLED)
@@ -87,7 +87,7 @@ class Tank(QObject):
         :return:
         """
         self.state = self.DRAINED
-        self.logger.warning(F"Tank {self.name} is drained")
+        self.logger.warning("Tank {} is drained".format(self.name))
 
         if self.gui_element is not None:
             self.state_changed.emit(self.DRAINED)

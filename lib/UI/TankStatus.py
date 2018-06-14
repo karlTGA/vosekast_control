@@ -38,7 +38,7 @@ class TankStatus(QWidget):
     def handle_state_change(self, new_state):
         self.fill_state.setValue(new_state*100)
         self.tank.setPixmap(QPixmap(self.get_icon(new_state)))
-        self.fill_text.setText(F"{str(new_state*100)} %")
+        self.fill_text.setText("{} %".format(str(new_state*100)))
 
 
     @pyqtSlot(float)

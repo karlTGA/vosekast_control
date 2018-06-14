@@ -35,7 +35,7 @@ class Pump(QObject):
         stop the pump
         :return:
         """
-        self.logger.debug(F"Stop the pump {self.name}")
+        self.logger.debug("Stop the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = self.STOPPED
         self.state_changed.emit(self.STOPPED)
@@ -45,7 +45,7 @@ class Pump(QObject):
         start the pump
         :return:
         """
-        self.logger.debug(F"Start the pump {self.name}")
+        self.logger.debug("Start the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = self.RUNNING
         self.state_changed.emit(self.RUNNING)

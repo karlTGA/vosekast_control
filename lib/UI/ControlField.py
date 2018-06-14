@@ -52,7 +52,7 @@ class ControlField(QWidget):
 
     def handle_click(self):
         if self.control_instance is None:
-            self.logger.warning(F"To the button {self.text} was no pump instance added.")
+            self.logger.warning("To the button {} was no pump instance added.".format(self.text))
             return
 
         self.toggle_control_instance()
