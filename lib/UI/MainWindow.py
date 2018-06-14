@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         # actions
         exitAction = QAction(QIcon.fromTheme("application-exit"), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
-        exitAction.triggered.connect(self.app_control.shutdown)
+        exitAction.triggered.connect(self.closeEvent)
 
         self.toolbar = self.addToolBar('main')
         self.toolbar.addAction(exitAction)
@@ -55,12 +55,14 @@ class MainWindow(QMainWindow):
             QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            event.accept()
+            if hasattr(event, 'accept'):
+                event.accept()
             self.state = self.GUI_TERMINATED
             self.app_control.shutdown()
             self.main_app.quit()
         else:
-            event.ignore()
+            if hasattr(event, 'ignore'):
+                event.ignore()
 
     @pyqtSlot(str)
     def send_status_message(self, message):
