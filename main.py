@@ -14,8 +14,12 @@ from lib.UI.MainWindow import MainWindow
 (sysname, nodename, release, version, machine) = os.uname()
 if machine.startswith('arm'):
     import RPi.GPIO as GPIO
+    DEBUG = False
 else:
     from third_party.RPi_emu import GPIO
+    import subprocess
+
+    DEBUG = True
 
 # add logger
 logger = setup_custom_logger()
@@ -61,4 +65,9 @@ if __name__ == "__main__":
     res = app.exec_()
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
-    sys.exit(0)
+
+    if DEBUG:
+        sys.exit(0)
+    else:
+        cmdCommand = "shutdown -h now"
+        process = subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
