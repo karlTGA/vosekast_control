@@ -23,7 +23,7 @@ class TankStatus(QWidget):
 
         self.fill_state = QProgressBar()
         self.fill_state.setOrientation(Qt.Vertical)
-        self.fill_state.setMinimum(0)
+        self.fill_state.setMinimum(-10)
         self.fill_state.setMaximum(100)
 
         self.fill_text = QLabel()

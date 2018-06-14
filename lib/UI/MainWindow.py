@@ -9,13 +9,14 @@ class MainWindow(QMainWindow):
     GUI_RUNNING = 'GUI_RUNNING'
     GUI_TERMINATED = 'GUI_TERMINATED'
 
-    def __init__(self, app, app_control):
+    def __init__(self, app, app_control, debug):
         super().__init__()
         self.main_app = app
         self.app_control = app_control
         self.status_bar = None
         self.tabs = None
         self.layout = None
+        self.debug = debug
         self.initUI()
         self.state = self.GUI_RUNNING
 
@@ -40,7 +41,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.tabs)
 
         self.show()
-        self.showFullScreen()
+        if not self.debug:
+            self.showFullScreen()
 
     def center(self):
         qr = self.frameGeometry()

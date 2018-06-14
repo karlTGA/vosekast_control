@@ -15,18 +15,21 @@ class LevelSensor:
         self._gpio_controller.setup(self._pin, self._gpio_controller.IN)
 
         # add a thread for event detection
-        if position == self.HIGH:
-            self._gpio_controller.add_event_detect(self._pin, self._gpio_controller.RISING, bouncetime=200)
-        else:
-            self._gpio_controller.add_event_detect(self._pin, self._gpio_controller.FALLING, bouncetime=200)
+        self._gpio_controller.add_event_detect(self._pin, self._gpio_controller.BOTH, bouncetime=200)
 
     def add_callback(self, callback_function):
         """
         add a callback function, that fire every time the sensor is triggered
+        the callback function get modified to add the information if it a alert or revoke
         :param callback_function: the function, that get fired
         :return:
         """
-        self._gpio_controller.add_event_callback(self._pin, callback_function)
+        def extra_callback_function(pin):
+            new_value = self._gpio_controller.input(self._pin)
+            alert = (self.position == self.HIGH and new_value == self._gpio_controller.HIGH) or (self.position == self.LOW and new_value == self._gpio_controller.HIGH)
+            callback_function(pin, alert)
+
+        self._gpio_controller.add_event_callback(self._pin, extra_callback_function)
 
     def clear_callbacks(self):
         """
@@ -34,4 +37,4 @@ class LevelSensor:
         :return:
         """
         self._gpio_controller.remove_event_detect(self._pin)
-        self._gpio_controller.add_event_detect(self._pin, self._gpio_controller.RISING, bouncetime=200)
+        self._gpio_controller.add_event_detect(self._pin, self._gpio_controller.BOTH, bouncetime=200)

@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # add gui
     app = QApplication(sys.argv)
-    main_window = MainWindow(app, app_control)
+    main_window = MainWindow(app, app_control, DEBUG)
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
