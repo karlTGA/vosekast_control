@@ -2,6 +2,7 @@ from lib.Pump import Pump
 from lib.Tank import Tank
 from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
+from lib.Scale import Scale
 import logging
 from lib.Log import LOGGER
 
@@ -39,6 +40,8 @@ MEASURING_TANK = 'MEASURING_TANK'
 class Vosekast:
 
     def __init__(self, gpio_controller, gui_main_window):
+        self.logger = logging.getLogger(LOGGER)
+
         try:
             self._gpio_controller = gpio_controller
             # define how the pins a numbered on the board
@@ -77,11 +80,13 @@ class Vosekast:
             self.measuring_tank = Tank(MEASURING_TANK, 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve, self.pump_measuring_tank, measuring_tank_gui, protect_draining=False)
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
-            self.logger = logging.getLogger(LOGGER)
+            # scale
+            self.scale = Scale(self, emulate=True)
+
             self.state = INITED
 
         except NoGPIOControllerError:
-            print('You have to add a gpio controller to control or simulate the components.')
+            self.logger.error('You have to add a gpio controller to control or simulate the components.')
 
     def prepare_measuring(self):
         """
@@ -107,6 +112,7 @@ class Vosekast:
     def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
+        self.scale.stop_measurement_thread()
         self.logger.info("Measuring tank is emptied.")
         self.clean()
         self.logger.info("Vosekast is shutdown.")
