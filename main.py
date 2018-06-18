@@ -41,6 +41,9 @@ def core_vorsekast(app_control, gui_main_window):
 
     except KeyboardInterrupt:
         logger.info("User stopped program")
+    except Exception as error:
+        logger.error(error)
+
     finally:
         if 'vk' in vars():
             vk.shutdown()

@@ -81,7 +81,8 @@ class Vosekast:
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
             # scale
-            self.scale = Scale(self, emulate=True)
+            scale_gui = self._main_window.tabs.tabStatus.scale_status
+            self.scale = Scale(scale_gui, emulate=True)
 
             self.state = INITED
 

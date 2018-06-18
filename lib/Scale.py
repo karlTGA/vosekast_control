@@ -1,4 +1,3 @@
-from PyQt5.QtCore import pyqtSignal, QObject
 import serial
 from collections import deque
 from threading import Thread
@@ -7,10 +6,16 @@ import logging
 from lib.Log import LOGGER
 from random import uniform
 from itertools import islice
+from PyQt5.QtCore import pyqtSignal, QObject
+
 
 class Scale(QObject):
 
-    def __init__(self, port='/dev/ttyS0', baudrate=9600, bytesize=serial.SEVENBITS, timeout=1, emulate=False):
+    # signals
+    state_changed = pyqtSignal(bool, name="ScaleStateChange")
+    value_changed = pyqtSignal(float, name="ScaleValueChange")
+
+    def __init__(self, gui_element, port='/dev/ttyS0', baudrate=9600, bytesize=serial.SEVENBITS, timeout=1, emulate=False):
         super().__init__()
 
         self.port = port
@@ -24,6 +29,12 @@ class Scale(QObject):
         self.run = False
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
+        self.gui_element = gui_element
+
+        # signals for gui
+        if gui_element is not None:
+            self.state_changed.connect(self.gui_element.state_change)
+            self.value_changed.connect(self.gui_element.value_change)
 
         self.start_measurement_thread()
 
@@ -55,6 +66,7 @@ class Scale(QObject):
 
     def new_value(self, new_value):
         self.last_values.append(new_value)
+        self.value_changed.emit(new_value)
 
         if len(self.last_values) == 10:
             # calculate square mean error
@@ -66,9 +78,11 @@ class Scale(QObject):
 
             if mean_diff < 0.1:
                 self.stable = True
+                self.state_changed.emit(True)
                 return
 
         self.stable = False
+        self.state_changed.emit(False)
 
     def get_stable_value(self):
         if self.stable:
