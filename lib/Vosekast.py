@@ -83,6 +83,7 @@ class Vosekast:
             # scale
             scale_gui = self._main_window.tabs.tabStatus.scale_status
             self.scale = Scale(scale_gui, emulate=True)
+            self.scale.open_connection()
 
             self.state = INITED
 
@@ -113,7 +114,6 @@ class Vosekast:
     def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
-        self.scale.stop_measurement_thread()
         self.logger.info("Measuring tank is emptied.")
         self.clean()
         self.logger.info("Vosekast is shutdown.")
@@ -126,6 +126,11 @@ class Vosekast:
         # close valves
         for valve in self.valves:
             valve.close()
+
+        # stop scale
+        self.scale.stop_measurement_thread()
+        self.scale.close_connection()
+
 
 class NoGPIOControllerError(Exception):
     pass

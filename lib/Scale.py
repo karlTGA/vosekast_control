@@ -48,11 +48,18 @@ class Scale(QObject):
         self.connection = ser
         self.connection.open()
 
+    def close_connection(self):
+        self.connection.close()
+
     def loop(self):
         self.logger.info("Start measuring with scale.")
         while self.run:
             if self.emulate:
-                self.new_value(10.0 + uniform(0.0, 0.2))
+                self.add_new_value(10.0 + uniform(0.0, 0.2))
+            else:
+                new_value = self.read_value_from_scale()
+                if new_value is not None:
+                    self.add_new_value(new_value)
             sleep(1)
 
         self.logger.info("Stopped measuring with scale.")
@@ -64,7 +71,18 @@ class Scale(QObject):
     def stop_measurement_thread(self):
         self.run = False
 
-    def new_value(self, new_value):
+    def read_value_from_scale(self):
+        if self.connection.is_open:
+            line = self.connection.readline()
+            splitted_line = line.split()
+
+            self.logger.info("Measured {}".format(line))
+
+            if len(splitted_line) == 3:
+                new_value = ''.join(splitted_line[:2])
+                return new_value
+
+    def add_new_value(self, new_value):
         self.last_values.append(new_value)
         self.value_changed.emit(new_value)
 

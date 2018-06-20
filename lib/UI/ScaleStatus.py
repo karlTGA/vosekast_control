@@ -1,8 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import QSize, Qt, pyqtSlot
-from PyQt5.QtSvg import QSvgRenderer, QSvgWidget
-from lib.Scale import Scale
 import os
 
 
@@ -47,14 +45,16 @@ class ScaleStatus(QWidget):
     def handle_value_change(self, new_value):
         self.value_text.setText(new_value)
 
-
     @pyqtSlot(bool)
     def state_change(self, new_state):
-        self.handle_state_change(str(new_state))
+        if new_state:
+            self.handle_state_change("Stable")
+        else:
+            self.handle_state_change("Unstable")
 
     @pyqtSlot(float)
     def value_change(self, new_value):
-        self.handle_value_change(str(new_value))
+        self.handle_value_change(str(round(new_value, 2)) + " kg")
 
 class NoImageForIconError(Exception):
     pass
