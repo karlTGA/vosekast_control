@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QToolTip, QPushButton, QApplic
 from PyQt5.QtCore import pyqtSlot, QSize
 from PyQt5.QtGui import QIcon
 from lib.UI.Tabs import Tabs
+from lib.UI.Toolbar import Toolbar
 
 
 class MainWindow(QMainWindow):
@@ -9,13 +10,14 @@ class MainWindow(QMainWindow):
     GUI_RUNNING = 'GUI_RUNNING'
     GUI_TERMINATED = 'GUI_TERMINATED'
 
-    def __init__(self, app, app_control):
+    def __init__(self, app, app_control, debug):
         super().__init__()
         self.main_app = app
         self.app_control = app_control
         self.status_bar = None
         self.tabs = None
         self.layout = None
+        self.debug = debug
         self.initUI()
         self.state = self.GUI_RUNNING
 
@@ -26,21 +28,17 @@ class MainWindow(QMainWindow):
         # init status bar
         self.status_bar = self.statusBar()
 
-        # actions
-        exitAction = QAction(QIcon.fromTheme("application-exit"), 'Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.triggered.connect(self.closeEvent)
-
-        self.toolbar = self.addToolBar('main')
-        self.toolbar.addAction(exitAction)
-        self.toolbar.setIconSize(QSize(64, 64))
+        # init toolbar
+        self.toolbar = Toolbar(self)
+        self.addToolBar(self.toolbar)
 
         # tabs with different informations and control
-        self.tabs = Tabs()
+        self.tabs = Tabs(self.toolbar)
         self.setCentralWidget(self.tabs)
 
         self.show()
-        self.showFullScreen()
+        if not self.debug:
+            self.showFullScreen()
 
     def center(self):
         qr = self.frameGeometry()

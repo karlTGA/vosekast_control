@@ -6,8 +6,10 @@ from PyQt5.QtCore import pyqtSignal, QObject
 class Tank(QObject):
     # tank states
     UNKNOWN = -1
-    DRAINED = 0
+    DRAINED = -0.1
+    EMPTY = 0
     FILLED = 1
+    BETWEEN = 0.5
 
     IS_DRAINING = 'IS_DRAINING'
     IS_FILLING = 'IS_FILLED'
@@ -44,10 +46,10 @@ class Tank(QObject):
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
-            self.overflow_sensor.add_callback(self._tank_is_full)
+            self.overflow_sensor.add_callback(self._up_state_changed)
 
         if drain_sensor is not None:
-            self.drain_sensor.add_callback(self._tank_is_empty)
+            self.drain_sensor.add_callback(self._low_position_changed)
 
         # signals for gui
         if gui_element is not None:
@@ -67,7 +69,24 @@ class Tank(QObject):
             self.logger.debug("No drain valve on the tank {}".format(self.name))
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
-    def _tank_is_full(self, pin):
+    def _up_state_changed(self, pin, alert):
+        if alert:
+            self._tank_is_full()
+        else:
+            self._tank_get_drained()
+
+    def _tank_get_drained(self):
+        """
+        intern function to register that the tank get drained from highest position
+        :return:
+        """
+        self.state = self.BETWEEN
+        self.logger.info("Tank {} get drained.".format(self.name))
+
+        if self.gui_element is not None:
+            self.state_changed.emit(self.BETWEEN)
+
+    def _tank_is_full(self):
         """
         intern function to register that the tank is filled
         :return:
@@ -81,7 +100,25 @@ class Tank(QObject):
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
 
-    def _tank_is_empty(self, pin):
+    def _low_position_changed(self, pin, alert):
+        if alert:
+            self._tank_is_drained()
+        else:
+            self._tank_get_filled()
+
+    def _tank_get_filled(self):
+        """
+        intern function to register that the tank get filled
+        :return:
+        """
+        self.state = self.BETWEEN
+        self.logger.warning("Tank {} get filled".format(self.name))
+
+        if self.gui_element is not None:
+            self.state_changed.emit(self.BETWEEN)
+
+
+    def _tank_is_drained(self):
         """
         intern function to register that the tank is drained
         :return:

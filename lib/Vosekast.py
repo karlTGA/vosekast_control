@@ -2,6 +2,7 @@ from lib.Pump import Pump
 from lib.Tank import Tank
 from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
+from lib.Scale import Scale
 import logging
 from lib.Log import LOGGER
 
@@ -39,6 +40,8 @@ MEASURING_TANK = 'MEASURING_TANK'
 class Vosekast:
 
     def __init__(self, gpio_controller, gui_main_window):
+        self.logger = logging.getLogger(LOGGER)
+
         try:
             self._gpio_controller = gpio_controller
             # define how the pins a numbered on the board
@@ -77,11 +80,15 @@ class Vosekast:
             self.measuring_tank = Tank(MEASURING_TANK, 100, None, self.level_measuring_low, self.level_measuring_high, self.measuring_drain_valve, self.pump_measuring_tank, measuring_tank_gui, protect_draining=False)
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
-            self.logger = logging.getLogger(LOGGER)
+            # scale
+            scale_gui = self._main_window.tabs.tabStatus.scale_status
+            self.scale = Scale(scale_gui, emulate=True)
+            self.scale.open_connection()
+
             self.state = INITED
 
         except NoGPIOControllerError:
-            print('You have to add a gpio controller to control or simulate the components.')
+            self.logger.error('You have to add a gpio controller to control or simulate the components.')
 
     def prepare_measuring(self):
         """
@@ -119,6 +126,11 @@ class Vosekast:
         # close valves
         for valve in self.valves:
             valve.close()
+
+        # stop scale
+        self.scale.stop_measurement_thread()
+        self.scale.close_connection()
+
 
 class NoGPIOControllerError(Exception):
     pass
