@@ -3,6 +3,8 @@
 import sys
 import os
 import time
+import subprocess
+
 from lib.Vosekast import Vosekast
 from lib.Log import setup_custom_logger, add_status_box_handler
 from lib.AppControl import AppControl
@@ -17,8 +19,6 @@ if machine.startswith('arm'):
     DEBUG = False
 else:
     from third_party.RPi_emu import GPIO
-    import subprocess
-
     DEBUG = True
 
 # add logger
