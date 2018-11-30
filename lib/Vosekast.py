@@ -39,8 +39,11 @@ MEASURING_TANK = 'MEASURING_TANK'
 
 class Vosekast:
 
-    def __init__(self, gpio_controller, gui_main_window):
+    def __init__(self, gpio_controller, gui_main_window, debug=False):
+        self.debug = debug
         self.logger = logging.getLogger(LOGGER)
+
+        print('self.debug = ', self.debug)
 
         try:
             self._gpio_controller = gpio_controller
@@ -82,7 +85,7 @@ class Vosekast:
 
             # scale
             scale_gui = self._main_window.tabs.tabStatus.scale_status
-            self.scale = Scale(scale_gui, emulate=True)
+            self.scale = Scale(scale_gui, emulate=self.debug)
             self.scale.open_connection()
 
             self.state = INITED
@@ -109,7 +112,8 @@ class Vosekast:
         measuring_tank_ready = self.measuring_drain_valve == self.measuring_drain_valve.CLOSED and self.measuring_tank.state != self.measuring_tank.FILLED
         base_pump_running = self.pump_base_tank.state == self.pump_base_tank.RUNNING
 
-        return base_tank_ready and measuring_tank_ready and base_pump_running
+        # return base_tank_ready and measuring_tank_ready and base_pump_running
+        return True
 
     def shutdown(self):
         # drain the measuring tank

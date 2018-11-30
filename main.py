@@ -1,19 +1,24 @@
 #!/usr/bin/python3
 
 import sys
-import os
+import platform
 import time
 import subprocess
 
 from lib.Vosekast import Vosekast
+from lib.ExperimentEnvironment import ExperimentEnvironment
+
 from lib.Log import setup_custom_logger, add_status_box_handler
 from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
 from lib.UI.MainWindow import MainWindow
 
+
+
 # if on raspberry pi then with real GPIO. Alternative with emulator
-(sysname, nodename, release, version, machine) = os.uname()
+(sysname, nodename, release, version, machine, processor) = platform.uname()
+print(machine)
 if machine.startswith('arm'):
     import RPi.GPIO as GPIO
     DEBUG = False
@@ -28,7 +33,11 @@ logger = setup_custom_logger()
 def core_vorsekast(app_control, gui_main_window):
     try:
         # add vorsecast instance
-        vk = Vosekast(GPIO, gui_main_window)
+        vk = Vosekast(GPIO, gui_main_window, DEBUG)
+        expEnv = ExperimentEnvironment(
+            vosekast=vk,
+            gui=gui_main_window,
+        )
         vk.prepare_measuring()
 
         while not vk.ready_to_measure():
@@ -38,6 +47,7 @@ def core_vorsekast(app_control, gui_main_window):
             time.sleep(1)
         else:
             logger.info("Ready to rumble")
+            expEnv.start_run()
 
     except KeyboardInterrupt:
         logger.info("User stopped program")
@@ -68,6 +78,9 @@ if __name__ == "__main__":
     res = app.exec_()
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
+
+
+
 
     if DEBUG:
         sys.exit(0)

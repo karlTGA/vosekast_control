@@ -39,14 +39,15 @@ class Scale(QObject):
         self.start_measurement_thread()
 
     def open_connection(self):
-        ser = serial.Serial()
-        ser.port = self.port
-        ser.baudrate = self.baudrate
-        ser.bytesize = self.bytesize
-        ser.timeout = self.timeout
+        if not self.emulate:
+            ser = serial.Serial()
+            ser.port = self.port
+            ser.baudrate = self.baudrate
+            ser.bytesize = self.bytesize
+            ser.timeout = self.timeout
 
-        self.connection = ser
-        self.connection.open()
+            self.connection = ser
+            self.connection.open()
 
     def close_connection(self):
         self.connection.close()
@@ -108,4 +109,3 @@ class Scale(QObject):
         else:
             self.logger.warning("No stable value. Scale varies until now.")
             return None
-

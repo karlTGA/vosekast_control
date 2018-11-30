@@ -2,13 +2,14 @@ from PyQt5.QtWidgets import QTabWidget
 
 from lib.UI.TabsViews.TabStatus import TabStatus
 from lib.UI.TabsViews.TabMeasuring import TabMeasuring
-
+from lib.UI.TabsViews.TabProgramms import TabProgramms
 
 class Tabs(QTabWidget):
 
     # tab names
     TAB_STATUS = "Tab Status"
     TAB_MEASURING = "Tab Measuring"
+    TAB_PROGRAMMS = "Tab Programms"
 
     def __init__(self, main_toolbar):
         super().__init__()
@@ -26,6 +27,12 @@ class Tabs(QTabWidget):
         self.addTab(self.tabMeasuring, self.TAB_MEASURING)
         self.setTabText(measuring_index, self.TAB_MEASURING)
         self.main_toolbar.add_link(self, measuring_index, self.TAB_MEASURING, 'x-office-spreadsheet')
+
+        measuring_index = 2
+        self.tabMeasuring = TabProgramms()
+        self.addTab(self.tabMeasuring, self.TAB_PROGRAMMS)
+        self.setTabText(measuring_index, self.TAB_PROGRAMMS)
+        self.main_toolbar.add_link(self, measuring_index, self.TAB_PROGRAMMS, 'x-office-spreadsheet')
 
         # utilities-system-monitor   -- Window with EKG
         # utilities-terminal  -- Window with terminal
