@@ -34,10 +34,11 @@ def core_vorsekast(app_control, gui_main_window):
     try:
         # add vorsecast instance
         vk = Vosekast(GPIO, gui_main_window, DEBUG)
-        expEnv = ExperimentEnvironment(
-            vosekast=vk,
-            gui=gui_main_window,
-        )
+#        expEnv = ExperimentEnvironment(5,
+#            vosekast=vk,
+#            gui=gui_main_window,
+#        )
+
         vk.prepare_measuring()
 
         while not vk.ready_to_measure():
@@ -47,7 +48,7 @@ def core_vorsekast(app_control, gui_main_window):
             time.sleep(1)
         else:
             logger.info("Ready to rumble")
-            expEnv.start_run()
+            #expEnv.start_run()
 
     except KeyboardInterrupt:
         logger.info("User stopped program")

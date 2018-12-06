@@ -28,11 +28,11 @@ class Tabs(QTabWidget):
         self.setTabText(measuring_index, self.TAB_MEASURING)
         self.main_toolbar.add_link(self, measuring_index, self.TAB_MEASURING, 'x-office-spreadsheet')
 
-        measuring_index = 2
-        self.tabMeasuring = TabProgramms()
-        self.addTab(self.tabMeasuring, self.TAB_PROGRAMMS)
-        self.setTabText(measuring_index, self.TAB_PROGRAMMS)
-        self.main_toolbar.add_link(self, measuring_index, self.TAB_PROGRAMMS, 'x-office-spreadsheet')
+        programms_index = 2
+        self.tabProgramms = TabProgramms()
+        self.addTab(self.tabProgramms, self.TAB_PROGRAMMS)
+        self.setTabText(programms_index, self.TAB_PROGRAMMS)
+        self.main_toolbar.add_link(self, programms_index, self.TAB_PROGRAMMS, 'x-office-spreadsheet')
 
         # utilities-system-monitor   -- Window with EKG
         # utilities-terminal  -- Window with terminal

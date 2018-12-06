@@ -1,3 +1,5 @@
+import logging
+from lib.Log import LOGGER
 import time
 import matplotlib.pyplot as plt
 from enum import Enum
@@ -17,10 +19,8 @@ class ExperimentEnvironment():
         self.vosekast = vosekast
         self.gui = gui
         self.state = default_state
-        self.A = 0
-        self.B = 1
         self.run_time_state = RunTimeState
-        self.state = default_state
+        self.logger = logging.getLogger(LOGGER)
 
 
     def get_state(self):
@@ -28,23 +28,28 @@ class ExperimentEnvironment():
 
 
     def start_run(self):
+        self.logger.debug("Start run {}".format('Hallo'))
         self.state = 1
         a = 0
         start_time = time.perf_counter()
 
-        #fig = plt.figure()
-
         while a < self.delta_t:
-            print(self.get_state(), a)
+            self.logger.info('Status: {}; Zeit: {}'.format(self.get_state(), a))#self.get_state(), a)#, self.vosekast.pump_measuring_tank.state)
             b = time.perf_counter() - start_time
             if a < 2.5 < b:
-                self.A = 1 - self.A
-                self.B = 1 - self.B
+                self.vosekast.pump_measuring_tank.start()
             a = b
-            plt.plot(a, self.A, '.' 'k')
-            plt.plot(a, self.B, '.' 'r')
-        self.state = 2
-        print(self.get_state(), a)
+
+            if self.vosekast.pump_measuring_tank.state is None:
+                plt.plot(a, 0, 'x' 'g')
+            else:
+                plt.plot(a, 1, 'x' 'g')
+
+            if self.vosekast.pump_base_tank.state == None:
+                plt.plot(a, 0, '+' 'b')
+            else:
+                plt.plot(a, 1, '+' 'b')
+        self.vosekast.pump_measuring_tank.stop()
+
         self.state = 0
-        print(self.get_state(), a)
         plt.show()

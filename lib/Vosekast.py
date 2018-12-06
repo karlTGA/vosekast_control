@@ -5,6 +5,7 @@ from lib.Valve import Valve
 from lib.Scale import Scale
 import logging
 from lib.Log import LOGGER
+from lib.ExperimentEnvironment import ExperimentEnvironment
 
 # Vorsekast States
 INITED = 'INITED'
@@ -87,6 +88,18 @@ class Vosekast:
             scale_gui = self._main_window.tabs.tabStatus.scale_status
             self.scale = Scale(scale_gui, emulate=self.debug)
             self.scale.open_connection()
+
+            # experiment_environment
+            button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
+            button_exp_env_0.set_exp_env(ExperimentEnvironment(5,
+                self,
+                gui=self._main_window,
+            ))
+            button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
+            button_exp_env_2 = self._main_window.tabs.tabProgramms.exp_env_buttons[2]
+            button_exp_env_3 = self._main_window.tabs.tabProgramms.exp_env_buttons[3]
+            button_exp_env_4 = self._main_window.tabs.tabProgramms.exp_env_buttons[4]
+            button_exp_env_5 = self._main_window.tabs.tabProgramms.exp_env_buttons[5]
 
             self.state = INITED
 

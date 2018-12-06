@@ -12,6 +12,7 @@ class PumpControl(ControlField):
     def set_pump(self, pump_instance):
         self.set_control_instance(pump_instance)
         self.pump = pump_instance
+        print('HALLO!!')
 
     def toggle_control_instance(self):
         if self.state == Pump.RUNNING:
