@@ -36,10 +36,10 @@ def core_vorsekast(app_control, gui_main_window):
         vk = Vosekast(GPIO, gui_main_window, DEBUG)
         logger.debug('Here')
 
-        expEnv = ExperimentEnvironment(5,
-            vosekast=vk,
-            main_window=gui_main_window,
-        )
+        #expEnv = ExperimentEnvironment(5,
+        #    vosekast=vk,
+        #    main_window=gui_main_window,
+        #)
         logger.debug('Here')
 
         vk.prepare_measuring()

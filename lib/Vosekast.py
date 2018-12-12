@@ -89,6 +89,9 @@ class Vosekast:
 
             # experiment_environment
             button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
+            button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
+            expEnv = ExperimentEnvironment(5, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
+            expEnv2 = ExperimentEnvironment(5, vosekast=self, main_window=self._main_window, index=1, funcs=['sin', 'cos', 'sqrt'])
             self.state = INITED
 
         except NoGPIOControllerError:
