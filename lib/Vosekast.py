@@ -44,8 +44,6 @@ class Vosekast:
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
 
-        print('self.debug = ', self.debug)
-
         try:
             self._gpio_controller = gpio_controller
             # define how the pins a numbered on the board
@@ -91,16 +89,6 @@ class Vosekast:
 
             # experiment_environment
             button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
-            button_exp_env_0.set_exp_env(ExperimentEnvironment(5,
-                self,
-                gui=self._main_window,
-            ))
-            button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
-            button_exp_env_2 = self._main_window.tabs.tabProgramms.exp_env_buttons[2]
-            button_exp_env_3 = self._main_window.tabs.tabProgramms.exp_env_buttons[3]
-            button_exp_env_4 = self._main_window.tabs.tabProgramms.exp_env_buttons[4]
-            button_exp_env_5 = self._main_window.tabs.tabProgramms.exp_env_buttons[5]
-
             self.state = INITED
 
         except NoGPIOControllerError:

@@ -18,7 +18,6 @@ from lib.UI.MainWindow import MainWindow
 
 # if on raspberry pi then with real GPIO. Alternative with emulator
 (sysname, nodename, release, version, machine, processor) = platform.uname()
-print(machine)
 if machine.startswith('arm'):
     import RPi.GPIO as GPIO
     DEBUG = False
@@ -33,11 +32,15 @@ logger = setup_custom_logger()
 def core_vorsekast(app_control, gui_main_window):
     try:
         # add vorsecast instance
+        logger.debug('Here')
         vk = Vosekast(GPIO, gui_main_window, DEBUG)
-#        expEnv = ExperimentEnvironment(5,
-#            vosekast=vk,
-#            gui=gui_main_window,
-#        )
+        logger.debug('Here')
+
+        expEnv = ExperimentEnvironment(5,
+            vosekast=vk,
+            main_window=gui_main_window,
+        )
+        logger.debug('Here')
 
         vk.prepare_measuring()
 
@@ -48,7 +51,6 @@ def core_vorsekast(app_control, gui_main_window):
             time.sleep(1)
         else:
             logger.info("Ready to rumble")
-            #expEnv.start_run()
 
     except KeyboardInterrupt:
         logger.info("User stopped program")
