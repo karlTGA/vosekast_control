@@ -10,8 +10,8 @@ class MainWindow(QMainWindow):
     GUI_RUNNING = 'GUI_RUNNING'
     GUI_TERMINATED = 'GUI_TERMINATED'
 
-    def __init__(self, app, app_control, debug):
-        super().__init__()
+    def __init__(self, app, app_control, debug, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.main_app = app
         self.app_control = app_control
         self.status_bar = None
