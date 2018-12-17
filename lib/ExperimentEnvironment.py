@@ -3,6 +3,7 @@ from lib.Log import LOGGER
 import time
 import matplotlib.pyplot as plt
 from enum import Enum
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal, QObject
 from lib.UI.CanvasDynamic import CanvasDynamic
 from numpy import arange, sin, cos, pi, log
@@ -44,25 +45,10 @@ class ExperimentEnvironment(QObject):
         return self.state
 
     def start_run(self):
-
         self.logger.debug("Start run {}".format('Hallo'))
         self.change_state(RUNNING)
-        #tick, base, measure, a = [], [], [], 0
-        #start_time = time.perf_counter()
 
-
-        """
-        while a < self.delta_t:
-            self.logger.info('Status: {}; Zeit: {}'.format(self.get_state(), a))#self.get_state(), a)#, self.vosekast.pump_measuring_tank.state)
-            b = time.perf_counter() - start_time
-            if a < self.delta_t / 2. < b:
-                self.vosekast.pump_measuring_tank.start()
-            a = b
-            tick.append(a)
-            base.append(self.vosekast.pump_base_tank.state)
-            measure.append(self.vosekast.pump_measuring_tank.state)
-        """
-        canvas = CanvasDynamic(funcs = self.funcs)
+        canvas = CanvasDynamic(self.vosekast, funcs = self.funcs)
         self.vosekast._main_window.tabs.tabProgramms.new_canvas(canvas)
 
 

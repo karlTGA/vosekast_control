@@ -12,8 +12,8 @@ from lib.Log import setup_custom_logger, add_status_box_handler
 from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtCore import QCoreApplication, QThreadPool
 from lib.UI.MainWindow import MainWindow
-
 
 
 # if on raspberry pi then with real GPIO. Alternative with emulator
@@ -67,22 +67,18 @@ if __name__ == "__main__":
     app_control = AppControl()
 
     # add gui
-    app = QApplication(sys.argv)
+    app = QCoreApplication(sys.argv)
     main_window = MainWindow(app, app_control, DEBUG)
+    vk = Vosekast(GPIO, main_window, DEBUG)
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
 
-    # start separate thread with core methods
-    pool = ThreadPool()
-    pool.apply_async(core_vorsekast, [app_control, main_window])
-
     app_control.start()
+    QThreadPool.globalInstance().start(vk)
     res = app.exec_()
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
-
-
 
 
     if DEBUG:

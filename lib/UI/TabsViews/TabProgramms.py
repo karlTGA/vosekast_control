@@ -13,7 +13,7 @@ from lib.Vosekast import Vosekast, BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWI
 
 from lib.UI.CanvasDynamicDefault import CanvasDynamicDefault
 from lib.UI.CanvasStatic import CanvasStatic
-
+from lib.UI.CanvasNew import CanvasNew
 
 
 class TabProgramms(QWidget):
@@ -23,46 +23,44 @@ class TabProgramms(QWidget):
         self.exp_env_buttons = {}
         self.initUI()
 
+
     def initUI(self):
-        on_off_box_0 = self.create_on_off(0)
-        on_off_box_1 = self.create_on_off(1)
-        #on_off_box_2 = self.create_on_off(2)
-        self.plot_box = self.create_canvas('r')
+        self.plot_box = self.create_canvas()
+        on_off_boxes = self.create_on_off(3)
+
+
+
         self.windowLayout = QGridLayout()
-        self.windowLayout.addWidget(on_off_box_0, 0, 0, 1, 1)
-        self.windowLayout.addWidget(on_off_box_1, 1, 0, 1, 1)
-        self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 5)
+        #self.windowLayout.setColumnStretch(0, 1)
+        #self.windowLayout.setColumnStretch(1, 1)
+
+        self.windowLayout.addWidget(on_off_boxes, 0, 0, 1, 1)
+        self.windowLayout.addWidget(self.plot_box, 0, 1, 1, 5)
         self.setLayout(self.windowLayout)
 
-    def create_on_off(self, index):
+    def create_on_off(self, number):
         out = QGroupBox("Trials")
         layout = QGridLayout()
-        layout.setColumnStretch(0, 0)
-        layout.setColumnStretch(1, 0)
-        button = OnOffControl('Trial ' + str(index))
+        layout.setSpacing(10)
 
-        self.exp_env_buttons[index] = button
-
-        layout.addWidget(button, 0, 0, 1, 0)
+        for a in range(number):
+            button = OnOffControl('Trial ' + str(a))
+            self.exp_env_buttons[a] = button
+            layout.addWidget(button, a, 0, 1, 0)
 
         out.setLayout(layout)
         return out
 
-    def create_canvas(self, color):
-        self.canvas = CanvasDynamicDefault(2,2, color)
+    def create_canvas(self):
+        self.screen = CanvasNew(2,2)
         out = QGroupBox("Graphs")
         layout = QGridLayout()
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
-        layout.addWidget(self.canvas, 0, 0)
+        layout.addWidget(self.screen, 0, 0)
         out.setLayout(layout)
         return out
 
-    def change_color_of_default_canvas(self, color):
-        self.plot_box.deleteLater()
-        self.plot_box = self.create_canvas(color)
-        self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 5)
-        self.setLayout(self.windowLayout)
 
     def new_canvas(self, canvas):
         self.plot_box.deleteLater()

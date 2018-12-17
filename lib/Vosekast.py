@@ -6,6 +6,9 @@ from lib.Scale import Scale
 import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
+from lib.ExperimentEnvironmentNew import ExperimentEnvironmentNew
+from PyQt5.QtCore import QThread
+
 
 # Vorsekast States
 INITED = 'INITED'
@@ -38,11 +41,12 @@ STOCK_TANK = 'STOCK_TANK'
 BASE_TANK = 'BASE_TANK'
 MEASURING_TANK = 'MEASURING_TANK'
 
-class Vosekast:
+class Vosekast(QThread):
 
     def __init__(self, gpio_controller, gui_main_window, debug=False):
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
+        self.app = QCoreApplication.instance()
 
         try:
             self._gpio_controller = gpio_controller
@@ -90,8 +94,11 @@ class Vosekast:
             # experiment_environment
             button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
             button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
-            expEnv = ExperimentEnvironment(5, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
-            expEnv2 = ExperimentEnvironment(5, vosekast=self, main_window=self._main_window, index=1, funcs=['sin', 'cos', 'sqrt'])
+            button_exp_env_2 = self._main_window.tabs.tabProgramms.exp_env_buttons[2]
+            expEnv = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
+            expEnv2 = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=1, funcs=['sin', 'cos', 'sqrt', 'pump_base'])
+            expEnv3 = ExperimentEnvironmentNew(20, vosekast=self, main_window=self._main_window, index=2, funcs=['sin', 'cos', 'sqrt', 'pump_base'])
+
             self.state = INITED
 
         except NoGPIOControllerError:
@@ -139,6 +146,8 @@ class Vosekast:
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
+    def run():
+        self.logger.debug('I started')
 
 class NoGPIOControllerError(Exception):
     pass
