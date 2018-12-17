@@ -45,8 +45,8 @@ class ExperimentEnvironmentNew(QObject):
 
 
         self.timer = QTimer
-        self.timer.timeout.connect(self.emit_new_data_point)
-        self.time_count = 0
+        # self.timer.timeout.connect(self.emit_new_data_point)
+        # self.time_count = 0
         self.change_state(READY)
 
 

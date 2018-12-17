@@ -67,7 +67,7 @@ if __name__ == "__main__":
     app_control = AppControl()
 
     # add gui
-    app = QCoreApplication(sys.argv)
+    app = QApplication(sys.argv)
     main_window = MainWindow(app, app_control, DEBUG)
     vk = Vosekast(GPIO, main_window, DEBUG)
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     # init thread pool 
     threadpool = QThreadPool()
-    print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+    print("Multithreading with maximum %d threads" % threadpool.maxThreadCount())
 
     app_control.start()
     threadpool.start(vk)

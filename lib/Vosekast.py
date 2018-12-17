@@ -7,7 +7,7 @@ import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.ExperimentEnvironmentNew import ExperimentEnvironmentNew
-from PyQt5.QtCore import QRunnable, pyqtSlot
+from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 
 
 # Vorsekast States
@@ -43,7 +43,9 @@ MEASURING_TANK = 'MEASURING_TANK'
 
 class Vosekast(QRunnable):
 
-    def __init__(self, gpio_controller, gui_main_window, debug=False):
+    def __init__(self, gpio_controller, gui_main_window, debug=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.app = QCoreApplication.instance()
@@ -147,7 +149,7 @@ class Vosekast(QRunnable):
         self.scale.close_connection()
 
     @pyqtSlot()
-    def run():
+    def run(self):
         self.logger.debug('I started')
 
 class NoGPIOControllerError(Exception):
