@@ -7,7 +7,7 @@ import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.ExperimentEnvironmentNew import ExperimentEnvironmentNew
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QRunnable, pyqtSlot
 
 
 # Vorsekast States
@@ -41,7 +41,7 @@ STOCK_TANK = 'STOCK_TANK'
 BASE_TANK = 'BASE_TANK'
 MEASURING_TANK = 'MEASURING_TANK'
 
-class Vosekast(QThread):
+class Vosekast(QRunnable):
 
     def __init__(self, gpio_controller, gui_main_window, debug=False):
         self.debug = debug
@@ -146,6 +146,7 @@ class Vosekast(QThread):
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
+    @pyqtSlot()
     def run():
         self.logger.debug('I started')
 
