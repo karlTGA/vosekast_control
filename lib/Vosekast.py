@@ -7,7 +7,7 @@ import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.ExperimentEnvironmentNew import ExperimentEnvironmentNew
-from PyQt5.QtCore import QRunnable
+from PyQt5.QtCore import QRunnable, pyqtSlot
 
 
 # Vorsekast States

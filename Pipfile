@@ -12,6 +12,8 @@ Pygame = "==1.9.3"
 "RPi.GPIO" = "==0.6.3"
 SIP = "==4.19.8"
 pyqt5 = "*"
+matplotlib = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.5"
