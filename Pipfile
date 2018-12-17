@@ -7,10 +7,10 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
-pyserial = "==3.4"
-Pygame = "==1.9.3"
-"RPi.GPIO" = "==0.6.3"
-SIP = "==4.19.8"
+pyserial = "*"
+Pygame = "*"
+"RPi.GPIO" = "*"
+SIP = "*"
 pyqt5 = "*"
 matplotlib = "*"
 numpy = "*"
