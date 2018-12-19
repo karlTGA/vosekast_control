@@ -78,9 +78,3 @@ class ExperimentEnvironmentNew(QObject):
         x = self.time_count
         y = sin(self.time_count)
         self.send_data_point.emit(x, y)
-
-    def update_figure(self):
-        self.logger.debug('Update figure')
-        print('Hallo')
-        self.time_count += 20/100
-        self.new_data_point.emit(self.time_count, sin(self.time_count))
