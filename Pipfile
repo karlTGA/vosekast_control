@@ -9,7 +9,6 @@ pylint = "*"
 [packages]
 pyserial = "*"
 Pygame = "*"
-"RPi.GPIO" = "*"
 SIP = "*"
 pyqt5 = "*"
 matplotlib = "*"

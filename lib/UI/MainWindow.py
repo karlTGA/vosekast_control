@@ -3,6 +3,20 @@ from PyQt5.QtCore import pyqtSlot, QSize
 from PyQt5.QtGui import QIcon
 from lib.UI.Tabs import Tabs
 from lib.UI.Toolbar import Toolbar
+from lib.Vosekast import Vosekast
+import platform
+from PyQt5.QtCore import QCoreApplication, QThreadPool
+
+
+
+# if on raspberry pi then with real GPIO. Alternative with emulator
+(sysname, nodename, release, version, machine, processor) = platform.uname()
+if machine.startswith('arm'):
+    import RPi.GPIO as GPIO
+    DEBUG = False
+else:
+    from third_party.RPi_emu import GPIO
+    DEBUG = True
 
 
 class MainWindow(QMainWindow):
@@ -36,9 +50,21 @@ class MainWindow(QMainWindow):
         self.tabs = Tabs(self.toolbar)
         self.setCentralWidget(self.tabs)
 
+        self.vk = Vosekast(GPIO, self, DEBUG)
+        self.vk.run()
+
         self.show()
+
         if not self.debug:
             self.showFullScreen()
+
+
+
+        # init thread pool
+        self.threadpool = QThreadPool()
+        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        self.threadpool.start(self.vk)
+
 
     def center(self):
         qr = self.frameGeometry()
@@ -66,4 +92,3 @@ class MainWindow(QMainWindow):
     def send_status_message(self, message):
         if not self.app_control.is_terminating() and self.state == self.GUI_RUNNING:
             self.status_bar.showMessage(message)
-

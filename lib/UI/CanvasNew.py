@@ -27,7 +27,7 @@ class CanvasNew(FigureCanvas):
         self.axes.plot(x,y)
 
     @pyqtSlot(float, float)
-    def new_data_point(self, x, y):
+    def get_data_point(self, x, y):
         self.logger.debug('Got new point')
         self.axes.plot(x,y, 'x' 'k')
         self.draw_idle()

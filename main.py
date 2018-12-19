@@ -69,17 +69,15 @@ if __name__ == "__main__":
     # add gui
     app = QApplication(sys.argv)
     main_window = MainWindow(app, app_control, DEBUG)
-    vk = Vosekast(GPIO, main_window, DEBUG)
+    
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
 
-    # init thread pool 
-    threadpool = QThreadPool()
-    print("Multithreading with maximum %d threads" % threadpool.maxThreadCount())
+
 
     app_control.start()
-    threadpool.start(vk)
+
     res = app.exec_()
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
