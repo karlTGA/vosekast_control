@@ -15,6 +15,7 @@ class CanvasNew(FigureCanvas):
         self.axes = fig.add_subplot(111)
         self.compute_initial_figure([0,1], [0,1])
         FigureCanvas.__init__(self, fig)
+        self.axes.legend(['A simple line'])
 
     def start_timer(self):
         self.timer.start(1000)

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTabWidget
+from PyQt5.QtWidgets import QTabWidget, QTextEdit, QMenu, QToolButton, QTabBar
 
 from lib.UI.TabsViews.TabStatus import TabStatus
 from lib.UI.TabsViews.TabMeasuring import TabMeasuring
@@ -33,6 +33,8 @@ class Tabs(QTabWidget):
         self.addTab(self.tabProgramms, self.TAB_PROGRAMMS)
         self.setTabText(programms_index, self.TAB_PROGRAMMS)
         self.main_toolbar.add_link(self, programms_index, self.TAB_PROGRAMMS, 'x-office-spreadsheet')
+
+
 
         # utilities-system-monitor   -- Window with EKG
         # utilities-terminal  -- Window with terminal

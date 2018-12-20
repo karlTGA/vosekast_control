@@ -7,17 +7,14 @@ from PyQt5.QtGui import QIcon
 
 from lib.EnumStates import States
 
-class OnOffControl(ControlField):
+class StopButton(ControlField):
 
     def __init__(self, text):
         super().__init__(text)
         self.logger = logging.getLogger(LOGGER)
 
     def toggle_control_instance(self):
-        if self.control_instance.state != States.RUNNING:
-            self.control_instance.start_experiment()
-        else:
-            self.control_instance.pause_experiment()
+        self.control_instance.stop_experiment()
 
     def handle_state_change(self, new_state):
         self.button.setIcon(QIcon(self.get_icon(new_state)))
@@ -28,12 +25,11 @@ class OnOffControl(ControlField):
     @staticmethod
     def get_icon(state):
         # search for icon
-        print('static method', state)
         path = os.path.dirname(os.path.abspath(__file__))
-        if state == States.RUNNING:
-            icon_path = os.path.join(path, 'icons/on_off_icons/color.png')
+        if state == States.NONE or state == States.STOPPED:
+            icon_path = os.path.join(path, 'icons/stop_icons/stop_sw.png')
         else:
-            icon_path = os.path.join(path, 'icons/on_off_icons/sw.png')
+            icon_path = os.path.join(path, 'icons/stop_icons/stop_color.png')
 
         if not os.path.isfile(icon_path):
             raise NoImageForIconError

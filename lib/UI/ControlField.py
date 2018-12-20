@@ -68,7 +68,6 @@ class ControlField(QWidget):
     @pyqtSlot(int)
     def state_change(self, new_state):
         print('ControlField, Singal income')
-        self.logger.debug("signal income - state_int {}; state_enum {}".format(new_state, States(new_state)))
         self.handle_state_change(States(new_state))
 
     @staticmethod

@@ -93,17 +93,15 @@ class Vosekast(QRunnable):
             self.scale.open_connection()
 
             # experiment_environment
-            expEnv0 = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
+            expEnv0 = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window)
 
-            button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
-            button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
-            button_exp_env_2 = self._main_window.tabs.tabProgramms.exp_env_buttons[2]
+            button_start_pause_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
+            button_stop_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
 
-            button_exp_env_0.set_control_instance(expEnv0.experiment_0)
-            button_exp_env_1.set_control_instance(expEnv0.experiment_1)
-            button_exp_env_2.set_control_instance(expEnv0.experiment_2)
+            button_start_pause_exp.set_control_instance(expEnv0.actual_experiment)
+            button_stop_exp.set_control_instance(expEnv0.actual_experiment)
 
-        
+
 
             self.state = INITED
 

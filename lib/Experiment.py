@@ -11,24 +11,41 @@ class Experiment(QObject):
     clear_canvas_ = pyqtSignal(name='Clear')
     state_changed = pyqtSignal(int, name='changed')
 
-    def __init__(self, ExperimentEnvironment, course_pump_measuring, course_pump_base, default_state = States.NONE):
+    def __init__(self, ExperimentEnvironment, course_pump_measuring, course_pump_base, index, default_state = States.NONE, legend='off'):
         super().__init__()
         self.logger = logging.getLogger(LOGGER)
         self.ExpEnv = ExperimentEnvironment
         self.cpm = course_pump_measuring
         self.cpb = course_pump_base
+        self.index = index
+        self.screen = self.ExpEnv._exp_env_tab.screen
         self.timer = QTimer()
         self.timer.timeout.connect(self.execute_experiment)
         self.time_count = 0
         self.state = default_state
-        self.send_data_point.connect(self.ExpEnv._exp_env_tab.screen.get_data_point)
-        self.clear_canvas_.connect(self.ExpEnv._exp_env_tab.screen.clear_canvas)
+        self.send_data_point.connect(self.screen.get_data_point)
+        self.clear_canvas_.connect(self.screen.clear_canvas)
         self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change)
+        self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change)
 
-    def start_experiment(self):
+        self.legend = legend
+
+    def continue_experiment(self):
         self.timer.start(500)
         self.state = States.RUNNING
+        self.change_state(self.state)
+
+    def start_experiment(self):
         self.clear_canvas()
+        x = self.time_count
+        y = self.ExpEnv.vosekast.pump_base_tank.state.value
+        self.send_new_data_point(x, y, 'x', 'r')
+        y = self.ExpEnv.vosekast.pump_measuring_tank.state.value
+        self.send_new_data_point(x, y, '+', 'g')
+        self.screen.axes.legend(['Pump Base Tank', 'Pump Measuring Tank'])
+        self.timer.start(500)
+        self.state = States.RUNNING
+
         self.change_state(self.state)
 
     def execute_experiment(self):
@@ -54,6 +71,12 @@ class Experiment(QObject):
         self.timer.stop()
         self.state = States.PAUSE
         self.change_state(self.state)
+
+    def stop_experiment(self):
+        self.timer.stop()
+        self.state = States.STOPPED
+        self.change_state(self.state)
+        self.time_count = 0
 
     def clear_canvas(self):
         self.clear_canvas_.emit()

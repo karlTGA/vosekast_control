@@ -22,7 +22,7 @@ class ExperimentEnvironment(QObject):
     #send_data_point = pyqtSignal(float, float, name="point")
     new_time = pyqtSignal(int, name="time_exp_env")
 
-    def __init__(self, delta_t, vosekast, main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'], update = False):
+    def __init__(self, delta_t, vosekast, main_window, funcs=['sin', 'cos', 'sqrt', 'log'], update = False):
         super().__init__()
 
         self.logger = logging.getLogger(LOGGER)
@@ -31,16 +31,22 @@ class ExperimentEnvironment(QObject):
 
         self._main_window = main_window
         self._exp_env_tab = self._main_window.tabs.tabProgramms
-        self._start_pause_button = self._exp_env_tab.exp_env_buttons[index]
-
-        # add instance to gui_elements
-        self._start_pause_button.control_instance = self
+        self._start_pause_button = self._exp_env_tab.exp_env_buttons[0]
+        self._stop_button = self._exp_env_tab.exp_env_buttons[1]
 
         # Add Experiment
-        self.experiment_0 = Experiment(self, [3,6,9], [4,8,12])
-        self.experiment_1 = Experiment(self, [1,2,7], [9,6,18])
-        self.experiment_2 = Experiment(self, [1,3,8], [7,5,11])
+        self.experiment_0 = Experiment(self, [3,6,9], [4,8,12], 0)
+        self.experiment_1 = Experiment(self, [1,2,7], [9,6,18], 1)
+        self.experiment_2 = Experiment(self, [1,3,8], [7,5,11], 2)
         self.experiments = [self.experiment_0, self.experiment_1, self.experiment_2]
+        self.actual_experiment = self.experiment_0
+
+        # add instance to gui_elements
+        self._start_pause_button.control_instance = self.actual_experiment
+        self._stop_button.control_instance = self.actual_experiment
+
+
+
 
         self.change_state(States.READY.value)
 
