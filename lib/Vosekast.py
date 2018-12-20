@@ -6,7 +6,6 @@ from lib.Scale import Scale
 import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
-from lib.ExperimentEnvironmentNew import ExperimentEnvironmentNew
 from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 
 
@@ -94,12 +93,17 @@ class Vosekast(QRunnable):
             self.scale.open_connection()
 
             # experiment_environment
+            expEnv0 = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
+
             button_exp_env_0 = self._main_window.tabs.tabProgramms.exp_env_buttons[0]
             button_exp_env_1 = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
             button_exp_env_2 = self._main_window.tabs.tabProgramms.exp_env_buttons[2]
-            expEnv = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'])
-            expEnv2 = ExperimentEnvironment(20, vosekast=self, main_window=self._main_window, index=1, funcs=['sin', 'cos', 'sqrt', 'pump_base'])
-            expEnv3 = ExperimentEnvironmentNew(20, vosekast=self, main_window=self._main_window, index=2, funcs=['sin', 'cos', 'sqrt', 'pump_base'])
+
+            button_exp_env_0.set_control_instance(expEnv0.experiment_0)
+            button_exp_env_1.set_control_instance(expEnv0.experiment_1)
+            button_exp_env_2.set_control_instance(expEnv0.experiment_2)
+
+        
 
             self.state = INITED
 

@@ -2,23 +2,27 @@ import logging
 from lib.Log import LOGGER
 import time
 import matplotlib.pyplot as plt
-from enum import Enum
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSignal, QObject
-from lib.UI.CanvasDynamic import CanvasDynamic
-from numpy import arange, sin, cos, pi, log
 
-PAUSE = 0
-RUNNING = 1
-READY = 2
-STOP = 3
+
+#from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer, pyqtSlot
+
+import numpy as np
+from numpy import arange, sin, cos, pi, log
+import time
+from lib.EnumStates import States
+from lib.Experiment import Experiment
+
+
 
 class ExperimentEnvironment(QObject):
 
     # signals
     state_changed = pyqtSignal(int, name="ExpEnvStateChanged")
+    #send_data_point = pyqtSignal(float, float, name="point")
+    new_time = pyqtSignal(int, name="time_exp_env")
 
-    def __init__(self, delta_t, vosekast, main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log']):
+    def __init__(self, delta_t, vosekast, main_window, index=0, funcs=['sin', 'cos', 'sqrt', 'log'], update = False):
         super().__init__()
 
         self.logger = logging.getLogger(LOGGER)
@@ -27,35 +31,44 @@ class ExperimentEnvironment(QObject):
 
         self._main_window = main_window
         self._exp_env_tab = self._main_window.tabs.tabProgramms
-        #self.canvas = self._main_window.tabs.tabProgramms.canvas
         self._start_pause_button = self._exp_env_tab.exp_env_buttons[index]
 
         # add instance to gui_elements
         self._start_pause_button.control_instance = self
-        self.state_changed.connect(self._start_pause_button.state_change)
-        self.funcs = funcs
-        self.change_state(READY)
+
+        # Add Experiment
+        self.experiment_0 = Experiment(self, [3,6,9], [4,8,12])
+        self.experiment_1 = Experiment(self, [1,2,7], [9,6,18])
+        self.experiment_2 = Experiment(self, [1,3,8], [7,5,11])
+        self.experiments = [self.experiment_0, self.experiment_1, self.experiment_2]
+
+        self.change_state(States.READY.value)
+
 
     def change_state(self, new_state):
-        self.state = new_state
+        self.state = States(new_state)
         self.logger.debug('New State ' + str(new_state))
         self.state_changed.emit(new_state)
+
+    def send_new_time(self):
+        self.new_time.emit(0)
 
     def get_state(self):
         return self.state
 
     def start_run(self):
         self.logger.debug("Start run {}".format('Hallo'))
-        self.change_state(RUNNING)
+        self.logger.debug('Jetzt sollte geplottet werden')
 
-        canvas = CanvasDynamic(self.vosekast, funcs = self.funcs)
-        self.vosekast._main_window.tabs.tabProgramms.new_canvas(canvas)
+        t = np.linspace(0, self.delta_t, 200)
+        y = sin(t)
 
+        self.vosekast._main_window.tabs.tabProgramms.screen.axes.cla()
+        self.vosekast._main_window.tabs.tabProgramms.screen.axes.plot(t,y)
+        self.vosekast._main_window.tabs.tabProgramms.screen.draw()
+        self.change_state(States.RUNNING.value)
+        self.timer.start(1000)
 
-
-
-
-
-        #self.vosekast.pump_measuring_tank.stop()
-
-        #self.change_state(STOP)
+    def pause_run(self):
+        self.timer.stop()
+        self.change_state(States.PAUSE.value)

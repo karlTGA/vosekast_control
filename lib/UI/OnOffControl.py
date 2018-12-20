@@ -1,5 +1,5 @@
 from lib.UI.ControlField import ControlField, NoImageForIconError
-from lib.ExperimentEnvironment import ExperimentEnvironment, RUNNING
+from lib.ExperimentEnvironment import ExperimentEnvironment
 import os
 import logging
 from lib.Log import LOGGER
@@ -10,30 +10,27 @@ from lib.EnumStates import States
 class OnOffControl(ControlField):
 
     def __init__(self, text):
-        super().__init__(text, default_state = None)
+        super().__init__(text)
         self.logger = logging.getLogger(LOGGER)
-        self.experiment_environment = None
 
     def toggle_control_instance(self):
-        self.control_instance.start_run()
+        if self.control_instance.state != States.RUNNING:
+            self.control_instance.start_experiment()
+        else:
+            self.control_instance.pause_experiment()
 
     def handle_state_change(self, new_state):
         self.button.setIcon(QIcon(self.get_icon(new_state)))
-        self.label.setText(self.text + ' - ' + str(States(new_state).name))
-        print('Hallo!!')
+        print('OnOff State change')
+        self.label.setText(self.text + ' - ' + new_state.name)# + str(new_state.name))
         self.state = new_state
-
-
-
-
 
     @staticmethod
     def get_icon(state):
         # search for icon
+        print('static method', state)
         path = os.path.dirname(os.path.abspath(__file__))
-        logger = logging.getLogger(LOGGER)
-        logger.debug('New State ' + str(state == RUNNING))
-        if state == RUNNING:
+        if state == States.RUNNING:
             icon_path = os.path.join(path, 'icons/on_off_icons/color.png')
         else:
             icon_path = os.path.join(path, 'icons/on_off_icons/sw.png')

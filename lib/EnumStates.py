@@ -4,4 +4,5 @@ class States(Enum):
     PAUSE = 0
     RUNNING = 1
     READY = 2
-    STOP = 3
+    STOPPED = 3
+    NONE = 4

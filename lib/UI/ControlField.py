@@ -3,11 +3,12 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize, Qt, pyqtSlot
 import logging
 from lib.Log import LOGGER
+from lib.EnumStates import States
 
 
 class ControlField(QWidget):
 
-    def __init__(self, text, default_state=None):
+    def __init__(self, text, default_state=States.NONE):
         super().__init__()
         self.text = text
         self.state = default_state
@@ -66,7 +67,9 @@ class ControlField(QWidget):
 
     @pyqtSlot(int)
     def state_change(self, new_state):
-        self.handle_state_change(new_state)
+        print('ControlField, Singal income')
+        self.logger.debug("signal income - state_int {}; state_enum {}".format(new_state, States(new_state)))
+        self.handle_state_change(States(new_state))
 
     @staticmethod
     def get_icon(state):

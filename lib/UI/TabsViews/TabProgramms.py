@@ -9,10 +9,6 @@ import matplotlib.pyplot as plt
 from lib.Vosekast import Vosekast, BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE, BASE_TANK, MEASURING_TANK
 
 
-
-
-from lib.UI.CanvasDynamicDefault import CanvasDynamicDefault
-from lib.UI.CanvasStatic import CanvasStatic
 from lib.UI.CanvasNew import CanvasNew
 
 
@@ -28,11 +24,7 @@ class TabProgramms(QWidget):
         self.plot_box = self.create_canvas()
         on_off_boxes = self.create_on_off(3)
 
-
-
         self.windowLayout = QGridLayout()
-        #self.windowLayout.setColumnStretch(0, 1)
-        #self.windowLayout.setColumnStretch(1, 1)
 
         self.windowLayout.addWidget(on_off_boxes, 0, 0, 1, 1)
         self.windowLayout.addWidget(self.plot_box, 0, 1, 1, 5)
@@ -61,7 +53,7 @@ class TabProgramms(QWidget):
         out.setLayout(layout)
         return out
 
-
+"""
     def new_canvas(self, canvas):
         self.plot_box.deleteLater()
         self.canvas = canvas
@@ -72,3 +64,4 @@ class TabProgramms(QWidget):
         layout.addWidget(self.canvas, 0, 0)
         self.plot_box.setLayout(layout)
         self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 5)
+"""

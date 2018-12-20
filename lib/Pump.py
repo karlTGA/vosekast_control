@@ -1,13 +1,10 @@
 import logging
 from lib.Log import LOGGER
 from PyQt5.QtCore import pyqtSignal, QObject
+from lib.EnumStates import States
 
 
 class Pump(QObject):
-    # states
-    RUNNING = 1
-    STOPPED = 0
-
     # signals
     state_changed = pyqtSignal(int, name="PumpStateChanged")
 
@@ -18,7 +15,7 @@ class Pump(QObject):
         self.name = name
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
-        self.state = None
+        self.state = States.NONE
         self.gui_element = gui_element
 
         # init the gpio pin
@@ -37,8 +34,8 @@ class Pump(QObject):
         """
         self.logger.debug("Stop the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
-        self.state = self.STOPPED
-        self.state_changed.emit(self.STOPPED)
+        self.state = States.STOPPED
+        self.state_changed.emit(States.STOPPED.value)
 
     def start(self):
         """
@@ -47,5 +44,14 @@ class Pump(QObject):
         """
         self.logger.debug("Start the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
-        self.state = self.RUNNING
-        self.state_changed.emit(self.RUNNING)
+        self.state = States.RUNNING
+        self.state_changed.emit(States.RUNNING.value)
+
+    def toggle(self):
+        """
+        toggle the pump
+        """
+        if self.state != States.RUNNING:
+            self.start()
+        else:
+            self.stop()
