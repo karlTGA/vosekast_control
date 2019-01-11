@@ -101,6 +101,8 @@ class Vosekast(QRunnable):
             button_start_pause_exp.set_control_instance(expEnv0.actual_experiment)
             button_stop_exp.set_control_instance(expEnv0.actual_experiment)
 
+            self._main_window.tabs.tabProgramms.set_experiments(expEnv0.experiments)
+
 
 
             self.state = INITED

@@ -35,9 +35,9 @@ class ExperimentEnvironment(QObject):
         self._stop_button = self._exp_env_tab.exp_env_buttons[1]
 
         # Add Experiment
-        self.experiment_0 = Experiment(self, [3,6,9], [4,8,12], 0)
-        self.experiment_1 = Experiment(self, [1,2,7], [9,6,18], 1)
-        self.experiment_2 = Experiment(self, [1,3,8], [7,5,11], 2)
+        self.experiment_0 = Experiment(self, "First Experiment",[3,6,9], [4,8,12], 0)
+        self.experiment_1 = Experiment(self, "Second Experiment",[1,2,7], [9,6,18], 1)
+        self.experiment_2 = Experiment(self, "Third Experiment",[1,3,8], [7,5,11], 2)
         self.experiments = [self.experiment_0, self.experiment_1, self.experiment_2]
         self.actual_experiment = self.experiment_0
 
@@ -45,10 +45,8 @@ class ExperimentEnvironment(QObject):
         self._start_pause_button.control_instance = self.actual_experiment
         self._stop_button.control_instance = self.actual_experiment
 
-
-
-
         self.change_state(States.READY.value)
+
 
 
     def change_state(self, new_state):

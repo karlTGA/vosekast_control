@@ -11,7 +11,7 @@ class Experiment(QObject):
     clear_canvas_ = pyqtSignal(name='Clear')
     state_changed = pyqtSignal(int, name='changed')
 
-    def __init__(self, ExperimentEnvironment, course_pump_measuring, course_pump_base, index, default_state = States.NONE, legend='off'):
+    def __init__(self, ExperimentEnvironment, name, course_pump_measuring, course_pump_base, index, default_state = States.READY, legend='off'):
         super().__init__()
         self.logger = logging.getLogger(LOGGER)
         self.ExpEnv = ExperimentEnvironment
@@ -27,7 +27,7 @@ class Experiment(QObject):
         self.clear_canvas_.connect(self.screen.clear_canvas)
         self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change)
         self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change)
-
+        self.name = name
         self.legend = legend
 
     def continue_experiment(self):
@@ -54,7 +54,6 @@ class Experiment(QObject):
         for time_toggle in self.cpb:
             if old < time_toggle <= self.time_count:
                 self.ExpEnv.vosekast.pump_base_tank.toggle()
-                print('in the loop')
         x = self.time_count
         y = self.ExpEnv.vosekast.pump_base_tank.state.value
         self.send_new_data_point(x, y, 'x', 'r')
@@ -72,9 +71,12 @@ class Experiment(QObject):
         self.state = States.PAUSE
         self.change_state(self.state)
 
+    @pyqtSlot()
     def stop_experiment(self):
+        print(States(self.state))
+        if self.state != States.READY:
+            self.state = States.STOPPED
         self.timer.stop()
-        self.state = States.STOPPED
         self.change_state(self.state)
         self.time_count = 0
 
