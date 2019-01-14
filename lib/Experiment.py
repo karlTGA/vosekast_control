@@ -61,7 +61,6 @@ class Experiment(QObject):
         for time_toggle in self.cpm:
             if old < time_toggle <= self.time_count:
                 self.ExpEnv.vosekast.pump_measuring_tank.toggle()
-                print('in the loop')
         x = self.time_count
         y = self.ExpEnv.vosekast.pump_measuring_tank.state.value
         self.send_new_data_point(x, y, '+', 'g')

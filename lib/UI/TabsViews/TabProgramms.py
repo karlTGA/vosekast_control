@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox, QComboBox, QMenu, QToolButton, QWidgetAction, QTextBrowser, QMenuBar, QAction
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, QGroupBox, QComboBox, QMenu, QToolButton, QWidgetAction, QTextBrowser, QMenuBar, QAction
 from lib.UI.StartPauseButton import StartPauseButton
 from lib.UI.StopButton import StopButton
 from lib.ExperimentEnvironment import ExperimentEnvironment
@@ -27,18 +27,24 @@ class TabProgramms(QWidget):
     def initUI(self):
         self.plot_box = self.create_canvas()
         on_off_boxes = self.create_on_off()
-        selection = self.create_selection_box()
+        selection_experiments = self.create_selection_box_experiments()
+        selection_values = self.create_selection_box_values()
 
         self.windowLayout = QGridLayout()
 
-        self.windowLayout.addWidget(selection, 0, 0, 1, 0.5)
+        self.windowLayout.setColumnStretch(0, 1)
+        self.windowLayout.setColumnStretch(1, 5)
+        self.windowLayout.setColumnStretch(2, 1)
+
+        self.windowLayout.addWidget(selection_experiments, 0, 0, 1, 1)
         self.windowLayout.addWidget(on_off_boxes, 1, 0, 1, 1)
-        self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 5)
+        self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 1)
+        self.windowLayout.addWidget(selection_values, 0, 2, 2, 2)
 
         self.setLayout(self.windowLayout)
 
     def create_on_off(self):
-        out = QGroupBox("Trials")
+        out = QGroupBox("Start Pause Stop")
         layout = QGridLayout()
         layout.setSpacing(10)
 
@@ -51,13 +57,10 @@ class TabProgramms(QWidget):
         button.button.clicked.connect(self.new_suptitle)
         layout.addWidget(button, 1, 0, 1, 0)
 
+
+
         out.setLayout(layout)
         return out
-
-    def new_suptitle(self):
-        print(self.actual_experiment.name, States(self.actual_experiment.state).name)
-        self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
-        self.screen.draw_idle()
 
     def create_canvas(self):
         self.screen = CanvasNew(2,2)
@@ -70,32 +73,62 @@ class TabProgramms(QWidget):
         out.setLayout(layout)
         return out
 
-    def create_selection_box(self):
+    def create_selection_box_experiments(self):
         out = QGroupBox("Selection")
 
         layout = QVBoxLayout(self)
-
-
-        self.myQMenuBar = QMenuBar(self)
-        Menu = self.myQMenuBar.addMenu('Monitored Machines')
-        Pump_Measurement_Menu = Menu.addMenu('Pump Measurement')
-        Pump_Base_Menu = Menu.addMenu('Pump Base')
-        Scale_Menu = Menu.addMenu('Scale')
-        Valve_1_Menu = Menu.addMenu('Valve 1')
-        Valve_2_Menu = Menu.addMenu('Valve 2')
-
-        Pump_Measurement_Menu.addAction('VolumeFlow')
-        Pump_Measurement_Menu.addAction('State')
 
         self.select_experiment = QMenuBar(self)
         self.Menu_exp = self.select_experiment.addMenu('Choose Experiment')
 
         layout.addWidget(self.select_experiment)
-        layout.addWidget(self.myQMenuBar)
+        out.setLayout(layout)
+        return out
 
+
+    def create_selection_box_values(self):
+        out = QGroupBox("Monitored Values")
+
+        layout = QVBoxLayout(self)
+
+        # Pump I
+        sub_I = QGroupBox("Pump I")
+        sub_I_layout = QVBoxLayout(self)
+        for a in ["State", "Volume Flow", "State"]:
+            to_be_added = QCheckBox(a)
+            sub_I_layout.addWidget(to_be_added)
+        sub_I.setLayout(sub_I_layout)
+
+        # Pump II
+        sub_II = QGroupBox("Pump II")
+        sub_II_layout = QVBoxLayout(self)
+        for a in ["State", "Volume Flow", "State"]:
+            to_be_added = QCheckBox(a)
+            sub_II_layout.addWidget(to_be_added)
+        sub_II.setLayout(sub_II_layout)
+
+        # Scale
+        sub_III = QGroupBox("Scale")
+        sub_III_layout = QVBoxLayout(self)
+        for a in ["State", "Weight"]:
+            to_be_added = QCheckBox(a)
+            sub_III_layout.addWidget(to_be_added)
+        sub_III.setLayout(sub_III_layout)
+
+        layout.addWidget(sub_I)
+        layout.addWidget(sub_II)
+        layout.addWidget(sub_III)
 
         out.setLayout(layout)
         return out
+
+
+    def new_suptitle(self):
+        print(self.actual_experiment.name, States(self.actual_experiment.state).name)
+        self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
+        self.screen.draw_idle()
+
+
 
     def set_experiments(self, experiments_to_be_added):
         self.experiments = experiments_to_be_added

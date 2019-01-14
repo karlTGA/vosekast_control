@@ -3,8 +3,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 from numpy import sin, cos, pi
 
+
 phi = np.linspace(0, 2 * pi, 100)
-fig, ax = plt.subplots(1)
+fig, ax = plt.subplots(1, figsize=(15,15))
 
 a, b = 5, 5
 ax.fill(a*sin(phi), a*cos(phi), 'green')
@@ -15,12 +16,12 @@ ax.plot([2/3.*cos(pi/6.)*b, -1/3.*cos(pi/6.)*b, -1/3.*cos(pi/6.)*b, 2/3.*cos(pi/
 
 ax.axis('equal')
 ax.axis('off')
-
-plt.savefig("StartGreen", dpi=None, facecolor='w', edgecolor='w',
+fig.tight_layout()
+plt.savefig('lib/UI/icons/on_off_icons/StartGreen.png', dpi=None,
         orientation='portrait', bbox_inches='tight', pad_inches=0, transparent = True)
 
 
-fig, ax = plt.subplots(1)
+fig, ax = plt.subplots(1, figsize=(15,15))
 
 a, b = 5, 5
 ax.fill(a*sin(phi), a*cos(phi), 'k')
@@ -31,12 +32,12 @@ ax.plot([2/3.*cos(pi/6.)*b, -1/3.*cos(pi/6.)*b, -1/3.*cos(pi/6.)*b, 2/3.*cos(pi/
 
 ax.axis('equal')
 ax.axis('off')
-
-plt.savefig("StartBlack", dpi=None, facecolor='w', edgecolor='w',
+fig.tight_layout()
+plt.savefig('lib/UI/icons/on_off_icons/StartBlack', dpi=None,
         orientation='portrait', bbox_inches='tight', pad_inches=0, transparent = True)
 
 
-fig, ax = plt.subplots(1)
+fig, ax = plt.subplots(1, figsize=(15,15))
 a, b, c = 5, 5, 2
 ax.fill(5*sin(phi), 5*cos(phi), 'darkred')
 ax.plot(a*sin(phi), a*cos(phi), 'k' '-')
@@ -47,11 +48,11 @@ ax.plot([b/2.-c, c, c, b/2.-c, b/2.-c], [b/2.,b/2.,-b/2.,-b/2.,b/2.],'k' '-')
 ax.plot([-b/2.+c, -c, -c, -b/2.+c, -b/2.+c], [b/2.,b/2.,-b/2.,-b/2.,b/2.], 'k' '-')
 ax.axis('equal')
 ax.axis('off')
-
-plt.savefig("PauseRed", dpi=None, facecolor='w', edgecolor='w',
+fig.tight_layout()
+plt.savefig('lib/UI/icons/on_off_icons/PauseRed', dpi=None,
         orientation='portrait', bbox_inches='tight', pad_inches=0, transparent = True)
 
-fig, ax = plt.subplots(1)
+fig, ax = plt.subplots(1, figsize=(15,15))
 a, b = 5, 5
 ax.fill(a*sin(phi), a*cos(phi), 'darkred')
 ax.plot(a*sin(phi), a*cos(phi), 'k' '-')
@@ -61,12 +62,12 @@ ax.plot([b/2., -b/2., -b/2., b/2., b/2.], [b/2., b/2.,-b/2.,-b/2.,b/2.],'k' '-')
 
 ax.axis('equal')
 ax.axis('off')
-
-plt.savefig("StopRed", dpi=None, facecolor='w', edgecolor='w',
+fig.tight_layout()
+plt.savefig('lib/UI/icons/on_off_icons/StopRed', dpi=None,
         orientation='portrait', bbox_inches='tight', pad_inches=0, transparent = True)
 
 
-fig, ax = plt.subplots(1)
+fig, ax = plt.subplots(1, figsize=(15,15))
 a, b = 5, 5
 ax.fill(a*sin(phi), a*cos(phi), 'k')
 ax.plot(a*sin(phi), a*cos(phi), 'k' '-')
@@ -76,6 +77,6 @@ ax.plot([b/2., -b/2., -b/2., b/2., b/2.], [b/2., b/2.,-b/2.,-b/2.,b/2.],'k' '-')
 
 ax.axis('equal')
 ax.axis('off')
-
-plt.savefig("StopBlack", dpi=None, facecolor='w', edgecolor='w',
+fig.tight_layout()
+plt.savefig('lib/UI/icons/on_off_icons/StopBlack', dpi=None,
         orientation='portrait', bbox_inches='tight', pad_inches=0, transparent = True)
