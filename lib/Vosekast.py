@@ -7,6 +7,7 @@ import logging
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
+from lib.Store import VosekastStore
 
 
 # Vorsekast States
@@ -56,6 +57,8 @@ class Vosekast(QRunnable):
 
             # main window of the gui
             self._main_window = gui_main_window
+            self.VosekastStore = VosekastStore(self)
+            self._main_window.tabs.tabProgramms.create_checkboxes(self.VosekastStore)
 
             # valves
             valve_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[MEASURING_TANK_VALVE]
@@ -67,6 +70,8 @@ class Vosekast(QRunnable):
             # throttle
             # self.volume_flow_throttle = Valve('VOLUME_FLOW_THROTTLE', PIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
 
+
+
             # level_sensors
             self.level_measuring_high = LevelSensor('LEVEL_MEASURING_UP', PIN_LEVEL_MEASURING_HIGH, bool, LevelSensor.HIGH, self._gpio_controller)
             self.level_measuring_low = LevelSensor('LEVEL_MEASURING_LOW', PIN_LEVEL_MEASURING_LOW, bool, LevelSensor.LOW, self._gpio_controller)
@@ -74,9 +79,9 @@ class Vosekast(QRunnable):
 
             # pumps
             pump_base_button = self._main_window.tabs.tabStatus.pump_buttons[BASE_PUMP]
-            self.pump_base_tank = Pump(BASE_PUMP, PIN_PUMP_BASE, self._gpio_controller, pump_base_button)
+            self.pump_base_tank = Pump(self, "Pump Base Tank", PIN_PUMP_BASE, self._gpio_controller, pump_base_button)
             pump_measuring_button = self._main_window.tabs.tabStatus.pump_buttons[MEASURING_PUMP]
-            self.pump_measuring_tank = Pump(MEASURING_PUMP, PIN_PUMP_MEASURING, self._gpio_controller, pump_measuring_button)
+            self.pump_measuring_tank = Pump(self, "Pump Measuring Tank", PIN_PUMP_MEASURING, self._gpio_controller, pump_measuring_button)
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
             # tanks
@@ -89,7 +94,7 @@ class Vosekast(QRunnable):
 
             # scale
             scale_gui = self._main_window.tabs.tabStatus.scale_status
-            self.scale = Scale(scale_gui, emulate=self.debug)
+            self.scale = Scale(self, scale_gui, emulate=self.debug)
             self.scale.open_connection()
 
             # experiment_environment
@@ -102,7 +107,6 @@ class Vosekast(QRunnable):
             button_stop_exp.set_control_instance(expEnv0.actual_experiment)
 
             self._main_window.tabs.tabProgramms.set_experiments(expEnv0.experiments)
-
 
 
             self.state = INITED

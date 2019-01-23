@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from lib.Vosekast import Vosekast, BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE, BASE_TANK, MEASURING_TANK
 from functools import partial
 
-from lib.UI.CanvasNew import CanvasNew
+from lib.UI.Canvas import Canvas
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from lib.EnumStates import States
@@ -22,13 +22,15 @@ class TabProgramms(QWidget):
     def __init__(self):
         super().__init__()
         self.exp_env_buttons = {}
+        self.Store = []
+        self.checkboxes = {}
         self.initUI()
 
     def initUI(self):
         self.plot_box = self.create_canvas()
+
         on_off_boxes = self.create_on_off()
         selection_experiments = self.create_selection_box_experiments()
-        selection_values = self.create_selection_box_values()
 
         self.windowLayout = QGridLayout()
 
@@ -39,9 +41,33 @@ class TabProgramms(QWidget):
         self.windowLayout.addWidget(selection_experiments, 0, 0, 1, 1)
         self.windowLayout.addWidget(on_off_boxes, 1, 0, 1, 1)
         self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 1)
-        self.windowLayout.addWidget(selection_values, 0, 2, 2, 2)
 
         self.setLayout(self.windowLayout)
+
+    def create_checkboxes(self, Store):
+        out = QGroupBox("Monitored Values")
+        layout = QVBoxLayout(self)
+
+        self.Store = Store
+        state = self.Store.get_state()
+        machines = state.keys()
+
+        for a in machines:
+            sub = QGroupBox(a)
+            sub_layout = QVBoxLayout(self)
+            sub.setLayout(sub_layout)
+            for to_be_monitored in state[a]:
+                checkbox = QCheckBox(to_be_monitored)
+                sub_layout.addWidget(checkbox)
+                checkbox.setChecked(True)
+                self.checkboxes[a + ' ' + to_be_monitored] = checkbox
+
+            layout.addWidget(sub)
+
+        out.setLayout(layout)
+        self.windowLayout.addWidget(out, 0, 2, 2, 2)
+        self.screen.checkboxes = self.checkboxes
+        print('TabProgramms', self.checkboxes.keys())
 
     def create_on_off(self):
         out = QGroupBox("Start Pause Stop")
@@ -57,13 +83,11 @@ class TabProgramms(QWidget):
         button.button.clicked.connect(self.new_suptitle)
         layout.addWidget(button, 1, 0, 1, 0)
 
-
-
         out.setLayout(layout)
         return out
 
     def create_canvas(self):
-        self.screen = CanvasNew(2,2)
+        self.screen = Canvas(2,2)
         self.screen.fig.suptitle("No Experiment chosen")
         out = QGroupBox("Graphs")
         layout = QGridLayout()
@@ -85,50 +109,9 @@ class TabProgramms(QWidget):
         out.setLayout(layout)
         return out
 
-
-    def create_selection_box_values(self):
-        out = QGroupBox("Monitored Values")
-
-        layout = QVBoxLayout(self)
-
-        # Pump I
-        sub_I = QGroupBox("Pump I")
-        sub_I_layout = QVBoxLayout(self)
-        for a in ["State", "Volume Flow", "State"]:
-            to_be_added = QCheckBox(a)
-            sub_I_layout.addWidget(to_be_added)
-        sub_I.setLayout(sub_I_layout)
-
-        # Pump II
-        sub_II = QGroupBox("Pump II")
-        sub_II_layout = QVBoxLayout(self)
-        for a in ["State", "Volume Flow", "State"]:
-            to_be_added = QCheckBox(a)
-            sub_II_layout.addWidget(to_be_added)
-        sub_II.setLayout(sub_II_layout)
-
-        # Scale
-        sub_III = QGroupBox("Scale")
-        sub_III_layout = QVBoxLayout(self)
-        for a in ["State", "Weight"]:
-            to_be_added = QCheckBox(a)
-            sub_III_layout.addWidget(to_be_added)
-        sub_III.setLayout(sub_III_layout)
-
-        layout.addWidget(sub_I)
-        layout.addWidget(sub_II)
-        layout.addWidget(sub_III)
-
-        out.setLayout(layout)
-        return out
-
-
     def new_suptitle(self):
-        print(self.actual_experiment.name, States(self.actual_experiment.state).name)
         self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
         self.screen.draw_idle()
-
-
 
     def set_experiments(self, experiments_to_be_added):
         self.experiments = experiments_to_be_added

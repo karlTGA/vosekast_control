@@ -8,11 +8,12 @@ class Pump(QObject):
     # signals
     state_changed = pyqtSignal(int, name="PumpStateChanged")
 
-    def __init__(self, name, control_pin, gpio_controller, gui_element):
+    def __init__(self, vosekast, name, control_pin, gpio_controller, gui_element):
         super().__init__()
 
-        self._pin = control_pin
+        self.vosekast = vosekast
         self.name = name
+        self._pin = control_pin
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
         self.state = States.NONE
@@ -36,6 +37,8 @@ class Pump(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
         self.state_changed.emit(States.STOPPED.value)
+        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
+
 
     def start(self):
         """
@@ -46,6 +49,8 @@ class Pump(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
         self.state_changed.emit(States.RUNNING.value)
+        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
+
 
     def toggle(self):
         """

@@ -7,6 +7,8 @@ from lib.Log import LOGGER
 from random import uniform
 from itertools import islice
 from PyQt5.QtCore import pyqtSignal, QObject
+from lib.EnumStates import States
+
 
 
 class Scale(QObject):
@@ -15,7 +17,7 @@ class Scale(QObject):
     state_changed = pyqtSignal(bool, name="ScaleStateChange")
     value_changed = pyqtSignal(float, name="ScaleValueChange")
 
-    def __init__(self, gui_element, port='/dev/ttyS0', baudrate=9600, bytesize=serial.SEVENBITS, timeout=1, emulate=False):
+    def __init__(self, vosekast, gui_element, port='/dev/ttyS0', baudrate=9600, bytesize=serial.SEVENBITS, timeout=1, emulate=False):
         super().__init__()
 
         self.port = port
@@ -29,7 +31,9 @@ class Scale(QObject):
         self.run = False
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
+        self.vosekast = vosekast
         self.gui_element = gui_element
+        self.state = States.NONE
 
         # signals for gui
         if gui_element is not None:
@@ -86,6 +90,8 @@ class Scale(QObject):
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
         self.value_changed.emit(new_value)
+        self.vosekast.VosekastStore.dispatch({ 'type': 'UPDATE_SCALE', 'body': {"Value": new_value, "State": self.state.value}})
+
 
         if len(self.last_values) == 10:
             # calculate square mean error
@@ -98,14 +104,16 @@ class Scale(QObject):
             if mean_diff < 0.1:
                 self.stable = True
                 self.state_changed.emit(True)
+                self.state = States.RUNNING
                 return
 
         self.stable = False
         self.state_changed.emit(False)
+        self.state = States.PAUSE
 
     def get_stable_value(self):
         if self.stable:
             return self.last_values[-1]
         else:
             self.logger.warning("No stable value. Scale varies until now.")
-            return None
+            return 0
