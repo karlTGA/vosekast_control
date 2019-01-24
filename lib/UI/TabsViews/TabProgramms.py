@@ -11,13 +11,19 @@ from lib.Vosekast import Vosekast, BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWI
 from functools import partial
 
 from lib.UI.Canvas import Canvas
+from lib.UI.LineCheckBox import LineCheckBox
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from lib.EnumStates import States
 
 class TabProgramms(QWidget):
+    """ Creates the third tab. Experiments can be chosen (box created in create_selection_box_experiments),
+    can be stopped (box created in create_on_off), can be displayed (box created in create_canvas) and
+    the displayed lines can be chosen (box created in create_checkboxes, depending
+    on the values that are put into the store)
+    """
 
-    stop_experiments = pyqtSignal(name="stop_all_experiments")
+    stop_experiment_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -28,20 +34,16 @@ class TabProgramms(QWidget):
 
     def initUI(self):
         self.plot_box = self.create_canvas()
-
         on_off_boxes = self.create_on_off()
         selection_experiments = self.create_selection_box_experiments()
 
         self.windowLayout = QGridLayout()
-
         self.windowLayout.setColumnStretch(0, 1)
         self.windowLayout.setColumnStretch(1, 5)
         self.windowLayout.setColumnStretch(2, 1)
-
         self.windowLayout.addWidget(selection_experiments, 0, 0, 1, 1)
         self.windowLayout.addWidget(on_off_boxes, 1, 0, 1, 1)
         self.windowLayout.addWidget(self.plot_box, 0, 1, 2, 1)
-
         self.setLayout(self.windowLayout)
 
     def create_checkboxes(self, Store):
@@ -52,27 +54,23 @@ class TabProgramms(QWidget):
         state = self.Store.get_state()
         machines = state.keys()
 
-        for a in machines:
+        for a in machines:  # One Groupbox for each machine
             sub = QGroupBox(a)
-            sub_layout = QVBoxLayout(self)
+            sub_layout = QVBoxLayout()
             sub.setLayout(sub_layout)
-            for to_be_monitored in state[a]:
-                checkbox = QCheckBox(to_be_monitored)
+
+            for to_be_monitored in state[a]:    # One checkbox for each value
+                checkbox = LineCheckBox(self, to_be_monitored, True)
                 sub_layout.addWidget(checkbox)
-                checkbox.setChecked(True)
                 self.checkboxes[a + ' ' + to_be_monitored] = checkbox
-
             layout.addWidget(sub)
-
         out.setLayout(layout)
         self.windowLayout.addWidget(out, 0, 2, 2, 2)
         self.screen.checkboxes = self.checkboxes
-        print('TabProgramms', self.checkboxes.keys())
 
     def create_on_off(self):
         out = QGroupBox("Start Pause Stop")
         layout = QGridLayout()
-        layout.setSpacing(10)
 
         button = StartPauseButton('Start/Pause')
         self.exp_env_buttons[0] = button
@@ -91,15 +89,12 @@ class TabProgramms(QWidget):
         self.screen.fig.suptitle("No Experiment chosen")
         out = QGroupBox("Graphs")
         layout = QGridLayout()
-        layout.setColumnStretch(0, 0)
-        layout.setColumnStretch(1, 0)
         layout.addWidget(self.screen, 0, 0)
         out.setLayout(layout)
         return out
 
     def create_selection_box_experiments(self):
         out = QGroupBox("Selection")
-
         layout = QVBoxLayout(self)
 
         self.select_experiment = QMenuBar(self)
@@ -121,7 +116,7 @@ class TabProgramms(QWidget):
             self.exp_actions.append(exp)
             self.Menu_exp.addAction(exp)
             exp.triggered.connect(partial(self.another_experiment_chosen, index))
-            self.stop_experiments.connect(a.stop_experiment)
+            self.stop_experiment_signal.connect(a.stop_experiment_slot)
 
     def another_experiment_chosen(self, index, newState):
         for index_, a in enumerate(self.exp_actions):
@@ -131,9 +126,9 @@ class TabProgramms(QWidget):
         self.actual_experiment = self.experiments[index]
         self.exp_env_buttons[0].control_instance = self.actual_experiment
         self.exp_env_buttons[1].control_instance = self.actual_experiment
-        self.stop_all_experiments()
+        self.stop_experiment()
         self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
         self.screen.draw_idle()
 
-    def stop_all_experiments(self):
-        self.stop_experiments.emit()
+    def stop_experiment(self):
+        self.stop_experiment_signal.emit()

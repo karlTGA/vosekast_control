@@ -6,3 +6,5 @@ class States(Enum):
     READY = 2
     STOPPED = 3
     NONE = 4
+    OPEN = 5
+    CLOSED = 6

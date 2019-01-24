@@ -4,6 +4,10 @@ from copy import deepcopy
 class VosekastStore():
 
     def __init__(self, vosekast):
+        """ All the values which interest us are stored in this store . The
+        checkboxes are created according to this store. It can only be changed
+        by means of the dispatch-function.
+        """
         self.vosekast = vosekast
 
 
@@ -25,9 +29,14 @@ class VosekastStore():
                     elif action['type'] == 'UPDATE_SCALE':
                         newState["Scale"] = deepcopy(action.get('body'))
                         return newState
-
-                    else:
+                    elif action['type'] == 'Update Measuring Drain Valve':
+                        newState["Measuring Drain Valve"] = deepcopy(action.get('body'))
                         return newState
+                    elif action['type'] == 'Update Measuring Tank Switch':
+                        newState["Measuring Tank Switch"] = deepcopy(action.get('body'))
+                        return newState
+
+
 
         default_state = {
             "Pump Measuring Tank":{
@@ -38,9 +47,13 @@ class VosekastStore():
             },
             "Scale":{
                 "State": 0,
-                "Value": 0,
-                "123": 0,
-                "456": 0
+                "Value": 0
+            },
+            "Measuring Drain Valve":{
+                "State": 5
+            },
+            "Measuring Switch Valve":{
+                "State": 5
             }
         }
 

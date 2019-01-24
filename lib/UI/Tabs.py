@@ -5,6 +5,8 @@ from lib.UI.TabsViews.TabMeasuring import TabMeasuring
 from lib.UI.TabsViews.TabProgramms import TabProgramms
 
 class Tabs(QTabWidget):
+    """ The basic architecture of the surface is defined here
+    """
 
     # tab names
     TAB_STATUS = "Tab Status"

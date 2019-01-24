@@ -1,12 +1,13 @@
 from lib.Valve import Valve
 from lib.UI.ControlField import ControlField, NoImageForIconError
 import os
+from lib.EnumStates import States
 
 
 class ValveControl(ControlField):
 
     def __init__(self, text):
-        super().__init__(text, default_state=Valve.CLOSED)
+        super().__init__(text, default_state=States.OPEN)
         self.valve = None
 
     def set_valve(self, valve_instance):
@@ -14,7 +15,7 @@ class ValveControl(ControlField):
         self.valve = valve_instance
 
     def toggle_control_instance(self):
-        if self.state == Valve.CLOSED:
+        if self.state == States.CLOSED:
             self.valve.open()
         else:
             self.valve.close()
@@ -24,7 +25,7 @@ class ValveControl(ControlField):
         # search for icon
         path = os.path.dirname(os.path.abspath(__file__))
 
-        if state == Valve.OPEN:
+        if state == States.OPEN:
             icon_path = os.path.join(path, 'icons/valve_icons/valve_color_1.png')
         else:
             icon_path = os.path.join(path, 'icons/valve_icons/valve_sw.png')

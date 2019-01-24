@@ -57,14 +57,16 @@ class Vosekast(QRunnable):
 
             # main window of the gui
             self._main_window = gui_main_window
+
+            # add store to create checkboxes
             self.VosekastStore = VosekastStore(self)
             self._main_window.tabs.tabProgramms.create_checkboxes(self.VosekastStore)
 
             # valves
             valve_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[MEASURING_TANK_VALVE]
-            self.measuring_drain_valve = Valve(MEASURING_TANK_VALVE, PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller, valve_measuring_button)
+            self.measuring_drain_valve = Valve(self, "Measuring Drain Valve", PIN_VALVE_MEASURING_DRAIN, Valve.TWO_WAY, Valve.BINARY, self._gpio_controller, valve_measuring_button)
             switch_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[MEASURING_TANK_SWITCH]
-            self.measuring_tank_switch = Valve(MEASURING_TANK_SWITCH, PIN_VALVE_MEASURING_SWITCH, Valve.SWITCH, Valve.BINARY, self._gpio_controller, switch_measuring_button)
+            self.measuring_tank_switch = Valve(self, "Measuring Tank Switch", PIN_VALVE_MEASURING_SWITCH, Valve.SWITCH, Valve.BINARY, self._gpio_controller, switch_measuring_button)
             self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
 
             # throttle
