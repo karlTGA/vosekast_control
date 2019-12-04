@@ -1,4 +1,15 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QToolTip, QPushButton, QApplication, QMessageBox, QDesktopWidget, QHBoxLayout, QVBoxLayout, QAction
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QWidget,
+    QToolTip,
+    QPushButton,
+    QApplication,
+    QMessageBox,
+    QDesktopWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QAction,
+)
 from PyQt5.QtCore import pyqtSlot, QSize
 from PyQt5.QtGui import QIcon
 from lib.UI.Tabs import Tabs
@@ -8,32 +19,23 @@ import platform
 from PyQt5.QtCore import QCoreApplication, QThreadPool
 
 
-
-# if on raspberry pi then with real GPIO. Alternative with emulator
-(sysname, nodename, release, version, machine, processor) = platform.uname()
-if machine.startswith('arm'):
-    import RPi.GPIO as GPIO
-    DEBUG = False
-else:
-    from third_party.RPi_emu import GPIO
-    DEBUG = True
-
-
 class MainWindow(QMainWindow):
     # Process States
-    GUI_RUNNING = 'GUI_RUNNING'
-    GUI_TERMINATED = 'GUI_TERMINATED'
+    GUI_RUNNING = "GUI_RUNNING"
+    GUI_TERMINATED = "GUI_TERMINATED"
 
-    def __init__(self, app, app_control, debug, *args, **kwargs):
+    def __init__(self, app, app_control, gpio, debug, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.main_app = app
         self.app_control = app_control
         self.status_bar = None
         self.tabs = None
         self.layout = None
-        self.debug = debug
-        self.initUI()
         self.state = self.GUI_RUNNING
+        self._gpio = gpio
+        self._debug = debug
+
+        self.initUI()
 
     def initUI(self):
         self.resize(1024, 600)
@@ -50,21 +52,20 @@ class MainWindow(QMainWindow):
         self.tabs = Tabs(self.toolbar)
         self.setCentralWidget(self.tabs)
 
-        self.vk = Vosekast(GPIO, self, DEBUG)
+        self.vk = Vosekast(self._gpio, self, self._debug)
         self.vk.run()
 
         self.show()
 
-        if not self.debug:
+        if not self._debug:
             self.showFullScreen()
-
-
 
         # init thread pool
         self.threadpool = QThreadPool()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        print(
+            "Multithreading with maximum %d threads" % self.threadpool.maxThreadCount()
+        )
         self.threadpool.start(self.vk)
-
 
     def center(self):
         qr = self.frameGeometry()
@@ -74,18 +75,22 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
 
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            "Message",
+            "Are you sure to quit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
         if reply == QMessageBox.Yes:
-            if hasattr(event, 'accept'):
+            if hasattr(event, "accept"):
                 event.accept()
             self.state = self.GUI_TERMINATED
             self.app_control.shutdown()
             self.main_app.quit()
         else:
-            if hasattr(event, 'ignore'):
+            if hasattr(event, "ignore"):
                 event.ignore()
 
     @pyqtSlot(str)

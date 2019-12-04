@@ -14,53 +14,11 @@ from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import QCoreApplication, QThreadPool
 from lib.UI.MainWindow import MainWindow
-
-
-# if on raspberry pi then with real GPIO. Alternative with emulator
-(sysname, nodename, release, version, machine, processor) = platform.uname()
-if machine.startswith('arm'):
-    import RPi.GPIO as GPIO
-    DEBUG = False
-else:
-    from third_party.RPi_emu import GPIO
-    DEBUG = True
+import RPi.GPIO as GPIO
 
 # add logger
 logger = setup_custom_logger()
-
-
-def core_vorsekast(app_control, gui_main_window):
-    try:
-        # add vorsecast instance
-        logger.debug('Here')
-        vk = Vosekast(GPIO, gui_main_window, DEBUG)
-        logger.debug('Here')
-
-        #expEnv = ExperimentEnvironment(5,
-        #    vosekast=vk,
-        #    main_window=gui_main_window,
-        #)
-        logger.debug('Here')
-
-        vk.prepare_measuring()
-
-        while not vk.ready_to_measure():
-            if app_control.is_terminating():
-                break
-            logger.info("Wait that vosekast is ready...")
-            time.sleep(1)
-        else:
-            logger.info("Ready to rumble")
-
-    except KeyboardInterrupt:
-        logger.info("User stopped program")
-    except Exception as error:
-        logger.error(error)
-
-    finally:
-        if 'vk' in vars():
-            vk.shutdown()
-        GPIO.cleanup()
+DEBUG = True
 
 if __name__ == "__main__":
     # process state
@@ -68,20 +26,16 @@ if __name__ == "__main__":
 
     # add gui
     app = QApplication(sys.argv)
-    main_window = MainWindow(app, app_control, DEBUG)
-    
+    main_window = MainWindow(app, app_control, GPIO, DEBUG)
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
-
-
 
     app_control.start()
 
     res = app.exec_()
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
-
 
     if DEBUG:
         sys.exit(0)
