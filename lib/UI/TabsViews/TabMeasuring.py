@@ -1,7 +1,14 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QGridLayout,
+    QPushButton,
+    QGroupBox,
+)
+
 
 class TabMeasuring(QWidget):
-
     def __init__(self):
         super().__init__()
         self.initUI()

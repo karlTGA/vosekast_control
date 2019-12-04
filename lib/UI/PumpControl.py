@@ -3,8 +3,8 @@ from lib.Pump import Pump
 import os
 from lib.EnumStates import States
 
-class PumpControl(ControlField):
 
+class PumpControl(ControlField):
     def __init__(self, text):
         super().__init__(text, default_state=States.STOPPED)
         self.pump = None
@@ -19,16 +19,15 @@ class PumpControl(ControlField):
         else:
             self.pump.start()
 
-
     @staticmethod
     def get_icon(state):
         # search for icon
         path = os.path.dirname(os.path.abspath(__file__))
 
         if state == States.RUNNING:
-            icon_path = os.path.join(path, 'icons/pump_icons/pump_color_1.png')
+            icon_path = os.path.join(path, "icons/pump_icons/pump_color_1.png")
         else:
-            icon_path = os.path.join(path, 'icons/pump_icons/pump_sw.png')
+            icon_path = os.path.join(path, "icons/pump_icons/pump_sw.png")
 
         if not os.path.isfile(icon_path):
             raise NoImageForIconError

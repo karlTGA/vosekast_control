@@ -7,6 +7,7 @@ from PyQt5.QtGui import QIcon
 
 from lib.EnumStates import States
 
+
 class StartPauseButton(ControlField):
     """ Button which controls the experiment. Starts and pauses this experiment.
     Inherites from ControlField. A control instance has to be added.
@@ -26,7 +27,7 @@ class StartPauseButton(ControlField):
 
     def handle_state_change(self, new_state):
         self.button.setIcon(QIcon(self.get_icon(new_state)))
-        self.label.setText(self.text + ' - ' + new_state.name)# + str(new_state.name))
+        self.label.setText(self.text + " - " + new_state.name)  # + str(new_state.name))
         self.state = new_state
 
     @staticmethod
@@ -34,9 +35,9 @@ class StartPauseButton(ControlField):
         # search for icon
         path = os.path.dirname(os.path.abspath(__file__))
         if state == States.RUNNING:
-            icon_path = os.path.join(path, 'icons/on_off_icons/PauseRed.png')
+            icon_path = os.path.join(path, "icons/on_off_icons/PauseRed.png")
         else:
-            icon_path = os.path.join(path, 'icons/on_off_icons/StartGreen.png')
+            icon_path = os.path.join(path, "icons/on_off_icons/StartGreen.png")
 
         if not os.path.isfile(icon_path):
             raise NoImageForIconError

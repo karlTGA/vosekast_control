@@ -1,4 +1,19 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, QGroupBox, QComboBox, QMenu, QToolButton, QWidgetAction, QTextBrowser, QMenuBar, QAction
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QGridLayout,
+    QPushButton,
+    QCheckBox,
+    QGroupBox,
+    QComboBox,
+    QMenu,
+    QToolButton,
+    QWidgetAction,
+    QTextBrowser,
+    QMenuBar,
+    QAction,
+)
 from lib.UI.StartPauseButton import StartPauseButton
 from lib.UI.StopButton import StopButton
 from lib.ExperimentEnvironment import ExperimentEnvironment
@@ -7,7 +22,15 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
-from lib.Vosekast import Vosekast, BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE, BASE_TANK, MEASURING_TANK
+from lib.Vosekast import (
+    Vosekast,
+    BASE_PUMP,
+    MEASURING_PUMP,
+    MEASURING_TANK_SWITCH,
+    MEASURING_TANK_VALVE,
+    BASE_TANK,
+    MEASURING_TANK,
+)
 from functools import partial
 
 from lib.UI.Canvas import Canvas
@@ -15,6 +38,7 @@ from lib.UI.LineCheckBox import LineCheckBox
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from lib.EnumStates import States
+
 
 class TabProgramms(QWidget):
     """ Creates the third tab. Experiments can be chosen (box created in create_selection_box_experiments),
@@ -59,10 +83,10 @@ class TabProgramms(QWidget):
             sub_layout = QVBoxLayout()
             sub.setLayout(sub_layout)
 
-            for to_be_monitored in state[a]:    # One checkbox for each value
+            for to_be_monitored in state[a]:  # One checkbox for each value
                 checkbox = LineCheckBox(self, to_be_monitored, True)
                 sub_layout.addWidget(checkbox)
-                self.checkboxes[a + ' ' + to_be_monitored] = checkbox
+                self.checkboxes[a + " " + to_be_monitored] = checkbox
             layout.addWidget(sub)
         out.setLayout(layout)
         self.windowLayout.addWidget(out, 0, 2, 2, 2)
@@ -72,11 +96,11 @@ class TabProgramms(QWidget):
         out = QGroupBox("Start Pause Stop")
         layout = QGridLayout()
 
-        button = StartPauseButton('Start/Pause')
+        button = StartPauseButton("Start/Pause")
         self.exp_env_buttons[0] = button
         button.button.clicked.connect(self.new_suptitle)
         layout.addWidget(button, 0, 0, 1, 0)
-        button = StopButton('Stop')
+        button = StopButton("Stop")
         self.exp_env_buttons[1] = button
         button.button.clicked.connect(self.new_suptitle)
         layout.addWidget(button, 1, 0, 1, 0)
@@ -85,7 +109,7 @@ class TabProgramms(QWidget):
         return out
 
     def create_canvas(self):
-        self.screen = Canvas(2,2)
+        self.screen = Canvas(2, 2)
         self.screen.fig.suptitle("No Experiment chosen")
         out = QGroupBox("Graphs")
         layout = QGridLayout()
@@ -98,14 +122,18 @@ class TabProgramms(QWidget):
         layout = QVBoxLayout(self)
 
         self.select_experiment = QMenuBar(self)
-        self.Menu_exp = self.select_experiment.addMenu('Choose Experiment')
+        self.Menu_exp = self.select_experiment.addMenu("Choose Experiment")
 
         layout.addWidget(self.select_experiment)
         out.setLayout(layout)
         return out
 
     def new_suptitle(self):
-        self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
+        self.screen.fig.suptitle(
+            self.actual_experiment.name
+            + " - "
+            + States(self.actual_experiment.state).name
+        )
         self.screen.draw_idle()
 
     def set_experiments(self, experiments_to_be_added):
@@ -127,7 +155,11 @@ class TabProgramms(QWidget):
         self.exp_env_buttons[0].control_instance = self.actual_experiment
         self.exp_env_buttons[1].control_instance = self.actual_experiment
         self.stop_experiment()
-        self.screen.fig.suptitle(self.actual_experiment.name + " - " + States(self.actual_experiment.state).name)
+        self.screen.fig.suptitle(
+            self.actual_experiment.name
+            + " - "
+            + States(self.actual_experiment.state).name
+        )
         self.screen.draw_idle()
 
     def stop_experiment(self):

@@ -10,14 +10,22 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from lib.EnumStates import States
 
 
-
 class Scale(QObject):
 
     # signals
     state_changed = pyqtSignal(bool, name="ScaleStateChange")
     value_changed = pyqtSignal(float, name="ScaleValueChange")
 
-    def __init__(self, vosekast, gui_element, port='/dev/ttyS0', baudrate=9600, bytesize=serial.SEVENBITS, timeout=1, emulate=False):
+    def __init__(
+        self,
+        vosekast,
+        gui_element,
+        port="/dev/ttyS0",
+        baudrate=9600,
+        bytesize=serial.SEVENBITS,
+        timeout=1,
+        emulate=False,
+    ):
         super().__init__()
 
         self.port = port
@@ -84,22 +92,26 @@ class Scale(QObject):
             self.logger.info("Measured {}".format(line))
 
             if len(splitted_line) == 3:
-                new_value = ''.join(splitted_line[:2])
+                new_value = "".join(splitted_line[:2])
                 return new_value
 
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
         self.value_changed.emit(new_value)
-        self.vosekast.VosekastStore.dispatch({ 'type': 'UPDATE_SCALE', 'body': {"Value": new_value, "State": self.state.value}})
-
+        self.vosekast.VosekastStore.dispatch(
+            {
+                "type": "UPDATE_SCALE",
+                "body": {"Value": new_value, "State": self.state.value},
+            }
+        )
 
         if len(self.last_values) == 10:
             # calculate square mean error
             diffs = 0
             for value in list(islice(self.last_values, 0, 9)):
-                diffs += abs(value-new_value)
+                diffs += abs(value - new_value)
 
-            mean_diff = diffs/len(self.last_values)
+            mean_diff = diffs / len(self.last_values)
 
             if mean_diff < 0.1:
                 self.stable = True

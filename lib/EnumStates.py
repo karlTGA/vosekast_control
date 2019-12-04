@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class States(Enum):
     PAUSE = 0
     RUNNING = 1

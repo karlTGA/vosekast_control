@@ -7,7 +7,6 @@ from lib.Tank import Tank
 
 
 class TankStatus(QWidget):
-
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -36,10 +35,9 @@ class TankStatus(QWidget):
         self.setLayout(layout)
 
     def handle_state_change(self, new_state):
-        self.fill_state.setValue(new_state*100)
+        self.fill_state.setValue(new_state * 100)
         self.tank.setPixmap(QPixmap(self.get_icon(new_state)))
-        self.fill_text.setText("{} %".format(str(new_state*100)))
-
+        self.fill_text.setText("{} %".format(str(new_state * 100)))
 
     @pyqtSlot(float)
     def state_change(self, new_state):
@@ -51,9 +49,9 @@ class TankStatus(QWidget):
         path = os.path.dirname(os.path.abspath(__file__))
 
         if state < Tank.DRAINED:
-            icon_path = os.path.join(path, 'icons/tank_icons/tank_sw.png')
+            icon_path = os.path.join(path, "icons/tank_icons/tank_sw.png")
         else:
-            icon_path = os.path.join(path, 'icons/tank_icons/tank_color.png')
+            icon_path = os.path.join(path, "icons/tank_icons/tank_color.png")
 
         if not os.path.isfile(icon_path):
             raise NoImageForIconError
@@ -63,4 +61,3 @@ class TankStatus(QWidget):
 
 class NoImageForIconError(Exception):
     pass
-

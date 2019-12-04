@@ -37,8 +37,9 @@ class Pump(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
         self.state_changed.emit(States.STOPPED.value)
-        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
-
+        self.vosekast.VosekastStore.dispatch(
+            {"type": "Update " + self.name, "body": {"State": self.state.value}}
+        )
 
     def start(self):
         """
@@ -49,8 +50,9 @@ class Pump(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
         self.state_changed.emit(States.RUNNING.value)
-        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
-
+        self.vosekast.VosekastStore.dispatch(
+            {"type": "Update " + self.name, "body": {"State": self.state.value}}
+        )
 
     def toggle(self):
         """

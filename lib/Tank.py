@@ -11,23 +11,25 @@ class Tank(QObject):
     FILLED = 1
     BETWEEN = 0.5
 
-    IS_DRAINING = 'IS_DRAINING'
-    IS_FILLING = 'IS_FILLED'
+    IS_DRAINING = "IS_DRAINING"
+    IS_FILLING = "IS_FILLED"
 
     # signals
     state_changed = pyqtSignal(float, name="TankStateChange")
 
-    def __init__(self,
-                 name,
-                 capacity,
-                 level_sensor,
-                 drain_sensor,
-                 overflow_sensor,
-                 drain_valve,
-                 source_pump,
-                 gui_element,
-                 protect_draining=True,
-                 protect_overflow=True):
+    def __init__(
+        self,
+        name,
+        capacity,
+        level_sensor,
+        drain_sensor,
+        overflow_sensor,
+        drain_valve,
+        source_pump,
+        gui_element,
+        protect_draining=True,
+        protect_overflow=True,
+    ):
 
         super().__init__()
         self.name = name
@@ -96,7 +98,7 @@ class Tank(QObject):
 
         if self.gui_element is not None:
             self.state_changed.emit(self.FILLED)
-        
+
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
 
@@ -116,7 +118,6 @@ class Tank(QObject):
 
         if self.gui_element is not None:
             self.state_changed.emit(self.BETWEEN)
-
 
     def _tank_is_drained(self):
         """

@@ -5,13 +5,23 @@ import logging
 import threading
 from lib.EnumStates import States
 
+
 class Experiment(QObject):
     # signals
     send_data_point = pyqtSignal(float, float, int, str, name="point")
-    state_changed = pyqtSignal(int, name='changed')
+    state_changed = pyqtSignal(int, name="changed")
     init_figure_signal = pyqtSignal()
 
-    def __init__(self, ExperimentEnvironment, name, course_pump_measuring, course_pump_base, index, default_state = States.READY, legend='off'):
+    def __init__(
+        self,
+        ExperimentEnvironment,
+        name,
+        course_pump_measuring,
+        course_pump_base,
+        index,
+        default_state=States.READY,
+        legend="off",
+    ):
         super().__init__()
         self.logger = logging.getLogger(LOGGER)
         self.ExpEnv = ExperimentEnvironment
@@ -28,10 +38,13 @@ class Experiment(QObject):
         self.timer.timeout.connect(self.execute_experiment)
         self.time_count = 0
 
-
         self.send_data_point.connect(self.screen.get_data_point)
-        self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change)
-        self.state_changed.connect(self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change)
+        self.state_changed.connect(
+            self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change
+        )
+        self.state_changed.connect(
+            self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change
+        )
         self.init_figure_signal.connect(self.screen.init_figure_slot)
 
     def continue_experiment(self):

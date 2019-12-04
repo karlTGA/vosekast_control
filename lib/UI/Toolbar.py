@@ -4,14 +4,15 @@ from PyQt5.QtCore import QSize
 
 
 class Toolbar(QToolBar):
-
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
 
         # actions
-        exitAction = QAction(QIcon.fromTheme("application-exit"), 'Exit', self.main_window)
-        exitAction.setShortcut('Ctrl+Q')
+        exitAction = QAction(
+            QIcon.fromTheme("application-exit"), "Exit", self.main_window
+        )
+        exitAction.setShortcut("Ctrl+Q")
         exitAction.triggered.connect(self.main_window.closeEvent)
 
         self.addAction(exitAction)

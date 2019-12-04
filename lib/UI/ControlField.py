@@ -7,7 +7,6 @@ from lib.EnumStates import States
 
 
 class ControlField(QWidget):
-
     def __init__(self, text, default_state=States.NONE):
         super().__init__()
         self.text = text
@@ -53,7 +52,9 @@ class ControlField(QWidget):
 
     def handle_click(self):
         if self.control_instance is None:
-            self.logger.warning("To the button {} was no pump instance added.".format(self.text))
+            self.logger.warning(
+                "To the button {} was no pump instance added.".format(self.text)
+            )
             return
 
         self.toggle_control_instance()

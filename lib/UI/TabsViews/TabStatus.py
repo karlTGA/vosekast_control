@@ -1,12 +1,26 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QPushButton, QGroupBox
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QGridLayout,
+    QPushButton,
+    QGroupBox,
+)
 from lib.UI.PumpControl import PumpControl
 from lib.UI.ValveControl import ValveControl
 from lib.UI.TankStatus import TankStatus
 from lib.UI.ScaleStatus import ScaleStatus
-from lib.Vosekast import BASE_PUMP, MEASURING_PUMP, MEASURING_TANK_SWITCH, MEASURING_TANK_VALVE, BASE_TANK, MEASURING_TANK
+from lib.Vosekast import (
+    BASE_PUMP,
+    MEASURING_PUMP,
+    MEASURING_TANK_SWITCH,
+    MEASURING_TANK_VALVE,
+    BASE_TANK,
+    MEASURING_TANK,
+)
+
 
 class TabStatus(QWidget):
-
     def __init__(self):
         super().__init__()
         self.pump_buttons = {}
@@ -38,11 +52,11 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        pump_base = PumpControl('Pump Base')
+        pump_base = PumpControl("Pump Base")
         self.pump_buttons[BASE_PUMP] = pump_base
         layout.addWidget(pump_base, 0, 0)
 
-        pump_measuring = PumpControl('Pump Measuring')
+        pump_measuring = PumpControl("Pump Measuring")
         self.pump_buttons[MEASURING_PUMP] = pump_measuring
         layout.addWidget(pump_measuring, 0, 1)
 
@@ -55,11 +69,11 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        valve_measuring = ValveControl('Valve Measuring')
+        valve_measuring = ValveControl("Valve Measuring")
         self.valve_buttons[MEASURING_TANK_VALVE] = valve_measuring
         layout.addWidget(valve_measuring, 0, 0)
 
-        valve_switch = ValveControl('Valve Switch Measuring')
+        valve_switch = ValveControl("Valve Switch Measuring")
         self.valve_buttons[MEASURING_TANK_SWITCH] = valve_switch
         layout.addWidget(valve_switch, 0, 2)
 
@@ -67,7 +81,7 @@ class TabStatus(QWidget):
         return valves_group_box
 
     def create_scale(self):
-        scale_box = QGroupBox('Scale')
+        scale_box = QGroupBox("Scale")
         layout = QGridLayout()
 
         self.scale_status = ScaleStatus("Scale")
@@ -77,7 +91,7 @@ class TabStatus(QWidget):
         return scale_box
 
     def create_tank_measurement(self):
-        tank_measurement_box = QGroupBox('Measurement')
+        tank_measurement_box = QGroupBox("Measurement")
         layout = QGridLayout()
         tank_status = TankStatus(MEASURING_TANK)
         layout.addWidget(tank_status, 0, 0)
@@ -87,7 +101,7 @@ class TabStatus(QWidget):
         return tank_measurement_box
 
     def create_tank_base(self):
-        tank_base_box = QGroupBox('Base')
+        tank_base_box = QGroupBox("Base")
         layout = QGridLayout()
         tank_status = TankStatus(BASE_TANK)
         layout.addWidget(tank_status, 0, 0)

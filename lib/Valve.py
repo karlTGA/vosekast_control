@@ -6,18 +6,27 @@ from lib.EnumStates import States
 
 class Valve(QObject):
     # regulations
-    BINARY = 'BINARY'
-    ANALOG = 'ANALOG'
+    BINARY = "BINARY"
+    ANALOG = "ANALOG"
 
     # valve_types
-    TWO_WAY = 'TWO_WAY'
-    THREE_WAY = 'THREE_WAY'
-    SWITCH = 'SWITCH'
+    TWO_WAY = "TWO_WAY"
+    THREE_WAY = "THREE_WAY"
+    SWITCH = "SWITCH"
 
     # signals
     state_changed = pyqtSignal(int, name="PumpStateChanged")
 
-    def __init__(self, vosekast, name, control_pin, valve_type, regulation, gpio_controller, button):
+    def __init__(
+        self,
+        vosekast,
+        name,
+        control_pin,
+        valve_type,
+        regulation,
+        gpio_controller,
+        button,
+    ):
         super().__init__()
 
         self.vosekast = vosekast
@@ -48,8 +57,9 @@ class Valve(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.CLOSED
         self.state_changed.emit(States.CLOSED.value)
-        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
-
+        self.vosekast.VosekastStore.dispatch(
+            {"type": "Update " + self.name, "body": {"State": self.state.value}}
+        )
 
     def open(self):
         """
@@ -60,4 +70,6 @@ class Valve(QObject):
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.OPEN
         self.state_changed.emit(States.OPEN.value)
-        self.vosekast.VosekastStore.dispatch({'type': 'Update ' + self.name, 'body': {'State': self.state.value}})
+        self.vosekast.VosekastStore.dispatch(
+            {"type": "Update " + self.name, "body": {"State": self.state.value}}
+        )

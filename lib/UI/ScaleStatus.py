@@ -5,7 +5,6 @@ import os
 
 
 class ScaleStatus(QWidget):
-
     def __init__(self, name):
         super().__init__()
 
@@ -27,12 +26,11 @@ class ScaleStatus(QWidget):
 
         self.setLayout(layout)
 
-
     @staticmethod
     def get_icon():
         # search for icon
         path = os.path.dirname(os.path.abspath(__file__))
-        icon_path = os.path.join(path, 'icons/scale_icons/scale_color.png')
+        icon_path = os.path.join(path, "icons/scale_icons/scale_color.png")
 
         if not os.path.isfile(icon_path):
             raise NoImageForIconError
@@ -55,6 +53,7 @@ class ScaleStatus(QWidget):
     @pyqtSlot(float)
     def value_change(self, new_value):
         self.handle_value_change(str(round(new_value, 2)) + " kg")
+
 
 class NoImageForIconError(Exception):
     pass

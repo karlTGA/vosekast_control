@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 
 
-#from PyQt5 import QtCore, QtWidgets
+# from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer, pyqtSlot
 
 import numpy as np
@@ -14,15 +14,21 @@ from lib.EnumStates import States
 from lib.Experiment import Experiment
 
 
-
 class ExperimentEnvironment(QObject):
 
     # signals
     state_changed = pyqtSignal(int, name="ExpEnvStateChanged")
-    #send_data_point = pyqtSignal(float, float, name="point")
+    # send_data_point = pyqtSignal(float, float, name="point")
     new_time = pyqtSignal(int, name="time_exp_env")
 
-    def __init__(self, delta_t, vosekast, main_window, funcs=['sin', 'cos', 'sqrt', 'log'], update = False):
+    def __init__(
+        self,
+        delta_t,
+        vosekast,
+        main_window,
+        funcs=["sin", "cos", "sqrt", "log"],
+        update=False,
+    ):
         super().__init__()
 
         self.logger = logging.getLogger(LOGGER)
@@ -35,9 +41,15 @@ class ExperimentEnvironment(QObject):
         self._stop_button = self._exp_env_tab.exp_env_buttons[1]
 
         # Add Experiment
-        self.experiment_0 = Experiment(self, "First Experiment",[3,6,9], [4,8,12], 0)
-        self.experiment_1 = Experiment(self, "Second Experiment",[1,2,7], [9,6,18], 1)
-        self.experiment_2 = Experiment(self, "Third Experiment",[1,3,8], [7,5,11], 2)
+        self.experiment_0 = Experiment(
+            self, "First Experiment", [3, 6, 9], [4, 8, 12], 0
+        )
+        self.experiment_1 = Experiment(
+            self, "Second Experiment", [1, 2, 7], [9, 6, 18], 1
+        )
+        self.experiment_2 = Experiment(
+            self, "Third Experiment", [1, 3, 8], [7, 5, 11], 2
+        )
         self.experiments = [self.experiment_0, self.experiment_1, self.experiment_2]
         self.actual_experiment = self.experiment_0
 
@@ -47,11 +59,9 @@ class ExperimentEnvironment(QObject):
 
         self.change_state(States.READY.value)
 
-
-
     def change_state(self, new_state):
         self.state = States(new_state)
-        self.logger.debug('New State ' + str(new_state))
+        self.logger.debug("New State " + str(new_state))
         self.state_changed.emit(new_state)
 
     def send_new_time(self):
@@ -61,14 +71,14 @@ class ExperimentEnvironment(QObject):
         return self.state
 
     def start_run(self):
-        self.logger.debug("Start run {}".format('Hallo'))
-        self.logger.debug('Jetzt sollte geplottet werden')
+        self.logger.debug("Start run {}".format("Hallo"))
+        self.logger.debug("Jetzt sollte geplottet werden")
 
         t = np.linspace(0, self.delta_t, 200)
         y = sin(t)
 
         self.vosekast._main_window.tabs.tabProgramms.screen.axes.cla()
-        self.vosekast._main_window.tabs.tabProgramms.screen.axes.plot(t,y)
+        self.vosekast._main_window.tabs.tabProgramms.screen.axes.plot(t, y)
         self.vosekast._main_window.tabs.tabProgramms.screen.draw()
         self.change_state(States.RUNNING.value)
         self.timer.start(1000)

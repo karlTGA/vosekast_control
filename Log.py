@@ -1,16 +1,17 @@
 import logging
 from PyQt5.QtCore import pyqtSignal, QObject
 
-LOGGER = 'ROOT'
+LOGGER = "ROOT"
 
 
 class StatusBoxHandle(logging.Handler):
-
     def __init__(self, window):
         super().__init__()
 
         self.window = window
-        self.log_message_handler = LogMessageToStatusBar(self.window.send_status_message)
+        self.log_message_handler = LogMessageToStatusBar(
+            self.window.send_status_message
+        )
 
     def emit(self, record):
         log_entry = self.format(record)
@@ -21,7 +22,8 @@ class LogMessageToStatusBar(QObject):
     """
     If we want send messages to the qt_gui, we have to use the signal slot process.
     """
-    log_message = pyqtSignal(str, name='LogMessage')
+
+    log_message = pyqtSignal(str, name="LogMessage")
 
     def __init__(self, slot):
         super().__init__()
@@ -33,7 +35,9 @@ class LogMessageToStatusBar(QObject):
 
 
 def setup_custom_logger():
-    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+    formatter = logging.Formatter(
+        fmt="%(asctime)s - %(levelname)s - %(module)s - %(message)s"
+    )
 
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
@@ -48,5 +52,3 @@ def add_status_box_handler(window):
     handler = StatusBoxHandle(window)
     logger = logging.getLogger(LOGGER)
     logger.addHandler(handler)
-
-
