@@ -16,11 +16,38 @@ from PyQt5.QtCore import QCoreApplication, QThreadPool
 from lib.UI.MainWindow import MainWindow
 import RPi.GPIO as GPIO
 
+# add mqtt resources
+import asyncio
+from lib.MQTT import MQTTController
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
 # add logger
 logger = setup_custom_logger()
 DEBUG = True
 
-if __name__ == "__main__":
+
+async def main():
+    # set mqtt host, token, message, topic
+    host = 'localhost'
+    token = None
+    message = "system start"
+    topic = "system"
+
+    # mqtt client
+    controller = MQTTController(host)
+
+    await controller.connect()
+    await asyncio.sleep(0.1)
+
+    # mqtt server credentials
+    if token != None:
+        controller.set_credentials(username, password)
+
+    # mqtt publish message
+    controller.publish(topic, message)
+    await asyncio.sleep(0.1)
+
     # process state
     app_control = AppControl()
 
@@ -34,6 +61,9 @@ if __name__ == "__main__":
     app_control.start()
 
     res = app.exec_()
+    
+    await controller.disconnect()
+    
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
 
@@ -42,3 +72,6 @@ if __name__ == "__main__":
     else:
         cmdCommand = "shutdown -h now"
         process = subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
+
+if __name__ == "__main__":
+    asyncio.run(main())
