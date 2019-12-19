@@ -4,13 +4,15 @@ from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
 from lib.Scale import Scale
 import logging
+import asyncio
 from lib.Log import LOGGER
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 from lib.Store import VosekastStore
+from lib.MQTT import MQTTController
 
 
-# Vorsekast States
+# Vosekast States
 INITED = "INITED"
 MEASURING = "MEASURING"
 PREPARING_MEASURMENT = "PREPARING_MEASURMENT"
@@ -42,13 +44,14 @@ BASE_TANK = "BASE_TANK"
 MEASURING_TANK = "MEASURING_TANK"
 
 
-class Vosekast(QRunnable):
+class Vosekast():
     def __init__(self, gpio_controller, gui_main_window, debug=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.app = QCoreApplication.instance()
+        self._mqtt_client = MQTTController('localhost')
 
         try:
             self._gpio_controller = gpio_controller
@@ -60,7 +63,8 @@ class Vosekast(QRunnable):
 
             # add store to create checkboxes
             self.VosekastStore = VosekastStore(self)
-            self._main_window.tabs.tabProgramms.create_checkboxes(self.VosekastStore)
+            self._main_window.tabs.tabProgramms.create_checkboxes(
+                self.VosekastStore)
 
             # valves
             valve_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[
@@ -87,7 +91,8 @@ class Vosekast(QRunnable):
                 self._gpio_controller,
                 switch_measuring_button,
             )
-            self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
+            self.valves = [self.measuring_drain_valve,
+                           self.measuring_tank_switch]
 
             # throttle
             # self.volume_flow_throttle = Valve('VOLUME_FLOW_THROTTLE', PIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
@@ -137,7 +142,8 @@ class Vosekast(QRunnable):
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
             # tanks
-            self.stock_tank = Tank(STOCK_TANK, 100, None, None, None, None, None, None)
+            self.stock_tank = Tank(STOCK_TANK, 100, None,
+                                   None, None, None, None, None)
             base_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[BASE_TANK]
             self.base_tank = Tank(
                 BASE_TANK,
@@ -181,10 +187,12 @@ class Vosekast(QRunnable):
             ]
             button_stop_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
 
-            button_start_pause_exp.set_control_instance(expEnv0.actual_experiment)
+            button_start_pause_exp.set_control_instance(
+                expEnv0.actual_experiment)
             button_stop_exp.set_control_instance(expEnv0.actual_experiment)
 
-            self._main_window.tabs.tabProgramms.set_experiments(expEnv0.experiments)
+            self._main_window.tabs.tabProgramms.set_experiments(
+                expEnv0.experiments)
 
             self.state = INITED
 
@@ -218,12 +226,13 @@ class Vosekast(QRunnable):
         # return base_tank_ready and measuring_tank_ready and base_pump_running
         return True
 
-    def shutdown(self):
+    async def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
         self.logger.info("Measuring tank is emptied.")
         self.clean()
         self.logger.info("Vosekast is shutdown.")
+        await self._mqtt_client.disconnect()
 
     def clean(self):
         # shutdown pumps
@@ -238,9 +247,9 @@ class Vosekast(QRunnable):
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-    @pyqtSlot()
-    def run(self):
+    async def run(self):
         self.logger.debug("I started")
+        await self._mqtt_client.connect()
 
 
 class NoGPIOControllerError(Exception):

@@ -15,6 +15,7 @@ from PyQt5.QtGui import QIcon
 from lib.UI.Tabs import Tabs
 from lib.UI.Toolbar import Toolbar
 from lib.Vosekast import Vosekast
+import asyncio
 import platform
 from PyQt5.QtCore import QCoreApplication, QThreadPool
 
@@ -53,19 +54,20 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.tabs)
 
         self.vk = Vosekast(self._gpio, self, self._debug)
-        self.vk.run()
 
+    async def run(self):
+        await self.vk.run()
         self.show()
 
         if not self._debug:
             self.showFullScreen()
 
         # init thread pool
-        self.threadpool = QThreadPool()
-        print(
-            "Multithreading with maximum %d threads" % self.threadpool.maxThreadCount()
-        )
-        self.threadpool.start(self.vk)
+        # self.threadpool = QThreadPool()
+        # print(
+        #     "Multithreading with maximum %d threads" % self.threadpool.maxThreadCount()
+        # )
+        # self.threadpool.start(self.vk)
 
     def center(self):
         qr = self.frameGeometry()

@@ -5,7 +5,6 @@ import platform
 import time
 import subprocess
 
-from lib.Vosekast import Vosekast
 from lib.ExperimentEnvironment import ExperimentEnvironment
 
 from lib.Log import setup_custom_logger, add_status_box_handler
@@ -18,7 +17,6 @@ import RPi.GPIO as GPIO
 
 # add mqtt resources
 import asyncio
-from lib.MQTT import MQTTController
 import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -31,22 +29,22 @@ async def main():
     # set mqtt host, token, message, topic
     host = 'localhost'
     token = None
-    message = "system start"
+    message = "vosekast start"
     topic = "system"
 
-    # mqtt client
-    controller = MQTTController(host)
+    # # mqtt client
+    # controller = MQTTController(host)
 
-    await controller.connect()
-    await asyncio.sleep(0.1)
+    # await controller.connect()
+    # await asyncio.sleep(0.1)
 
-    # mqtt server credentials
-    if token != None:
-        controller.set_credentials(username, password)
+    # # mqtt server credentials
+    # if token != None:
+    #     controller.set_credentials(username, password)
 
-    # mqtt publish message
-    controller.publish(topic, message)
-    await asyncio.sleep(0.1)
+    # # mqtt publish message
+    # controller.publish(topic, message)
+    # await asyncio.sleep(0.1)
 
     # process state
     app_control = AppControl()
@@ -54,6 +52,7 @@ async def main():
     # add gui
     app = QApplication(sys.argv)
     main_window = MainWindow(app, app_control, GPIO, DEBUG)
+    await main_window.run()
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
@@ -61,9 +60,9 @@ async def main():
     app_control.start()
 
     res = app.exec_()
-    
-    await controller.disconnect()
-    
+
+    # await controller.disconnect()
+
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()
 
