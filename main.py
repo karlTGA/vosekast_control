@@ -56,12 +56,14 @@ async def main():
 
     # route log messages to status box of main window
     add_status_box_handler(main_window)
-
     app_control.start()
 
-    res = app.exec_()
+    # res = app.exec_()
 
-    # await controller.disconnect()
+    while True:
+        await asyncio.sleep(1)
+
+    logger.info('start thread')
 
     logger.info("GUI closed. Shutdown Vosekast.")
     app_control.shutdown()

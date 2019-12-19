@@ -1,6 +1,7 @@
 import logging
 from lib.Log import LOGGER
 from PyQt5.QtCore import pyqtSignal, QObject
+import asyncio
 
 
 class Tank(QObject):
@@ -27,6 +28,7 @@ class Tank(QObject):
         drain_valve,
         source_pump,
         gui_element,
+        vosekast,
         protect_draining=True,
         protect_overflow=True,
     ):
@@ -39,12 +41,14 @@ class Tank(QObject):
         self.overflow_sensor = overflow_sensor
         self.drain_valve = drain_valve
         self.source_pump = source_pump
+        self.vosekast = vosekast
         self.state = self.UNKNOWN
         self.progress = None
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
         self.gui_element = gui_element
+        self.mqtt = self.vosekast.mqtt_client
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
@@ -62,16 +66,18 @@ class Tank(QObject):
             self.drain_valve.open()
             self.progress = self.IS_DRAINING
         else:
-            self.logger.warning("No valve to drain the tank {}".format(self.name))
+            self.logger.warning(
+                "No valve to drain the tank {}".format(self.name))
 
     def prepare_to_fill(self):
         if self.drain_valve is not None:
             self.drain_valve.close()
         else:
-            self.logger.debug("No drain valve on the tank {}".format(self.name))
+            self.logger.debug(
+                "No drain valve on the tank {}".format(self.name))
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
-    def _up_state_changed(self, pin, alert):
+    async def _up_state_changed(self, pin, alert):
         if alert:
             self._tank_is_full()
         else:
@@ -79,7 +85,7 @@ class Tank(QObject):
 
     def _tank_get_drained(self):
         """
-        intern function to register that the tank get drained from highest position
+        internal function to register that the tank gets drained from highest position
         :return:
         """
         self.state = self.BETWEEN
@@ -90,7 +96,7 @@ class Tank(QObject):
 
     def _tank_is_full(self):
         """
-        intern function to register that the tank is filled
+        internal function to register that the tank is filled
         :return:
         """
         self.state = self.FILLED
@@ -102,7 +108,7 @@ class Tank(QObject):
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
 
-    def _low_position_changed(self, pin, alert):
+    async def _low_position_changed(self, pin, alert):
         if alert:
             self._tank_is_drained()
         else:
@@ -110,7 +116,7 @@ class Tank(QObject):
 
     def _tank_get_filled(self):
         """
-        intern function to register that the tank get filled
+        internal function to register that the tank gets filled
         :return:
         """
         self.state = self.BETWEEN
@@ -121,11 +127,12 @@ class Tank(QObject):
 
     def _tank_is_drained(self):
         """
-        intern function to register that the tank is drained
+        internal function to register that the tank is drained
         :return:
         """
         self.state = self.DRAINED
         self.logger.warning("Tank {} is drained".format(self.name))
+        self.mqtt.publish("system", "tank drained")
 
         if self.gui_element is not None:
             self.state_changed.emit(self.DRAINED)

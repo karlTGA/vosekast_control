@@ -51,7 +51,7 @@ class Vosekast():
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.app = QCoreApplication.instance()
-        self._mqtt_client = MQTTController('localhost')
+        self.mqtt_client = MQTTController('localhost')
 
         try:
             self._gpio_controller = gpio_controller
@@ -142,9 +142,20 @@ class Vosekast():
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
             # tanks
-            self.stock_tank = Tank(STOCK_TANK, 100, None,
-                                   None, None, None, None, None)
+            self.stock_tank = Tank(
+                STOCK_TANK,
+                100,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                vosekast=self
+            )
+
             base_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[BASE_TANK]
+
             self.base_tank = Tank(
                 BASE_TANK,
                 100,
@@ -154,11 +165,14 @@ class Vosekast():
                 None,
                 self.pump_base_tank,
                 base_tank_gui,
+                vosekast=self,
                 protect_overflow=False,
             )
+
             measuring_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[
                 MEASURING_TANK
             ]
+
             self.measuring_tank = Tank(
                 MEASURING_TANK,
                 100,
@@ -168,8 +182,10 @@ class Vosekast():
                 self.measuring_drain_valve,
                 self.pump_measuring_tank,
                 measuring_tank_gui,
+                vosekast=self,
                 protect_draining=False,
             )
+
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
             # scale
@@ -203,7 +219,7 @@ class Vosekast():
 
     def prepare_measuring(self):
         """
-        before we can measur we have to prepare the station
+        before we can measure we have to prepare the station
         :return:
         """
         # fill the base tank
@@ -232,7 +248,7 @@ class Vosekast():
         self.logger.info("Measuring tank is emptied.")
         self.clean()
         self.logger.info("Vosekast is shutdown.")
-        await self._mqtt_client.disconnect()
+        await self.mqtt_client.disconnect()
 
     def clean(self):
         # shutdown pumps
@@ -249,7 +265,7 @@ class Vosekast():
 
     async def run(self):
         self.logger.debug("I started")
-        await self._mqtt_client.connect()
+        await self.mqtt_client.connect()
 
 
 class NoGPIOControllerError(Exception):

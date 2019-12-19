@@ -23,7 +23,7 @@ class MQTTController():
         return self.client.is_connected
 
     def publish(self, topic, message):
-        self.client.publish(topic, message, qos=1)
+        self.client.publish(topic, message, qos=0)
         print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def on_connect(self, client, flags, rc, properties):
