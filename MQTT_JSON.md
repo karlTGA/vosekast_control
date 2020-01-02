@@ -45,7 +45,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 
 ### Resources:
 
-http://www.steves-internet-guide.com/send-json-data-mqtt-python/
-http://www.steves-internet-guide.com/mqtt-topic-payload-design-notes/
-https://stackoverflow.com/questions/42731998/how-to-publish-json-data-on-mqtt-broker-in-python
-http://support.elmark.com.pl/advantech/pdf/bb/MQTT_Topics_and_JSON_Data_Format.pdf
+* http://www.steves-internet-guide.com/send-json-data-mqtt-python/
+* http://www.steves-internet-guide.com/mqtt-topic-payload-design-notes/
+* https://stackoverflow.com/questions/42731998/how-to-publish-json-data-on-mqtt-broker-in-python
+* http://support.elmark.com.pl/advantech/pdf/bb/MQTT_Topics_and_JSON_Data_Format.pdf
