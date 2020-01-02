@@ -1,15 +1,15 @@
 # MQTT and JSON
 
-MQTT is used to send commands to Vosekast as well as to publish current sensor data.
+MQTT is used to send commands to Vosekast as well as to publish sensor data.
 
 We decided to use the JSON:API for its ease of use, flexibility and lightweight design to encode and decode all MQTT messages.
 
 ## JSON payload format
 
-* There will be different classes to distinguish between error messages/sensor data/command.
-* All sensors publish to topic /status. 
-* Commands will be published to topic /commands.
-* Error messages publish to /error.
+* There will be different classes to distinguish between error messages/sensor data/command. Each class will publish to a separate topic  for easier differentiation.
+	* All sensors publish to topic /status. 
+	* Commands will be published to topic /commands.
+	* Error messages publish to /error.
 * Data is distinguished by sensor_id.
 
 ```json
@@ -19,7 +19,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	"type": "object",
 	"error": false,
 	"message": "msg"
-	"required":["s","t"],
+	"required": ["s","t"],
  	"properties":
 		{
  		"s":	{"title":"Sequence Number","description":"A number incremented for every publish of sensor data.",
@@ -33,7 +33,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 		"temp1":{"title":"Temperature Input 1","description":"The value of temperature input 1.",
  				"$ref":"#/definitions/temp_value"}
 		}
-	 "definitions":
+	 "definitions": 
 		{
  		"ai_value":{"type":"number"},
  		"di_value":{"oneOf":[{"type":"boolean"},{"type":"number"}]},
