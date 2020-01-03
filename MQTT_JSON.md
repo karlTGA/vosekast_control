@@ -25,7 +25,20 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	"sensor_id": "Temperatur Tank",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
 	"temperature": 24.59
-}
+},
+{
+	"type": "error message",
+	"sensor_id": "Durchflussmesser",
+	"timestamp": "2019-11-20T19:03:59.975Z+0100",
+	"message": "Flow rate out of bounds."
+},
+{
+	"type": "command",
+	"description": "Pumpe anschalten",
+	"sensor_id": "Pumpe",
+	"timestamp": "2019-11-20T19:03:59.975Z+0100",
+	"on": true
+} 
 ```
 
 ### Resources:
