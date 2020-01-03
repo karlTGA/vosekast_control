@@ -27,6 +27,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	"temperature": 24.59,
 },
 // [...]
+]
 ```
 
 ### Resources:
@@ -37,3 +38,4 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 * http://support.elmark.com.pl/advantech/pdf/bb/MQTT_Topics_and_JSON_Data_Format.pdf
 * https://owntracks.org/booklet/tech/json/
 * https://www.pikkerton.de/_mediafiles/133-mqtt-payload-data.pdf
+* https://com2m.de/blog/technology/message-payloads-json-vs-byte-protocol-in-conjunction-with-compression/
