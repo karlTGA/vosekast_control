@@ -2,6 +2,7 @@ import logging
 from lib.Log import LOGGER
 from PyQt5.QtCore import pyqtSignal, QObject
 import asyncio
+from lib.utils.Message import StatusMessage
 
 
 class Tank(QObject):
@@ -131,8 +132,10 @@ class Tank(QObject):
         :return:
         """
         self.state = self.DRAINED
+        message = StatusMessage(self.name, '0', unit = "%")
+
         self.logger.warning("Tank {} is drained".format(self.name))
-        self.mqtt.publish("system", "tank drained")
+        self.mqtt.publish(message.topic, message.get_json())
 
         if self.gui_element is not None:
             self.state_changed.emit(self.DRAINED)

@@ -10,12 +10,13 @@ from lib.ExperimentEnvironment import ExperimentEnvironment
 from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
+import json
 
 
 # Vosekast States
 INITED = "INITED"
 MEASURING = "MEASURING"
-PREPARING_MEASURMENT = "PREPARING_MEASURMENT"
+PREPARING_MEASURMENT = "PREPARING_MEASUREMENT"
 TIME_stop = "time_stop"
 WAS_MEASURE = "was_measure"
 WEIGHT_start = "weight_start"
