@@ -23,7 +23,6 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 },
 {
 	"type": "system message",
-	"sensor_id": "Vosekast",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
 	"message": "Vosekast shutting down."
 },
