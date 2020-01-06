@@ -19,12 +19,14 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	"sensor_id": "z.B. Tank_Fuellstand",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
 	"value": 99
+	"unit": "%"
 },
 {
 	"type": "sensor data",
 	"sensor_id": "Temperatur Tank",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
-	"temperature": 24.59
+	"value": 24.59
+	"unit": "°C"
 },
 {
 	"type": "error message",
