@@ -6,27 +6,26 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 ## JSON payload format
 
 * There will be different classes to distinguish between sensor data/commands/error messages. Each class will publish to a separate topic for easier differentiation.
-	* All sensors publish to topic /status. 
-	* Commands will be published to /commands.
+	* All sensors publish to their on topic under /status, i.e. /status/Tank_Fuellstand 
 	* System messages will publish to /system
-	* Error messages publish to /error.
-* Data is distinguished by sensor_id.
+	* Error messages publish to /error
+	* Commands will be published to /command
+* Data is distinguished by sensor_id and timestamp.
 
 ```json
 
 {
 	"type": "sensor data",
-	"sensor_id": "z.B. Tank_Fuellstand",
+	"sensor_id": "Tank_Fuellstand",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
-	"value": 99
+	"value": 99,
 	"unit": "%"
 },
 {
-	"type": "sensor data",
-	"sensor_id": "Temperatur Tank",
+	"type": "system message",
+	"sensor_id": "Vosekast",
 	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
-	"value": 24.59
-	"unit": "°C"
+	"message": "Vosekast shutting down."
 },
 {
 	"type": "error message",
