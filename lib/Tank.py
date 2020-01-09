@@ -1,11 +1,10 @@
 import logging
 from lib.Log import LOGGER
-from PyQt5.QtCore import pyqtSignal, QObject
 import asyncio
-from lib.utils.Msg import StatusMessage, ErrorMessage, LogMessage
+from lib.utils.Msg import StatusMessage, ErrorMessage
 
 
-class Tank(QObject):
+class Tank():
     # tank states
     UNKNOWN = -1
     DRAINED = -0.1
@@ -16,9 +15,7 @@ class Tank(QObject):
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
 
-    # signals
-    state_changed = pyqtSignal(float, name="TankStateChange")
-
+    
     def __init__(
         self,
         name,
@@ -28,7 +25,6 @@ class Tank(QObject):
         overflow_sensor,
         drain_valve,
         source_pump,
-        gui_element,
         vosekast,
         protect_draining=True,
         protect_overflow=True,
@@ -48,7 +44,6 @@ class Tank(QObject):
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
-        self.gui_element = gui_element
         self.mqtt = self.vosekast.mqtt_client
 
         # register callback for overfill if necessary
@@ -58,9 +53,6 @@ class Tank(QObject):
         if drain_sensor is not None:
             self.drain_sensor.add_callback(self._low_position_changed)
 
-        # signals for gui
-        if gui_element is not None:
-            self.state_changed.connect(self.gui_element.state_change)
 
     def drain_tank(self):
         if self.drain_valve is not None:
@@ -101,8 +93,8 @@ class Tank(QObject):
         self.logger.info("Tank {} get drained.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        if self.gui_element is not None:
-            self.state_changed.emit(self.BETWEEN)
+        #if self.gui_element is not None:
+        #    self.state_changed.emit(self.BETWEEN)
 
     def _tank_is_full(self):
         """
@@ -115,8 +107,8 @@ class Tank(QObject):
         self.logger.warning("Tank {} is filled.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        if self.gui_element is not None:
-            self.state_changed.emit(self.FILLED)
+        #if self.gui_element is not None:
+        #    self.state_changed.emit(self.FILLED)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -138,8 +130,8 @@ class Tank(QObject):
         self.logger.warning("Tank {} is being filled".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        if self.gui_element is not None:
-            self.state_changed.emit(self.BETWEEN)
+        #if self.gui_element is not None:
+        #    self.state_changed.emit(self.BETWEEN)
 
     def _tank_is_drained(self):
         """
@@ -152,8 +144,8 @@ class Tank(QObject):
         self.logger.warning("Tank {} is drained/ empty".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        if self.gui_element is not None:
-            self.state_changed.emit(self.DRAINED)
+        #if self.gui_element is not None:
+        #    self.state_changed.emit(self.DRAINED)
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()

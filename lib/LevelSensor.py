@@ -24,8 +24,8 @@ class LevelSensor:
     def add_callback(self, callback_function):
         """
         add callback function that fires every time the sensor is triggered
-        the callback function gets modified to add the information if it encounters a alert or revoke
-        :param callback_function: the function, that get fired
+        the callback function gets modified to add the information if it encounters an alert or revoke
+        :param callback_function: the function that gets fired
         :return:
         """
         loop = asyncio.get_event_loop()

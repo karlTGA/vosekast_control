@@ -152,7 +152,6 @@ class Vosekast():
                 None,
                 None,
                 None,
-                None,
                 vosekast=self
             )
 
@@ -166,7 +165,6 @@ class Vosekast():
                 None,
                 None,
                 self.pump_base_tank,
-                base_tank_gui,
                 vosekast=self,
                 protect_overflow=False,
             )
@@ -183,7 +181,6 @@ class Vosekast():
                 self.level_measuring_high,
                 self.measuring_drain_valve,
                 self.pump_measuring_tank,
-                measuring_tank_gui,
                 vosekast=self,
                 protect_draining=False,
             )

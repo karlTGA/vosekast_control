@@ -6,20 +6,16 @@ import logging
 from lib.Log import LOGGER
 from random import uniform
 from itertools import islice
-from PyQt5.QtCore import pyqtSignal, QObject
+from lib.utils.Msg import StatusMessage
+
 from lib.EnumStates import States
 
 
-class Scale(QObject):
-
-    # signals
-    state_changed = pyqtSignal(bool, name="ScaleStateChange")
-    value_changed = pyqtSignal(float, name="ScaleValueChange")
+class Scale:
 
     def __init__(
         self,
         vosekast,
-        gui_element,
         port="/dev/ttyS0",
         baudrate=9600,
         bytesize=serial.SEVENBITS,
@@ -40,13 +36,8 @@ class Scale(QObject):
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
-        self.gui_element = gui_element
         self.state = States.NONE
-
-        # signals for gui
-        if gui_element is not None:
-            self.state_changed.connect(self.gui_element.state_change)
-            self.value_changed.connect(self.gui_element.value_change)
+        self.mqtt = self.vosekast.mqtt_client
 
         self.start_measurement_thread()
 
@@ -73,7 +64,7 @@ class Scale(QObject):
                 new_value = self.read_value_from_scale()
                 if new_value is not None:
                     self.add_new_value(new_value)
-            sleep(1)
+            sleep(5)
 
         self.logger.info("Stopped measuring with scale.")
 
@@ -97,14 +88,12 @@ class Scale(QObject):
 
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
-        self.value_changed.emit(new_value)
-        self.vosekast.VosekastStore.dispatch(
-            {
-                "type": "UPDATE_SCALE",
-                "body": {"Value": new_value, "State": self.state.value},
-            }
-        )
-
+        
+        # publish new_value via mqtt
+        mqttmsg = StatusMessage("scale", new_value, unit="Kg")
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
+                
         if len(self.last_values) == 10:
             # calculate square mean error
             diffs = 0
@@ -115,12 +104,10 @@ class Scale(QObject):
 
             if mean_diff < 0.1:
                 self.stable = True
-                self.state_changed.emit(True)
                 self.state = States.RUNNING
                 return
 
         self.stable = False
-        self.state_changed.emit(False)
         self.state = States.PAUSE
 
     def get_stable_value(self):

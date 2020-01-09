@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from logging import LogRecord
 
+
 class Message:
     type = 'default'
 
@@ -29,7 +30,7 @@ class ErrorMessage(Message):
 
     @property
     def topic(self):
-        return f'vosekast/status/{self.sensor_id}'
+        return f'vosekast/error/{self.sensor_id}'
 
     def get_message_object(self):
         message_object = super().get_message_object()
@@ -94,7 +95,7 @@ class Command(Message):
 
     @property
     def topic(self):
-        return f'vosekast/status/{self.sensor_id}'
+        return f'vosekast/command/{self.sensor_id}'
 
     def get_message_object(self):
         message_object = super().get_message_object()

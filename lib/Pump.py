@@ -1,14 +1,12 @@
 import logging
 from lib.Log import LOGGER
-from PyQt5.QtCore import pyqtSignal, QObject
 from lib.EnumStates import States
+from lib.utils.Msg import StatusMessage
 
 
-class Pump(QObject):
-    # signals
-    state_changed = pyqtSignal(int, name="PumpStateChanged")
+class Pump():
 
-    def __init__(self, vosekast, name, control_pin, gpio_controller, gui_element):
+    def __init__(self, vosekast, name, control_pin, gpio_controller):
         super().__init__()
 
         self.vosekast = vosekast
@@ -17,16 +15,10 @@ class Pump(QObject):
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
         self.state = States.NONE
-        self.gui_element = gui_element
+        self.mqtt = self.vosekast.mqtt_client
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
-
-        # signals for gui
-        self.state_changed.connect(self.gui_element.state_change)
-
-        # add to the button instance the pump instance
-        self.gui_element.set_pump(self)
 
     def stop(self):
         """
@@ -36,10 +28,11 @@ class Pump(QObject):
         self.logger.debug("Stop the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
-        self.state_changed.emit(States.STOPPED.value)
-        self.vosekast.VosekastStore.dispatch(
-            {"type": "Update " + self.name, "body": {"State": self.state.value}}
-        )
+
+        # publish States.STOPPED.value via mqtt
+        mqttmsg = StatusMessage(self.name, States.STOPPED.value, unit="%")
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     def start(self):
         """
@@ -49,10 +42,11 @@ class Pump(QObject):
         self.logger.debug("Start the pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
-        self.state_changed.emit(States.RUNNING.value)
-        self.vosekast.VosekastStore.dispatch(
-            {"type": "Update " + self.name, "body": {"State": self.state.value}}
-        )
+
+        # publish States.RUNNING.value via mqtt
+        mqttmsg = StatusMessage(self.name, States.RUNNING.value, unit="%")
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     def toggle(self):
         """

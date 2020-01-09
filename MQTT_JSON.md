@@ -5,11 +5,11 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 
 ## JSON payload format
 
-* There will be different classes to distinguish between sensor data/commands/error messages. Each class will publish to a separate topic for easier differentiation.
-	* All sensors publish to their on topic under /status, i.e. /status/Tank_Fuellstand 
-	* All log events will publish to /system_log
-	* Error messages publish to /error
-	* Commands will be published to /command
+* There are different classes to distinguish between sensor data/ logs/ commands/ error messages. Each class will publish to a separate topic under /vosekast for easier differentiation.
+	* Sensors publish to their on topic under /status, i.e. vosekast/status/Stock_Tank 
+	* All log events will publish to /log, i.e. vosekast/log
+	* Error messages publish to /error, i.e. vosekast/error/Stock_Tank
+	* Commands will be published to /command, i.e. vosekast/command/Stock_Tank
 * Data is distinguished by sensor_id and timestamp.
 
 ```json
@@ -23,7 +23,8 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 },
 {
 	"type": "log message",
-	"timestamp": "2019-11-20T19:02:59.975Z+0100", 
+	"timestamp": "2019-11-20T19:02:59.975Z+0100",
+	"level": "DEBUG/INFO/WARNING/ERROR/CRITICAL",
 	"message": "Vosekast shutting down."
 },
 {
@@ -37,7 +38,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"description": "Pumpe anschalten",
 	"sensor_id": "Pumpe",
-	"state": on
+	"state": "on"
 } 
 ```
 
