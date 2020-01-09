@@ -26,6 +26,9 @@ class MQTTController():
         self.client.publish(topic, message, qos=0)
         print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
+    def publish_message(self, message_object):
+        self.publish(message_object.topic, message_object.get_json())
+
     def on_connect(self, client, flags, rc, properties):
         self.client.subscribe('TEST/#', qos=0)
         if self.connected:
@@ -43,3 +46,6 @@ class MQTTController():
 
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)
+
+    def connection_test(self):
+        return self.client.is_connected

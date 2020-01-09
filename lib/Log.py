@@ -1,37 +1,21 @@
 import logging
 from PyQt5.QtCore import pyqtSignal, QObject
+from lib.utils.Msg import LogMessage, ErrorMessage
 
 LOGGER = "ROOT"
 
 
-class StatusBoxHandle(logging.Handler):
-    def __init__(self, window):
+class MQTTLoggingHandler(logging.Handler):
+    def __init__(self, mqtt_client):
         super().__init__()
 
-        self.window = window
-        self.log_message_handler = LogMessageToStatusBar(
-            self.window.send_status_message
-        )
+        self.mqtt = mqtt_client
 
     def emit(self, record):
-        log_entry = self.format(record)
-        self.log_message_handler.new_log_message(log_entry)
+        mqttmsg = LogMessage(record)
 
-
-class LogMessageToStatusBar(QObject):
-    """
-    If we want send messages to the qt_gui, we have to use the signal slot process.
-    """
-
-    log_message = pyqtSignal(str, name="LogMessage")
-
-    def __init__(self, slot):
-        super().__init__()
-        self.slot = slot
-        self.log_message.connect(self.slot)
-
-    def new_log_message(self, message):
-        self.log_message.emit(message)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
 
 def setup_custom_logger():
@@ -48,7 +32,7 @@ def setup_custom_logger():
     return logger
 
 
-def add_status_box_handler(window):
-    handler = StatusBoxHandle(window)
+def add_mqtt_logger_handler(mqtt):
+    handler = MQTTLoggingHandler(mqtt)
     logger = logging.getLogger(LOGGER)
     logger.addHandler(handler)

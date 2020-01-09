@@ -2,7 +2,7 @@ import logging
 from lib.Log import LOGGER
 from PyQt5.QtCore import pyqtSignal, QObject
 import asyncio
-from lib.utils.Message import StatusMessage
+from lib.utils.Msg import StatusMessage, ErrorMessage, LogMessage
 
 
 class Tank(QObject):
@@ -76,7 +76,13 @@ class Tank(QObject):
         else:
             self.logger.debug(
                 "No drain valve on the tank {}".format(self.name))
+            mqttmsg = ErrorMessage(self.name, 'Drain valve missing.')
+            self.mqtt.publish_message(mqttmsg)
         self.logger.info("Ready to fill the tank {}".format(self.name))
+
+        mqttmsg = StatusMessage(
+            self.name, 'Ready to fill the tank.', unit=None)
+        self.mqtt.publish_message(mqttmsg)
 
     async def _up_state_changed(self, pin, alert):
         if alert:
@@ -90,7 +96,10 @@ class Tank(QObject):
         :return:
         """
         self.state = self.BETWEEN
+        mqttmsg = StatusMessage(self.name, 'DRAINING', unit=None)
+
         self.logger.info("Tank {} get drained.".format(self.name))
+        self.mqtt.publish_message(mqttmsg)
 
         if self.gui_element is not None:
             self.state_changed.emit(self.BETWEEN)
@@ -101,7 +110,10 @@ class Tank(QObject):
         :return:
         """
         self.state = self.FILLED
+        mqttmsg = StatusMessage(self.name, 'FULL', unit=None)
+
         self.logger.warning("Tank {} is filled.".format(self.name))
+        self.mqtt.publish_message(mqttmsg)
 
         if self.gui_element is not None:
             self.state_changed.emit(self.FILLED)
@@ -121,7 +133,10 @@ class Tank(QObject):
         :return:
         """
         self.state = self.BETWEEN
-        self.logger.warning("Tank {} get filled".format(self.name))
+        mqttmsg = StatusMessage(self.name, 'FILLING', unit=None)
+
+        self.logger.warning("Tank {} is being filled".format(self.name))
+        self.mqtt.publish_message(mqttmsg)
 
         if self.gui_element is not None:
             self.state_changed.emit(self.BETWEEN)
@@ -132,10 +147,10 @@ class Tank(QObject):
         :return:
         """
         self.state = self.DRAINED
-        message = StatusMessage(self.name, '0', unit = "%")
+        mqttmsg = StatusMessage(self.name, 'DRAINED', unit=None)
 
-        self.logger.warning("Tank {} is drained".format(self.name))
-        self.mqtt.publish(message.topic, message.get_json())
+        self.logger.warning("Tank {} is drained/ empty".format(self.name))
+        self.mqtt.publish_message(mqttmsg)
 
         if self.gui_element is not None:
             self.state_changed.emit(self.DRAINED)

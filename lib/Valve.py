@@ -2,6 +2,7 @@ import logging
 from lib.Log import LOGGER
 from PyQt5.QtCore import pyqtSignal, QObject
 from lib.EnumStates import States
+from lib.utils.Msg import StatusMessage, ErrorMessage, LogMessage
 
 
 class Valve(QObject):
@@ -50,7 +51,7 @@ class Valve(QObject):
 
     def close(self):
         """
-        function close the valve or switch
+        function to close the valve or switch
         :return:
         """
         self.logger.debug("Close valve {}".format(self.name))
@@ -60,6 +61,9 @@ class Valve(QObject):
         self.vosekast.VosekastStore.dispatch(
             {"type": "Update " + self.name, "body": {"State": self.state.value}}
         )
+        mqttmsg = StatusMessage(
+            self.name, 'Closing valve.', unit=None)
+        self.mqtt.publish_message(mqttmsg)
 
     def open(self):
         """
@@ -73,3 +77,6 @@ class Valve(QObject):
         self.vosekast.VosekastStore.dispatch(
             {"type": "Update " + self.name, "body": {"State": self.state.value}}
         )
+        mqttmsg = StatusMessage(
+            self.name, 'Opening valve.', unit=None)
+        self.mqtt.publish_message(mqttmsg)

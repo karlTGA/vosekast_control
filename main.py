@@ -7,7 +7,7 @@ import subprocess
 
 from lib.ExperimentEnvironment import ExperimentEnvironment
 
-from lib.Log import setup_custom_logger, add_status_box_handler
+from lib.Log import setup_custom_logger
 from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -27,12 +27,12 @@ DEBUG = True
 
 async def main():
     # set mqtt host, token, message, topic
-    host = 'localhost'
-    token = None
-    message = "vosekast start"
-    topic = "system"
+    # host = 'localhost'
+    # token = None
+    # message = "vosekast start"
+    # topic = "system"
 
-    # # mqtt client
+    # mqtt client
     # controller = MQTTController(host)
 
     # await controller.connect()
@@ -55,7 +55,6 @@ async def main():
     await main_window.run()
 
     # route log messages to status box of main window
-    add_status_box_handler(main_window)
     app_control.start()
 
     # res = app.exec_()

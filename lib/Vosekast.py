@@ -5,12 +5,12 @@ from lib.Valve import Valve
 from lib.Scale import Scale
 import logging
 import asyncio
-from lib.Log import LOGGER
+from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
-import json
+# import json
 
 
 # Vosekast States
@@ -53,6 +53,7 @@ class Vosekast():
         self.logger = logging.getLogger(LOGGER)
         self.app = QCoreApplication.instance()
         self.mqtt_client = MQTTController('localhost')
+        add_mqtt_logger_handler(self.mqtt_client)
 
         try:
             self._gpio_controller = gpio_controller

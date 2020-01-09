@@ -1,44 +1,62 @@
 from datetime import datetime
 import json
-
+from logging import LogRecord
 
 class Message:
     type = 'default'
 
     def __init__(self):
-        self.timestamp = datetime.now()
+        self.timestamp = datetime.now().isoformat()
 
     def get_json(self):
-        return json.dumps(self.get_message_object)
+        return json.dumps(self.get_message_object())
 
-    @property
     def get_message_object(self):
         return {
             'type': self.type,
+            'time': self.timestamp
         }
 
 
 class ErrorMessage(Message):
-    type: 'error'
+    type = 'error'
 
-    def __init__(self, message):
+    def __init__(self, sensor_id, message):
         super().__init__()
 
+        self.sensor_id = sensor_id
         self.message = message
 
     @property
+    def topic(self):
+        return f'vosekast/status/{self.sensor_id}'
+
     def get_message_object(self):
-        message_object = super().get_message_object
+        message_object = super().get_message_object()
+        message_object['sensor_id'] = self.sensor_id
         message_object['message'] = self.message
 
         return message_object
 
 
-class SystemMessage(ErrorMessage):
-    type = 'system'
+class LogMessage(Message):
+    type = 'log'
 
-    def __init__(self):
+    def __init__(self, record: LogRecord):
         super().__init__()
+
+        self.record = record
+
+    def get_message_object(self):
+        message_object = super().get_message_object()
+        message_object['message'] = self.record.message
+        message_object['level'] = self.record.levelname
+
+        return message_object
+
+    @property
+    def topic(self):
+        return 'vosekast/log'
 
 
 class StatusMessage(Message):
@@ -53,11 +71,10 @@ class StatusMessage(Message):
 
     @property
     def topic(self):
-        return f'status/{self.sensor_id}'
+        return f'vosekast/status/{self.sensor_id}'
 
-    @property
     def get_message_object(self):
-        message_object = super().get_message_object
+        message_object = super().get_message_object()
         message_object['sensor_id'] = self.sensor_id
         message_object['value'] = self.value
         message_object['unit'] = self.unit
@@ -68,15 +85,20 @@ class StatusMessage(Message):
 class Command(Message):
     type = 'command'
 
-    def __init__(self, description, state):
+    def __init__(self, sensor_id, description, state):
         super().__init__()
 
+        self.sensor_id = sensor_id
         self.description = description
         self.state = state
 
     @property
+    def topic(self):
+        return f'vosekast/status/{self.sensor_id}'
+
     def get_message_object(self):
-        message_object = super().get_message_object
+        message_object = super().get_message_object()
+        message_object['sensor_id'] = self.sensor_id
         message_object['description'] = self.description
         message_object['state'] = self.state
 
