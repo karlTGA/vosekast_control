@@ -7,6 +7,7 @@ class MQTTController():
     def __init__(self, host):
         self.client = MQTTClient("Vosekast")
         self.host = host
+        self.topic = "vosekast/commands"
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
@@ -30,9 +31,10 @@ class MQTTController():
         self.publish(message_object.topic, message_object.get_json())
 
     def on_connect(self, client, flags, rc, properties):
-        self.client.subscribe('TEST/#', qos=0)
+        # topic = "vosekast/commands"
+        self.client.subscribe(self.topic, qos=0)
         if self.connected:
-            print('Connected to: ' + self.host)
+            print('Connected to host: \"' + self.host + "\"")
 
     def on_message(self, client, topic, payload, qos, properties):
         msg = str(payload.decode("utf-8"))
@@ -42,7 +44,7 @@ class MQTTController():
         print('Disconnected')
 
     def on_subscribe(self, client, mid, qos):
-        print('Subscribed OK ' + str(mid))
+        print('Vosekast listening on: \"' + self.topic + "\"")
 
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)

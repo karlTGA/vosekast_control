@@ -15,7 +15,6 @@ class Tank():
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
 
-    
     def __init__(
         self,
         name,
@@ -53,7 +52,6 @@ class Tank():
         if drain_sensor is not None:
             self.drain_sensor.add_callback(self._low_position_changed)
 
-
     def drain_tank(self):
         if self.drain_valve is not None:
             self.drain_valve.open()
@@ -90,10 +88,10 @@ class Tank():
         self.state = self.BETWEEN
         mqttmsg = StatusMessage(self.name, 'DRAINING', unit=None)
 
-        self.logger.info("Tank {} get drained.".format(self.name))
+        self.logger.info("Tank {} is being drained.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        #if self.gui_element is not None:
+        # if self.gui_element is not None:
         #    self.state_changed.emit(self.BETWEEN)
 
     def _tank_is_full(self):
@@ -104,10 +102,10 @@ class Tank():
         self.state = self.FILLED
         mqttmsg = StatusMessage(self.name, 'FULL', unit=None)
 
-        self.logger.warning("Tank {} is filled.".format(self.name))
+        self.logger.warning("Tank {} is full.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        #if self.gui_element is not None:
+        # if self.gui_element is not None:
         #    self.state_changed.emit(self.FILLED)
 
         if self.source_pump is not None and self.protect_overflow:
@@ -130,7 +128,7 @@ class Tank():
         self.logger.warning("Tank {} is being filled".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        #if self.gui_element is not None:
+        # if self.gui_element is not None:
         #    self.state_changed.emit(self.BETWEEN)
 
     def _tank_is_drained(self):
@@ -141,10 +139,10 @@ class Tank():
         self.state = self.DRAINED
         mqttmsg = StatusMessage(self.name, 'DRAINED', unit=None)
 
-        self.logger.warning("Tank {} is drained/ empty".format(self.name))
+        self.logger.warning("Tank {} is drained".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        #if self.gui_element is not None:
+        # if self.gui_element is not None:
         #    self.state_changed.emit(self.DRAINED)
 
         if self.drain_valve is not None and self.protect_draining:

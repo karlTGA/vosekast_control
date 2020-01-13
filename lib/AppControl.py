@@ -1,6 +1,6 @@
 class AppControl:
     """
-    This class controls the hole app. Every thread should get the instance.
+    This class controls the whole app. Every thread should get the instance.
     """
 
     # states

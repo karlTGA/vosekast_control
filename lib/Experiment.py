@@ -4,6 +4,7 @@ from lib.Log import LOGGER
 import logging
 import threading
 from lib.EnumStates import States
+from lib.utils.Msg import StatusMessage, ErrorMessage
 
 
 class Experiment(QObject):
@@ -19,18 +20,24 @@ class Experiment(QObject):
         course_pump_measuring,
         course_pump_base,
         index,
+        vosekast,
         default_state=States.READY,
         legend="off",
+        
     ):
+
         super().__init__()
         self.logger = logging.getLogger(LOGGER)
         self.ExpEnv = ExperimentEnvironment
-        self.cpm = course_pump_measuring
-        self.cpb = course_pump_base
+        self.course_pump_measuring = course_pump_measuring
+        self.course_pump_base = course_pump_base
         self.index = index
+        self.vosekast = vosekast
         self.name = name
         self.screen = self.ExpEnv._exp_env_tab.screen
         self.state = default_state
+
+        self.mqtt = self.vosekast.mqtt_client
 
         self.timer = QTimer()
         self.pause_timer = QTimer()
@@ -54,7 +61,12 @@ class Experiment(QObject):
         self.change_state(self.state)
 
     def start_experiment(self):
-        self.init_figure_signal.emit()
+        # self.init_figure_signal.emit()
+
+        # publish via mqtt
+        mqttmsg = StatusMessage(self.name, "Calibration started.", unit=None)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
         self.timer.start(500)
         self.state = States.RUNNING
         self.change_state(self.state)
@@ -62,11 +74,11 @@ class Experiment(QObject):
     def execute_experiment(self):
         old = self.time_count
         self.time_count += 0.5
-        for time_toggle in self.cpb:
+        for time_toggle in self.course_pump_base:
             if old < time_toggle <= self.time_count:
                 self.ExpEnv.vosekast.pump_base_tank.toggle()
 
-        for time_toggle in self.cpm:
+        for time_toggle in self.course_pump_measuring:
             if old < time_toggle <= self.time_count:
                 self.ExpEnv.vosekast.pump_measuring_tank.toggle()
 
@@ -88,10 +100,21 @@ class Experiment(QObject):
         self.time_count += 0.5
 
     def send_new_data_point(self, x, y, index, legend):
-        self.send_data_point.emit(x, y, index, legend)
+        # self.send_data_point.emit(x, y, index, legend)
+
+        # publish via mqtt
+        mqttmsg = StatusMessage(self.name, str(
+            x, y, index, legend), unit="data point")
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     def change_state(self, new_state):
-        self.state_changed.emit(States(new_state).value)
+        # self.state_changed.emit(States(new_state).value)
+
+        # publish via mqtt
+        mqttmsg = StatusMessage(self.name, States(new_state).value, unit=None)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     @pyqtSlot()
     def stop_experiment_slot(self):

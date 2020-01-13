@@ -23,7 +23,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 },
 {
 	"type": "log message",
-	"timestamp": "2019-11-20T19:02:59.975Z+0100",
+	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"level": "DEBUG/INFO/WARNING/ERROR/CRITICAL",
 	"message": "Vosekast shutting down."
 },

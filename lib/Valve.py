@@ -1,11 +1,10 @@
 import logging
 from lib.Log import LOGGER
-from PyQt5.QtCore import pyqtSignal, QObject
 from lib.EnumStates import States
-from lib.utils.Msg import StatusMessage, ErrorMessage, LogMessage
+from lib.utils.Msg import StatusMessage, ErrorMessage
 
 
-class Valve(QObject):
+class Valve():
     # regulations
     BINARY = "BINARY"
     ANALOG = "ANALOG"
@@ -14,9 +13,6 @@ class Valve(QObject):
     TWO_WAY = "TWO_WAY"
     THREE_WAY = "THREE_WAY"
     SWITCH = "SWITCH"
-
-    # signals
-    state_changed = pyqtSignal(int, name="PumpStateChanged")
 
     def __init__(
         self,
@@ -37,17 +33,11 @@ class Valve(QObject):
         self.regulation = regulation
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
-        self.gui_button = button
         self.state = None
+        self.mqtt = self.vosekast.mqtt_client
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
-
-        # add to the button instance the valve instance
-        self.gui_button.set_valve(self)
-
-        # signals for gui
-        self.state_changed.connect(self.gui_button.state_change)
 
     def close(self):
         """
@@ -57,13 +47,12 @@ class Valve(QObject):
         self.logger.debug("Close valve {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.CLOSED
-        self.state_changed.emit(States.CLOSED.value)
-        self.vosekast.VosekastStore.dispatch(
-            {"type": "Update " + self.name, "body": {"State": self.state.value}}
-        )
-        mqttmsg = StatusMessage(
-            self.name, 'Closing valve.', unit=None)
-        self.mqtt.publish_message(mqttmsg)
+        # self.state_changed.emit(States.CLOSED.value)
+
+        # publish States.CLOSED.value via mqtt
+        mqttmsg = StatusMessage(self.name, "Closing valve {}", unit=None)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     def open(self):
         """
@@ -73,10 +62,9 @@ class Valve(QObject):
         self.logger.debug("Open valve {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.OPEN
-        self.state_changed.emit(States.OPEN.value)
-        self.vosekast.VosekastStore.dispatch(
-            {"type": "Update " + self.name, "body": {"State": self.state.value}}
-        )
-        mqttmsg = StatusMessage(
-            self.name, 'Opening valve.', unit=None)
-        self.mqtt.publish_message(mqttmsg)
+        # self.state_changed.emit(States.OPEN.value)
+
+        # publish States.OPEN.value via mqtt
+        mqttmsg = StatusMessage(self.name, "Opening valve {}", unit=None)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)

@@ -7,10 +7,8 @@ import logging
 import asyncio
 from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.ExperimentEnvironment import ExperimentEnvironment
-from PyQt5.QtCore import QRunnable, pyqtSlot, QCoreApplication
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
-# import json
 
 
 # Vosekast States
@@ -51,7 +49,6 @@ class Vosekast():
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
-        self.app = QCoreApplication.instance()
         self.mqtt_client = MQTTController('localhost')
         add_mqtt_logger_handler(self.mqtt_client)
 
@@ -123,23 +120,17 @@ class Vosekast():
             )
 
             # pumps
-            pump_base_button = self._main_window.tabs.tabStatus.pump_buttons[BASE_PUMP]
             self.pump_base_tank = Pump(
                 self,
                 "Pump Base Tank",
                 PIN_PUMP_BASE,
                 self._gpio_controller,
-                pump_base_button,
             )
-            pump_measuring_button = self._main_window.tabs.tabStatus.pump_buttons[
-                MEASURING_PUMP
-            ]
             self.pump_measuring_tank = Pump(
                 self,
                 "Pump Measuring Tank",
                 PIN_PUMP_MEASURING,
                 self._gpio_controller,
-                pump_measuring_button,
             )
             self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
 
@@ -246,7 +237,7 @@ class Vosekast():
         self.measuring_tank.drain_tank()
         self.logger.info("Measuring tank is emptied.")
         self.clean()
-        self.logger.info("Vosekast is shutdown.")
+        self.logger.info("Vosekast is shut down.")
         await self.mqtt_client.disconnect()
 
     def clean(self):

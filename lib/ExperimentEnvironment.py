@@ -12,6 +12,7 @@ from numpy import arange, sin, cos, pi, log
 import time
 from lib.EnumStates import States
 from lib.Experiment import Experiment
+from lib.utils.Msg import StatusMessage, ErrorMessage
 
 
 class ExperimentEnvironment(QObject):
@@ -42,15 +43,16 @@ class ExperimentEnvironment(QObject):
 
         # Add Experiment
         self.experiment_0 = Experiment(
-            self, "First Experiment", [3, 6, 9], [4, 8, 12], 0
+            self, "First Experiment", [3, 6, 9], [4, 8, 12], 0, vosekast
         )
         self.experiment_1 = Experiment(
-            self, "Second Experiment", [1, 2, 7], [9, 6, 18], 1
+            self, "Second Experiment", [1, 2, 7], [9, 6, 18], 1, vosekast
         )
         self.experiment_2 = Experiment(
-            self, "Third Experiment", [1, 3, 8], [7, 5, 11], 2
+            self, "Third Experiment", [1, 3, 8], [7, 5, 11], 2, vosekast
         )
-        self.experiments = [self.experiment_0, self.experiment_1, self.experiment_2]
+        self.experiments = [self.experiment_0,
+                            self.experiment_1, self.experiment_2]
         self.actual_experiment = self.experiment_0
 
         # add instance to gui_elements
@@ -58,14 +60,20 @@ class ExperimentEnvironment(QObject):
         self._stop_button.control_instance = self.actual_experiment
 
         self.change_state(States.READY.value)
+        self.mqtt = self.vosekast.mqtt_client
 
     def change_state(self, new_state):
         self.state = States(new_state)
         self.logger.debug("New State " + str(new_state))
-        self.state_changed.emit(new_state)
+        # self.state_changed.emit(new_state)
 
     def send_new_time(self):
-        self.new_time.emit(0)
+        # self.new_time.emit(0)
+
+        # publish via mqtt
+        mqttmsg = StatusMessage(self.name, self.new_time, unit=None)
+        if self.mqtt.connection_test():
+            self.mqtt.publish_message(mqttmsg)
 
     def get_state(self):
         return self.state

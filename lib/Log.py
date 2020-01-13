@@ -1,5 +1,4 @@
 import logging
-from PyQt5.QtCore import pyqtSignal, QObject
 from lib.utils.Msg import LogMessage
 
 LOGGER = "ROOT"
