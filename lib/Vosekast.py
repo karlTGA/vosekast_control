@@ -9,6 +9,8 @@ from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
+from lib.MQTT import MQTTCommandHandler
+
 
 
 # Vosekast States
@@ -50,6 +52,7 @@ class Vosekast():
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.mqtt_client = MQTTController('localhost')
+        self.mqtt_command = MQTTCommandHandler()
         add_mqtt_logger_handler(self.mqtt_client)
 
         try:

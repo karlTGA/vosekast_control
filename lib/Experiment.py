@@ -4,7 +4,7 @@ from lib.Log import LOGGER
 import logging
 import threading
 from lib.EnumStates import States
-from lib.utils.Msg import StatusMessage, ErrorMessage
+from lib.utils.Msg import StatusMessage
 
 
 class Experiment(QObject):

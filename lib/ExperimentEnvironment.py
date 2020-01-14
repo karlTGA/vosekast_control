@@ -12,7 +12,7 @@ from numpy import arange, sin, cos, pi, log
 import time
 from lib.EnumStates import States
 from lib.Experiment import Experiment
-from lib.utils.Msg import StatusMessage, ErrorMessage
+from lib.utils.Msg import StatusMessage
 
 
 class ExperimentEnvironment(QObject):

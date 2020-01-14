@@ -1,7 +1,7 @@
 import logging
 from lib.Log import LOGGER
 import asyncio
-from lib.utils.Msg import StatusMessage, ErrorMessage
+from lib.utils.Msg import StatusMessage
 
 
 class Tank():
@@ -66,7 +66,7 @@ class Tank():
         else:
             self.logger.debug(
                 "No drain valve on the tank {}".format(self.name))
-            mqttmsg = ErrorMessage(self.name, 'Drain valve missing.')
+            mqttmsg = StatusMessage(self.name, 'Drain valve missing.')
             self.mqtt.publish_message(mqttmsg)
         self.logger.info("Ready to fill the tank {}".format(self.name))
 

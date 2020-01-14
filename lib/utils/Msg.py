@@ -19,25 +19,25 @@ class Message:
         }
 
 
-class ErrorMessage(Message):
-    type = 'error'
+# class ErrorMessage(Message):
+#     type = 'error'
 
-    def __init__(self, sensor_id, message):
-        super().__init__()
+#     def __init__(self, sensor_id, message):
+#         super().__init__()
 
-        self.sensor_id = sensor_id
-        self.message = message
+#         self.sensor_id = sensor_id
+#         self.message = message
 
-    @property
-    def topic(self):
-        return f'vosekast/error/{self.sensor_id}'
+#     @property
+#     def topic(self):
+#         return f'vosekast/error/{self.sensor_id}'
 
-    def get_message_object(self):
-        message_object = super().get_message_object()
-        message_object['sensor_id'] = self.sensor_id
-        message_object['message'] = self.message
+#     def get_message_object(self):
+#         message_object = super().get_message_object()
+#         message_object['sensor_id'] = self.sensor_id
+#         message_object['message'] = self.message
 
-        return message_object
+#         return message_object
 
 
 class LogMessage(Message):
@@ -47,17 +47,27 @@ class LogMessage(Message):
         super().__init__()
 
         self.record = record
+        self.sensor_id = record.module
 
     def get_message_object(self):
         message_object = super().get_message_object()
+        message_object['sensor_id'] = self.sensor_id
         message_object['message'] = self.record.message
         message_object['level'] = self.record.levelname
+        
+        if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
+            message_object['type'] = self.record.levelname
 
         return message_object
 
     @property
     def topic(self):
-        return 'vosekast/log'
+        
+        if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
+            return f'vosekast/error/{self.sensor_id}'
+            
+        else:
+            return 'vosekast/log'
 
 
 class StatusMessage(Message):

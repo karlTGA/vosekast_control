@@ -1,4 +1,5 @@
-
+from datetime import datetime
+import json
 from gmqtt import Client as MQTTClient
 
 
@@ -31,14 +32,17 @@ class MQTTController():
         self.publish(message_object.topic, message_object.get_json())
 
     def on_connect(self, client, flags, rc, properties):
-        # topic = "vosekast/commands"
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
             print('Connected to host: \"' + self.host + "\"")
 
     def on_message(self, client, topic, payload, qos, properties):
-        msg = str(payload.decode("utf-8"))
+        msg = json.loads(payload.decode("utf-8"))
+        MQTTCommandHandler(msg)
+
         print('Received: \"' + msg + "\" from client: " + self.client._client_id)
+
+
 
     def on_disconnect(self, client, packet, exc=None):
         print('Disconnected')
@@ -51,3 +55,17 @@ class MQTTController():
 
     def connection_test(self):
         return self.client.is_connected
+
+class MQTTCommandHandler():
+    type = 'command'
+
+    def __init__(self):
+        pass
+
+    # def read_message_object(self):
+    #     return {
+    #         'type': self.type,
+    #         'description': self.description,
+    #         'sensor_id': self.sensor_id,
+    #         'state': self.state
+    #     }
