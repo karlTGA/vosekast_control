@@ -54,7 +54,7 @@ class LogMessage(Message):
         message_object['sensor_id'] = self.sensor_id
         message_object['message'] = self.record.message
         message_object['level'] = self.record.levelname
-        
+
         if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
             message_object['type'] = self.record.levelname
 
@@ -62,10 +62,10 @@ class LogMessage(Message):
 
     @property
     def topic(self):
-        
+
         if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
             return f'vosekast/error/{self.sensor_id}'
-            
+
         else:
             return 'vosekast/log'
 

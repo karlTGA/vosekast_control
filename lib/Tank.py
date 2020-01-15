@@ -66,7 +66,7 @@ class Tank():
         else:
             self.logger.debug(
                 "No drain valve on the tank {}".format(self.name))
-            mqttmsg = StatusMessage(self.name, 'Drain valve missing.')
+            mqttmsg = StatusMessage(self.name, 'Drain valve missing.', unit=None)
             self.mqtt.publish_message(mqttmsg)
         self.logger.info("Ready to fill the tank {}".format(self.name))
 

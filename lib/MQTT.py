@@ -1,14 +1,18 @@
-from datetime import datetime
 import json
 from gmqtt import Client as MQTTClient
 
 
+def noop():
+    pass
+
+
 class MQTTController():
 
-    def __init__(self, host):
+    def __init__(self, host, message_handler=None):
         self.client = MQTTClient("Vosekast")
         self.host = host
         self.topic = "vosekast/commands"
+        self.message_handler = message_handler
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
@@ -37,12 +41,21 @@ class MQTTController():
             print('Connected to host: \"' + self.host + "\"")
 
     def on_message(self, client, topic, payload, qos, properties):
-        msg = json.loads(payload.decode("utf-8"))
-        MQTTCommandHandler(msg)
+        message = payload
 
-        print('Received: \"' + msg + "\" from client: " + self.client._client_id)
+        try:
+            command = json.loads(message)
 
+            if command['type'] == 'command':
+                self.message_handler.on_command(command)
 
+        except ValueError:
+            print("unexpected formatting: " +
+                  str(payload.decode("utf-8")))
+        except KeyError:
+            print("Got message without type.")
+
+        # print('Received: \"' + str(payload.decode("utf-8")) + "\" from client: " + self.client._client_id)
 
     def on_disconnect(self, client, packet, exc=None):
         print('Disconnected')
@@ -56,16 +69,8 @@ class MQTTController():
     def connection_test(self):
         return self.client.is_connected
 
+
 class MQTTCommandHandler():
-    type = 'command'
 
     def __init__(self):
-        pass
-
-    # def read_message_object(self):
-    #     return {
-    #         'type': self.type,
-    #         'description': self.description,
-    #         'sensor_id': self.sensor_id,
-    #         'state': self.state
-    #     }
+        self.on_command = noop

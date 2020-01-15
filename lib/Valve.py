@@ -22,7 +22,6 @@ class Valve():
         valve_type,
         regulation,
         gpio_controller,
-        button,
     ):
         super().__init__()
 

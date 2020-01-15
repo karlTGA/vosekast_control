@@ -7,9 +7,9 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 
 * There are different classes to distinguish between sensor data/ logs/ commands/ error messages. Each class will publish to a separate topic under /vosekast for easier differentiation.
 	* Sensors publish to their on topic under /status, i.e. vosekast/status/Stock_Tank 
-	* All log events will publish to /log, i.e. vosekast/log
-	* Error messages publish to /error, i.e. vosekast/error/Stock_Tank
-	* Commands will be published to /command, i.e. vosekast/command/Stock_Tank
+	* Standard Log events will publish to /log, i.e. vosekast/log
+	* Log events with level "Error" or "Critical" publish to /error, i.e. vosekast/error/Stock_Tank
+	* Vosekast is listening for commands on /command, i.e. vosekast/command/Stock_Tank
 * Data is distinguished by sensor_id and timestamp.
 
 ```json
@@ -36,9 +36,10 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"description": "Pumpe anschalten",
-	"sensor_id": "Pumpe",
-	"state": "on"
+	"target": "System/Pumpe",
+	"target_id": "Pumpe 1",
+	"command": "switch_off",
+	"data": null
 } 
 ```
 

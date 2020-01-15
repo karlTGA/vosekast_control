@@ -8,9 +8,7 @@ import asyncio
 from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.Store import VosekastStore
-from lib.MQTT import MQTTController
-from lib.MQTT import MQTTCommandHandler
-
+from lib.MQTT import MQTTController, MQTTCommandHandler
 
 
 # Vosekast States
@@ -52,12 +50,15 @@ class Vosekast():
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.mqtt_client = MQTTController('localhost')
-        self.mqtt_command = MQTTCommandHandler()
+        self.message_handler = MQTTCommandHandler()
+
+        self.mqtt_client.message_handler = self.message_handler
+        self.message_handler.on_command = self.handle_command
         add_mqtt_logger_handler(self.mqtt_client)
 
         try:
             self._gpio_controller = gpio_controller
-            # define how the pins a numbered on the board
+            # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
 
             # main window of the gui
@@ -65,13 +66,8 @@ class Vosekast():
 
             # add store to create checkboxes
             self.VosekastStore = VosekastStore(self)
-            self._main_window.tabs.tabProgramms.create_checkboxes(
-                self.VosekastStore)
 
             # valves
-            valve_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[
-                MEASURING_TANK_VALVE
-            ]
             self.measuring_drain_valve = Valve(
                 self,
                 "Measuring Drain Valve",
@@ -79,11 +75,7 @@ class Vosekast():
                 Valve.TWO_WAY,
                 Valve.BINARY,
                 self._gpio_controller,
-                valve_measuring_button,
             )
-            switch_measuring_button = self._main_window.tabs.tabStatus.valve_buttons[
-                MEASURING_TANK_SWITCH
-            ]
             self.measuring_tank_switch = Valve(
                 self,
                 "Measuring Tank Switch",
@@ -91,7 +83,6 @@ class Vosekast():
                 Valve.SWITCH,
                 Valve.BINARY,
                 self._gpio_controller,
-                switch_measuring_button,
             )
             self.valves = [self.measuring_drain_valve,
                            self.measuring_tank_switch]
@@ -259,6 +250,13 @@ class Vosekast():
     async def run(self):
         self.logger.debug("I started")
         await self.mqtt_client.connect()
+
+    def handle_command(self, command):
+        if command['target'] == 'valve':
+            for valve in self.valves:
+                target_id = command['target_id']
+                if valve.name == target_id:
+                    print("target_id match")
 
 
 class NoGPIOControllerError(Exception):
