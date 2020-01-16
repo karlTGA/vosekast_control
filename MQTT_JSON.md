@@ -17,8 +17,8 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "status",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "Tank",
-	"value": 99,
+	"sensor_id": "i.e. BASE_TANK",
+	"value": 100,
 	"unit": "%"
 },
 {
@@ -30,15 +30,15 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "error message",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "Durchflussmesser",
-	"message": "Flow rate out of bounds."
+	"sensor_id": "i.e. BASE_TANK",
+	"message": "Water level low."
 },
 {
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"target": "System/Pumpe",
-	"target_id": "Pumpe 1",
-	"command": "switch_off",
+	"target": "valve/tank/pump/scale/system",
+	"target_id": "i.e. Measuring Drain Valve",
+	"command": "close",
 	"data": null
 } 
 ```

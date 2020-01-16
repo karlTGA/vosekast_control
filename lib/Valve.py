@@ -49,7 +49,7 @@ class Valve():
         # self.state_changed.emit(States.CLOSED.value)
 
         # publish States.CLOSED.value via mqtt
-        mqttmsg = StatusMessage(self.name, "Closing valve {}", unit=None)
+        mqttmsg = StatusMessage(self.name, "Closing valve {}".format(self.name), unit=None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 
@@ -64,6 +64,6 @@ class Valve():
         # self.state_changed.emit(States.OPEN.value)
 
         # publish States.OPEN.value via mqtt
-        mqttmsg = StatusMessage(self.name, "Opening valve {}", unit=None)
+        mqttmsg = StatusMessage(self.name, "Opening valve {}".format(self.name), unit=None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)

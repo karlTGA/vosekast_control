@@ -50,11 +50,9 @@ class Vosekast():
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.mqtt_client = MQTTController('localhost')
-        # self.message_handler = MQTTCommandHandler()
-        # self.mqtt_client.message_handler = self.message_handler
-        # self.message_handler.on_command = self.handle_command
         self.mqtt_client.on_command = self.handle_command
         add_mqtt_logger_handler(self.mqtt_client)
+        # new
 
         try:
             self._gpio_controller = gpio_controller
@@ -251,29 +249,67 @@ class Vosekast():
         self.logger.debug("I started")
         await self.mqtt_client.connect()
 
-    def handle_command(self, command):
+    # handle incoming mqtt commands
+    async def handle_command(self, command):
+        # valves
         if command['target'] == 'valve':
             for valve in self.valves:
                 target_id = command['target_id']
                 if valve.name == target_id:
-                    print("target_id {} match")
+                    if command['command'] == 'close':
+                        # print(f"{command['command']} {target_id}")
+                        valve.close()
+                    if command['command'] == 'open':
+                        valve.open()
 
+        # pumps
         elif command['target'] == 'pump':
-            for valve in self.pumps:
+            for pump in self.pumps:
                 target_id = command['target_id']
-                if valve.name == target_id:
-                    print("target_id {} match")
+                if pump.name == target_id:
+                    if command['command'] == 'start':
+                        pump.start()
+                    if command['command'] == 'stop':
+                        pump.stop()
+                    if command['command'] == 'toggle':
+                        pump.toggle()
 
+        # tanks
         elif command['target'] == 'tank':
-            for valve in self.tanks:
+            for tank in self.tanks:
                 target_id = command['target_id']
-                if valve.name == target_id:
-                    print("target_id {} match")
+                if tank.name == target_id:
+                    print(f"{target_id} match")
 
+        # scales
         elif command['target'] == 'scale':
-            print("target_id {} match")
+            if command['command'] == 'open_connection':
+                self.scale.open_connection()
+            elif command['command'] == 'close_connection':
+                self.scale.close_connection()
+            elif command['command'] == 'start_measurement_thread':
+                self.scale.start_measurement_thread()
+            elif command['command'] == 'stop_measurement_thread':
+                self.scale.stop_measurement_thread()
+            elif command['command'] == 'get_stable_value':
+                self.scale.get_stable_value()
 
-            # system
+            # read_value_from_scale
+
+        # system
+        elif command['target'] == 'system':
+            if command['command'] == 'shutdown':
+                await self.shutdown()
+            elif command['command'] == 'clean':
+                self.clean()
+            elif command['command'] == 'prepare_measuring':
+                self.prepare_measuring()
+            elif command['command'] == 'ready_to_measure':
+                self.ready_to_measure()
+
+        # exception
+        else:
+            print('Target could not be found.')
 
 
 class NoGPIOControllerError(Exception):

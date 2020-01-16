@@ -53,7 +53,8 @@ class Scale:
             self.connection.open()
 
     def close_connection(self):
-        self.connection.close()
+        if not self.emulate:
+            self.connection.close()
 
     def loop(self):
         self.logger.info("Start measuring with scale.")
@@ -88,12 +89,12 @@ class Scale:
 
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
-        
+
         # publish new_value via mqtt
         mqttmsg = StatusMessage("scale", new_value, unit="Kg")
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
-                
+
         if len(self.last_values) == 10:
             # calculate square mean error
             diffs = 0

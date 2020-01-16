@@ -8,13 +8,12 @@ def noop(*args, **kwargs):
 
 class MQTTController():
 
-    # def __init__(self, host, message_handler=None):
     def __init__(self, host):
         self.client = MQTTClient("Vosekast")
         self.host = host
         self.on_command = noop
         self.topic = "vosekast/commands"
-        # self.message_handler = message_handler
+
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
@@ -32,7 +31,7 @@ class MQTTController():
 
     def publish(self, topic, message):
         self.client.publish(topic, message, qos=0)
-        print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
+        # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def publish_message(self, message_object):
         self.publish(message_object.topic, message_object.get_json())
@@ -42,15 +41,14 @@ class MQTTController():
         if self.connected:
             print('Connected to host: \"' + self.host + "\"")
 
-    def on_message(self, client, topic, payload, qos, properties):
+    async def on_message(self, client, topic, payload, qos, properties):
         message = payload
 
         try:
             command = json.loads(message)
 
             if command['type'] == 'command':
-                # self.message_handler.on_command(command)
-                self.on_command(command)
+                await self.on_command(command)
 
         except ValueError:
             print("unexpected formatting: " +
@@ -71,9 +69,3 @@ class MQTTController():
 
     def connection_test(self):
         return self.client.is_connected
-
-
-# class MQTTCommandHandler():
-
-#     def __init__(self):
-#         self.on_command = noop

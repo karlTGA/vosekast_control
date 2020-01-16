@@ -25,7 +25,7 @@ class Pump():
         stop the pump
         :return:
         """
-        self.logger.debug("Stop the pump {}".format(self.name))
+        self.logger.debug("Stopping pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
 
@@ -39,7 +39,7 @@ class Pump():
         start the pump
         :return:
         """
-        self.logger.debug("Start the pump {}".format(self.name))
+        self.logger.debug("Starting pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
 
