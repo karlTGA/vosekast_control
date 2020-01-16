@@ -2,17 +2,19 @@ import json
 from gmqtt import Client as MQTTClient
 
 
-def noop():
+def noop(*args, **kwargs):
     pass
 
 
 class MQTTController():
 
-    def __init__(self, host, message_handler=None):
+    # def __init__(self, host, message_handler=None):
+    def __init__(self, host):
         self.client = MQTTClient("Vosekast")
         self.host = host
+        self.on_command = noop
         self.topic = "vosekast/commands"
-        self.message_handler = message_handler
+        # self.message_handler = message_handler
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
@@ -47,7 +49,8 @@ class MQTTController():
             command = json.loads(message)
 
             if command['type'] == 'command':
-                self.message_handler.on_command(command)
+                # self.message_handler.on_command(command)
+                self.on_command(command)
 
         except ValueError:
             print("unexpected formatting: " +
@@ -70,7 +73,7 @@ class MQTTController():
         return self.client.is_connected
 
 
-class MQTTCommandHandler():
+# class MQTTCommandHandler():
 
-    def __init__(self):
-        self.on_command = noop
+#     def __init__(self):
+#         self.on_command = noop

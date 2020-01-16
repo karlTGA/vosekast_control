@@ -8,7 +8,7 @@ import asyncio
 from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.Store import VosekastStore
-from lib.MQTT import MQTTController, MQTTCommandHandler
+from lib.MQTT import MQTTController
 
 
 # Vosekast States
@@ -50,10 +50,10 @@ class Vosekast():
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
         self.mqtt_client = MQTTController('localhost')
-        self.message_handler = MQTTCommandHandler()
-
-        self.mqtt_client.message_handler = self.message_handler
-        self.message_handler.on_command = self.handle_command
+        # self.message_handler = MQTTCommandHandler()
+        # self.mqtt_client.message_handler = self.message_handler
+        # self.message_handler.on_command = self.handle_command
+        self.mqtt_client.on_command = self.handle_command
         add_mqtt_logger_handler(self.mqtt_client)
 
         try:
@@ -256,7 +256,24 @@ class Vosekast():
             for valve in self.valves:
                 target_id = command['target_id']
                 if valve.name == target_id:
-                    print("target_id match")
+                    print("target_id {} match")
+
+        elif command['target'] == 'pump':
+            for valve in self.pumps:
+                target_id = command['target_id']
+                if valve.name == target_id:
+                    print("target_id {} match")
+
+        elif command['target'] == 'tank':
+            for valve in self.tanks:
+                target_id = command['target_id']
+                if valve.name == target_id:
+                    print("target_id {} match")
+
+        elif command['target'] == 'scale':
+            print("target_id {} match")
+
+            # system
 
 
 class NoGPIOControllerError(Exception):
