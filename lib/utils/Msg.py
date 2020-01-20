@@ -19,27 +19,6 @@ class Message:
         }
 
 
-# class ErrorMessage(Message):
-#     type = 'error'
-
-#     def __init__(self, sensor_id, message):
-#         super().__init__()
-
-#         self.sensor_id = sensor_id
-#         self.message = message
-
-#     @property
-#     def topic(self):
-#         return f'vosekast/error/{self.sensor_id}'
-
-#     def get_message_object(self):
-#         message_object = super().get_message_object()
-#         message_object['sensor_id'] = self.sensor_id
-#         message_object['message'] = self.message
-
-#         return message_object
-
-
 class LogMessage(Message):
     type = 'log'
 

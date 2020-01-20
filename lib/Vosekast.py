@@ -128,7 +128,7 @@ class Vosekast():
 
             # tanks
             self.stock_tank = Tank(
-                STOCK_TANK,
+                "Stock Tank",
                 100,
                 None,
                 None,
@@ -141,7 +141,7 @@ class Vosekast():
             base_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[BASE_TANK]
 
             self.base_tank = Tank(
-                BASE_TANK,
+                "Base Tank",
                 100,
                 None,
                 self.level_base_low,
@@ -157,7 +157,7 @@ class Vosekast():
             ]
 
             self.measuring_tank = Tank(
-                MEASURING_TANK,
+                "Measuring Tank",
                 100,
                 None,
                 self.level_measuring_low,
@@ -227,9 +227,9 @@ class Vosekast():
     async def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
-        self.logger.info("Measuring tank is emptied.")
+        self.logger.info("Measuring tank is empty.")
         self.clean()
-        self.logger.info("Vosekast is shut down.")
+        self.logger.info("Vosekast is shutting down.")
         await self.mqtt_client.disconnect()
 
     def clean(self):
@@ -246,7 +246,7 @@ class Vosekast():
         self.scale.close_connection()
 
     async def run(self):
-        self.logger.debug("I started")
+        self.logger.debug("Vosekast started ok.")
         await self.mqtt_client.connect()
 
     # handle incoming mqtt commands
@@ -257,10 +257,15 @@ class Vosekast():
                 target_id = command['target_id']
                 if valve.name == target_id:
                     if command['command'] == 'close':
-                        # print(f"{command['command']} {target_id}")
                         valve.close()
                     if command['command'] == 'open':
                         valve.open()
+                    else:
+                        self.logger.warning(f'command {command["command"]} could not be found.')
+
+                    return
+                
+            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
 
         # pumps
         elif command['target'] == 'pump':
@@ -273,43 +278,74 @@ class Vosekast():
                         pump.stop()
                     if command['command'] == 'toggle':
                         pump.toggle()
+                    else:
+                        self.logger.warning(f'command {command["command"]} could not be found.')
+
+                    return
+                
+            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
 
         # tanks
         elif command['target'] == 'tank':
             for tank in self.tanks:
                 target_id = command['target_id']
                 if tank.name == target_id:
-                    print(f"{target_id} match")
+                    if command['command'] == 'drain_tank':
+                        tank.drain_tank()
+                    if command['command'] == 'prepare_to_fill':
+                        tank.prepare_to_fill()
+                    else:
+                        self.logger.warning(f'command {command["command"]} could not be found.')
+
+                    return
+                
+            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
 
         # scales
         elif command['target'] == 'scale':
-            if command['command'] == 'open_connection':
-                self.scale.open_connection()
-            elif command['command'] == 'close_connection':
-                self.scale.close_connection()
-            elif command['command'] == 'start_measurement_thread':
-                self.scale.start_measurement_thread()
-            elif command['command'] == 'stop_measurement_thread':
-                self.scale.stop_measurement_thread()
-            elif command['command'] == 'get_stable_value':
-                self.scale.get_stable_value()
+            if command['target_id'] == 'scale':
+                if command['command'] == 'open_connection':
+                    self.scale.open_connection()
+                elif command['command'] == 'close_connection':
+                    self.scale.close_connection()
+                elif command['command'] == 'start_measurement_thread':
+                    self.scale.start_measurement_thread()
+                elif command['command'] == 'stop_measurement_thread':
+                    self.scale.stop_measurement_thread()
+                elif command['command'] == 'get_stable_value':
+                    self.scale.get_stable_value()
+                elif command['command'] == 'loop':
+                    self.scale.loop()
+                elif command['command'] == 'read_value_from_scale':
+                    self.scale.read_value_from_scale()
+                else:
+                    self.logger.warning(f'command {command["command"]} could not be found.')
 
-            # read_value_from_scale
+                return
+                
+            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
 
         # system
         elif command['target'] == 'system':
-            if command['command'] == 'shutdown':
-                await self.shutdown()
-            elif command['command'] == 'clean':
-                self.clean()
-            elif command['command'] == 'prepare_measuring':
-                self.prepare_measuring()
-            elif command['command'] == 'ready_to_measure':
-                self.ready_to_measure()
+            if command['target_id'] == 'system':
+                if command['command'] == 'shutdown':
+                    await self.shutdown()
+                elif command['command'] == 'clean':
+                    self.clean()
+                elif command['command'] == 'prepare_measuring':
+                    self.prepare_measuring()
+                elif command['command'] == 'ready_to_measure':
+                    self.ready_to_measure()
+                else:
+                    self.logger.warning(f'command {command["command"]} could not be found.')
+
+                return
+                
+            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
 
         # exception
         else:
-            print('Target could not be found.')
+            self.logger.warning(f'target {command["target"]} could not be found.')
 
 
 class NoGPIOControllerError(Exception):

@@ -91,9 +91,6 @@ class Tank():
         self.logger.info("Tank {} is being drained.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        # if self.gui_element is not None:
-        #    self.state_changed.emit(self.BETWEEN)
-
     def _tank_is_full(self):
         """
         internal function to register that the tank is filled
@@ -104,9 +101,6 @@ class Tank():
 
         self.logger.warning("Tank {} is full.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
-
-        # if self.gui_element is not None:
-        #    self.state_changed.emit(self.FILLED)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -128,9 +122,6 @@ class Tank():
         self.logger.warning("Tank {} is being filled".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-        # if self.gui_element is not None:
-        #    self.state_changed.emit(self.BETWEEN)
-
     def _tank_is_drained(self):
         """
         internal function to register that the tank is drained
@@ -141,9 +132,6 @@ class Tank():
 
         self.logger.warning("Tank {} is drained".format(self.name))
         self.mqtt.publish_message(mqttmsg)
-
-        # if self.gui_element is not None:
-        #    self.state_changed.emit(self.DRAINED)
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()
