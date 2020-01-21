@@ -18,7 +18,6 @@ raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspb
 pydux = "*"
 uvloop = "*"
 gmqtt = "*"
-json = "*"
 
 [requires]
 python_version = "3.7"
