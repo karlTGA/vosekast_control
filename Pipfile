@@ -12,7 +12,6 @@ rope = "*"
 pyserial = "*"
 SIP = "*"
 pyqt5 = "*"
-matplotlib = "*"
 numpy = "*"
 raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspberry-gpio-emulator"}
 pydux = "*"
