@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QTimer
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+#from PyQt5.QtCore import QTimer
+#from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from lib.Log import LOGGER
 import logging
 import threading
@@ -7,11 +7,11 @@ from lib.EnumStates import States
 from lib.utils.Msg import StatusMessage
 
 
-class Experiment(QObject):
+class Experiment():
     # signals
-    send_data_point = pyqtSignal(float, float, int, str, name="point")
-    state_changed = pyqtSignal(int, name="changed")
-    init_figure_signal = pyqtSignal()
+    #send_data_point = pyqtSignal(float, float, int, str, name="point")
+    #state_changed = pyqtSignal(int, name="changed")
+    #init_figure_signal = pyqtSignal()
 
     def __init__(
         self,
@@ -116,10 +116,10 @@ class Experiment(QObject):
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 
-    @pyqtSlot()
-    def stop_experiment_slot(self):
-        if self.state != States.READY:
-            self.state = States.STOPPED
-        self.timer.stop()
-        self.change_state(self.state)
-        self.time_count = 0
+    # @pyqtSlot()
+    # def stop_experiment_slot(self):
+    #     if self.state != States.READY:
+    #         self.state = States.STOPPED
+    #     self.timer.stop()
+    #     self.change_state(self.state)
+    #     self.time_count = 0

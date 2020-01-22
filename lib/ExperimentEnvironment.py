@@ -1,21 +1,21 @@
 import logging
 from lib.Log import LOGGER
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 # from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSignal, QObject, QTimer, pyqtSlot
+#from PyQt5.QtCore import pyqtSignal, QObject, QTimer, pyqtSlot
 
-import numpy as np
-from numpy import arange, sin, cos, pi, log
+#import numpy as np
+#from numpy import arange, sin, cos, pi, log
 import time
 from lib.EnumStates import States
 from lib.Experiment import Experiment
 from lib.utils.Msg import StatusMessage
 
 
-class ExperimentEnvironment(QObject):
+class ExperimentEnvironment():
 
     # signals
     state_changed = pyqtSignal(int, name="ExpEnvStateChanged")

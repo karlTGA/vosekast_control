@@ -5,15 +5,13 @@ import platform
 import time
 import subprocess
 
-from lib.ExperimentEnvironment import ExperimentEnvironment
+#from lib.ExperimentEnvironment import ExperimentEnvironment
 
 from lib.Log import setup_custom_logger
 from lib.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
-from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtCore import QCoreApplication, QThreadPool
-from lib.UI.MainWindow import MainWindow
 import RPi.GPIO as GPIO
+from lib.Vosekast import Vosekast
 
 # add mqtt resources
 import asyncio
@@ -50,9 +48,8 @@ async def main():
     app_control = AppControl()
 
     # add gui
-    app = QApplication(sys.argv)
-    main_window = MainWindow(app, app_control, GPIO, DEBUG)
-    await main_window.run()
+    vosekast = Vosekast(GPIO, DEBUG)
+    await vosekast.run()
 
     # route log messages to status box of main window
     app_control.start()

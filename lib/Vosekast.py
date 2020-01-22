@@ -6,7 +6,7 @@ from lib.Scale import Scale
 import logging
 import asyncio
 from lib.Log import LOGGER, add_mqtt_logger_handler
-from lib.ExperimentEnvironment import ExperimentEnvironment
+#from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
 
@@ -44,7 +44,7 @@ MEASURING_TANK = "MEASURING_TANK"
 
 
 class Vosekast():
-    def __init__(self, gpio_controller, gui_main_window, debug=False, *args, **kwargs):
+    def __init__(self, gpio_controller, debug=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.debug = debug
@@ -58,9 +58,6 @@ class Vosekast():
             self._gpio_controller = gpio_controller
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
-
-            # main window of the gui
-            self._main_window = gui_main_window
 
             # add store to create checkboxes
             self.VosekastStore = VosekastStore(self)
@@ -138,8 +135,6 @@ class Vosekast():
                 vosekast=self
             )
 
-            base_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[BASE_TANK]
-
             self.base_tank = Tank(
                 "Base Tank",
                 100,
@@ -151,10 +146,6 @@ class Vosekast():
                 vosekast=self,
                 protect_overflow=False,
             )
-
-            measuring_tank_gui = self._main_window.tabs.tabStatus.tank_statuses[
-                MEASURING_TANK
-            ]
 
             self.measuring_tank = Tank(
                 "Measuring Tank",
@@ -171,26 +162,22 @@ class Vosekast():
             self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
 
             # scale
-            scale_gui = self._main_window.tabs.tabStatus.scale_status
-            self.scale = Scale(self, scale_gui, emulate=self.debug)
+            self.scale = Scale(self, emulate=self.debug)
             self.scale.open_connection()
 
             # experiment_environment
-            expEnv0 = ExperimentEnvironment(
-                20, vosekast=self, main_window=self._main_window
-            )
+            # expEnv0 = ExperimentEnvironment(
+            #     20, vosekast=self, main_window=self._main_window
+            # )
 
-            button_start_pause_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[
-                0
-            ]
-            button_stop_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
+            # button_start_pause_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[
+            #     0
+            # ]
+            # button_stop_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
 
-            button_start_pause_exp.set_control_instance(
-                expEnv0.actual_experiment)
-            button_stop_exp.set_control_instance(expEnv0.actual_experiment)
-
-            self._main_window.tabs.tabProgramms.set_experiments(
-                expEnv0.experiments)
+            # button_start_pause_exp.set_control_instance(
+            #     expEnv0.actual_experiment)
+            # button_stop_exp.set_control_instance(expEnv0.actual_experiment)
 
             self.state = INITED
 
@@ -261,11 +248,13 @@ class Vosekast():
                     if command['command'] == 'open':
                         valve.open()
                     else:
-                        self.logger.warning(f'command {command["command"]} could not be found.')
+                        self.logger.warning(
+                            f'command {command["command"]} did not execute.')
 
                     return
-                
-            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
+
+            self.logger.warning(
+                f'target_id {command["target_id"]} could not be found.')
 
         # pumps
         elif command['target'] == 'pump':
@@ -279,11 +268,13 @@ class Vosekast():
                     if command['command'] == 'toggle':
                         pump.toggle()
                     else:
-                        self.logger.warning(f'command {command["command"]} could not be found.')
+                        self.logger.warning(
+                            f'command {command["command"]} did not execute.')
 
                     return
-                
-            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
+
+            self.logger.warning(
+                f'target_id {command["target_id"]} could not be found.')
 
         # tanks
         elif command['target'] == 'tank':
@@ -292,14 +283,17 @@ class Vosekast():
                 if tank.name == target_id:
                     if command['command'] == 'drain_tank':
                         tank.drain_tank()
+                        return
                     if command['command'] == 'prepare_to_fill':
                         tank.prepare_to_fill()
                     else:
-                        self.logger.warning(f'command {command["command"]} could not be found.')
+                        self.logger.warning(
+                            f'command {command["command"]} did not execute.')
 
                     return
-                
-            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
+
+            self.logger.warning(
+                f'target_id {command["target_id"]} could not be found.')
 
         # scales
         elif command['target'] == 'scale':
@@ -319,11 +313,13 @@ class Vosekast():
                 elif command['command'] == 'read_value_from_scale':
                     self.scale.read_value_from_scale()
                 else:
-                    self.logger.warning(f'command {command["command"]} could not be found.')
+                    self.logger.warning(
+                        f'command {command["command"]} did not execute.')
 
                 return
-                
-            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
+
+            self.logger.warning(
+                f'target_id {command["target_id"]} could not be found.')
 
         # system
         elif command['target'] == 'system':
@@ -337,15 +333,18 @@ class Vosekast():
                 elif command['command'] == 'ready_to_measure':
                     self.ready_to_measure()
                 else:
-                    self.logger.warning(f'command {command["command"]} could not be found.')
+                    self.logger.warning(
+                        f'command {command["command"]} did not execute.')
 
                 return
-                
-            self.logger.warning(f'target_id {command["target_id"]} could not be found.')
+
+            self.logger.warning(
+                f'target_id {command["target_id"]} could not be found.')
 
         # exception
         else:
-            self.logger.warning(f'target {command["target"]} could not be found.')
+            self.logger.warning(
+                f'target {command["target"]} could not be found.')
 
 
 class NoGPIOControllerError(Exception):

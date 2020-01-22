@@ -11,13 +11,10 @@ rope = "*"
 [packages]
 pyserial = "*"
 SIP = "*"
-pyqt5 = "*"
-numpy = "*"
 raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspberry-gpio-emulator"}
 pydux = "*"
 uvloop = "*"
 gmqtt = "*"
-matplotlib = {editable = true,git = "https://github.com/matplotlib/matplotlib"}
 
 [requires]
 python_version = "3.7"
