@@ -51,10 +51,12 @@ class Scale:
 
             self.connection = ser
             self.connection.open()
+            self.logger.info("Opening connection to scale.")
 
     def close_connection(self):
         if not self.emulate:
             self.connection.close()
+            self.logger.info("Closing connection to scale.")
 
     def loop(self):
         self.logger.info("Start measuring with scale.")
