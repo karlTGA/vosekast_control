@@ -56,3 +56,11 @@ class Pump():
             self.start()
         else:
             self.stop()
+
+    @property
+    def is_stopped(self):
+        return self.state == States.STOPPED
+
+    @property
+    def is_running(self):
+        return self.state == States.RUNNING   

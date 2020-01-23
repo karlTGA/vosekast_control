@@ -77,11 +77,11 @@ class Tank():
 
     async def _up_state_changed(self, pin, alert):
         if alert:
-            self._tank_is_full()
+            self._on_full()
         else:
-            self._tank_get_drained()
+            self._on_draining()
 
-    def _tank_get_drained(self):
+    def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position
         :return:
@@ -92,7 +92,7 @@ class Tank():
         self.logger.info("Tank {} is being drained.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-    def _tank_is_full(self):
+    def _on_full(self):
         """
         internal function to register that the tank is filled
         :return:
@@ -108,11 +108,11 @@ class Tank():
 
     async def _low_position_changed(self, pin, alert):
         if alert:
-            self._tank_is_drained()
+            self._handle_drained()
         else:
-            self._tank_get_filled()
+            self._handle_filling()
 
-    def _tank_get_filled(self):
+    def _handle_filling(self):
         """
         internal function to register that the tank gets filled
         :return:
@@ -123,7 +123,7 @@ class Tank():
         self.logger.warning("Tank {} is being filled".format(self.name))
         self.mqtt.publish_message(mqttmsg)
 
-    def _tank_is_drained(self):
+    def _handle_drained(self):
         """
         internal function to register that the tank is drained
         :return:
@@ -136,3 +136,11 @@ class Tank():
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()
+
+    @property
+    def is_filled(self):
+        return self.state == self.FILLED
+
+    @property
+    def is_drained(self):
+        return self.state == self.DRAINED    

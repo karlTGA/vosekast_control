@@ -1,6 +1,6 @@
 # sending commands to Vosekast via MQTT
 
-## exemplary message with all required fields:
+## exemplary message (json) with all required fields:
 
 ```json
 {
@@ -27,12 +27,11 @@
         * command = drain_tank, prepare_to_fill
 * target = scale
     * target_id = scale
-        * command = open_connection, close_connection, start_measurement_thread*, stop_measurement_thread, get_stable_value, loop, read_value_from_scale*
+        * command = open_connection, close_connection, start_measurement_thread, stop_measurement_thread, get_stable_value, loop, read_value_from_scale
 * target = system
     * target_id = system
-        * command = shutdown, clean, prepare_measuring, ready_to_measure**
+        * command = shutdown*, clean, prepare_measuring, ready_to_measure*
 
-commands with (*) throw RuntimeError
-commands with (**) throw AttributeError
+commands with (*) do not work as of now
 
 if target, target_id or command do not match, a respective error message will be thrown.

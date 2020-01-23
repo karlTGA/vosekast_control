@@ -201,22 +201,26 @@ class Vosekast():
         is vosekast ready to measure
         :return: measuring ready
         """
-        base_tank_ready = self.base_tank.state == self.base_tank.FILLED
-        measuring_tank_ready = (
-            self.measuring_drain_valve == self.measuring_drain_valve.CLOSED
-            and self.measuring_tank.state != self.measuring_tank.FILLED
-        )
-        base_pump_running = self.pump_base_tank.state == self.pump_base_tank.RUNNING
 
-        # return base_tank_ready and measuring_tank_ready and base_pump_running
-        return True
+        base_tank_ready = self.base_tank.is_filled
+        measuring_tank_ready = (
+            self.measuring_drain_valve.is_closed
+            and not self.measuring_tank.is_filled
+        )
+        base_pump_running = self.pump_base_tank.is_running
+        
+        if base_tank_ready and measuring_tank_ready and base_pump_running:
+            self.logger.info("Ready to start measuring.")
+
+        return base_tank_ready and measuring_tank_ready and base_pump_running
+        # return True
 
     async def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
         self.logger.info("Measuring tank is empty.")
         self.clean()
-        self.logger.info("Vosekast is shutting down.")
+        self.logger.info("Shutting down.")
         await self.mqtt_client.disconnect()
 
     def clean(self):
@@ -245,8 +249,10 @@ class Vosekast():
                 if valve.name == target_id:
                     if command['command'] == 'close':
                         valve.close()
+                        return
                     if command['command'] == 'open':
                         valve.open()
+                        return
                     else:
                         self.logger.warning(
                             f'command {command["command"]} did not execute.')
@@ -286,6 +292,13 @@ class Vosekast():
                         return
                     if command['command'] == 'prepare_to_fill':
                         tank.prepare_to_fill()
+                        return
+                    if command['command'] == '_handle_drained':
+                        tank._handle_drained()
+                        return
+                    if command['command'] == '_handle_filling':
+                        tank._handle_filling()
+                        return
                     else:
                         self.logger.warning(
                             f'command {command["command"]} did not execute.')

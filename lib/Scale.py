@@ -39,8 +39,6 @@ class Scale:
         self.state = States.NONE
         self.mqtt = self.vosekast.mqtt_client
 
-        self.start_measurement_thread()
-
     def open_connection(self):
         if not self.emulate:
             ser = serial.Serial()
@@ -72,6 +70,10 @@ class Scale:
         self.logger.info("Stopped measuring with scale.")
 
     def start_measurement_thread(self):
+        if self.run or self.thread.is_alive():
+            self.logger.info("Thread already running.")
+            return
+
         self.run = True
         self.thread.start()
 
@@ -79,7 +81,7 @@ class Scale:
         self.run = False
 
     def read_value_from_scale(self):
-        if self.connection.is_open:
+        if self.connection is not None and self.connection.is_open:
             line = self.connection.readline()
             splitted_line = line.split()
 
@@ -88,6 +90,9 @@ class Scale:
             if len(splitted_line) == 3:
                 new_value = "".join(splitted_line[:2])
                 return new_value
+        else:
+            self.open_connection()
+            self.logger.info("Initialising connection to scale. Please retry.")
 
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
