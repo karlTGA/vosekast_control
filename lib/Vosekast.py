@@ -237,8 +237,9 @@ class Vosekast():
         self.scale.close_connection()
 
     async def run(self):
-        self.logger.debug("Vosekast started ok.")
         await self.mqtt_client.connect()
+        self.logger.debug("Vosekast started ok.")
+        self.scale.start_measurement_thread()
 
     # handle incoming mqtt commands
     async def handle_command(self, command):
@@ -321,10 +322,13 @@ class Vosekast():
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'get_stable_value':
                     self.scale.get_stable_value()
-                elif command['command'] == 'loop':
-                    self.scale.loop()
+                elif command['command'] == 'print_threads':
+                    self.scale.print_threads()
                 elif command['command'] == 'read_value_from_scale':
                     self.scale.read_value_from_scale()
+                elif command['command'] == 'toggle_publishing':
+                    self.scale.toggle_publishing()
+                    
                 else:
                     self.logger.warning(
                         f'command {command["command"]} did not execute.')

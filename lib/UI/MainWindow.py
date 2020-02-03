@@ -17,7 +17,7 @@ from lib.UI.Toolbar import Toolbar
 from lib.Vosekast import Vosekast
 import asyncio
 import platform
-from PyQt5.QtCore import QCoreApplication, QThreadPool
+#from PyQt5.QtCore import QCoreApplication, QThreadPool
 
 
 class MainWindow(QMainWindow):
