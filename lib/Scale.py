@@ -1,3 +1,5 @@
+from __future__ import division
+
 import serial
 from collections import deque
 from threading import Thread
@@ -11,6 +13,7 @@ from lib.utils.Msg import StatusMessage
 from lib.EnumStates import States
 
 from collections import deque
+from datetime import datetime
 
 
 class Scale:
@@ -35,15 +38,16 @@ class Scale:
         self.thread = Thread()
         self.emulate = emulate
         self.run = False
-        self.publish = False
+        #self.publish = False
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
         self.state = States.NONE
         self.mqtt = self.vosekast.mqtt_client
+        self.threads = []
+        self.scale_history = deque([], maxlen=100)
+        self.flow_history = deque([], maxlen=100)
 
-    threads = []
-    scale_history = deque()
 
     def open_connection(self):
         if not self.emulate:
@@ -66,38 +70,45 @@ class Scale:
         self.logger.info("Start measuring with scale.")
        
         while self.run:
-            if self.publish:
-                if self.emulate:
-                    self.add_new_value(10.0 + uniform(0.0, 0.2))
-                else:
-                    new_value = self.read_value_from_scale()
-                    if new_value is not None:
-                        self.add_new_value(new_value)
-                sleep(0.1)
+            
+            if self.emulate:
+                new_value = 10.0 + uniform(0.0, 0.2)
+                self.add_new_value(new_value)
+                self.timestamp = datetime.now()
+            else:
+                new_value = self.read_value_from_scale()
+                if new_value is not None:
+                    self.add_new_value(new_value)
+                    self.timestamp = datetime.now()
+            
+            #deque scale history
+            self.scale_history.appendleft(self.timestamp)
+            self.scale_history.appendleft(new_value)
+            
+            sleep(5)
 
         self.logger.info("Stopped measuring with scale.")
 
     def start_measurement_thread(self):
-        self.publish = True
+        #self.publish = True
         self.run = True
 
         if self.thread.is_alive():
-            self.logger.info("Thread already running, now publishing scale values via MQTT.")
+            self.logger.info("Already measuring.")
             return
         else:
             self.thread = Thread(target = self.loop)
             self.thread.start()
             self.threads.append(self.thread)
             #self.logger.info("Starting thread: " + self.thread.getName())
-
                     
+    # diagnostics
     def print_threads(self):
         print(self.threads)
-        print("Thread alive: " + str(self.thread.is_alive()))
+        #print("Thread alive: " + str(self.thread.is_alive()))
         print("self.run = " + str(self.run))
-        print("self.publish = " + str(self.publish))
         print(self.scale_history)
-        
+        print(self.flow_history)
        
     def stop_measurement_thread(self):
         self.run = False
@@ -105,14 +116,14 @@ class Scale:
         #self.logger.info("Exiting Main Thread, Thread alive: " + str(self.thread.is_alive()))
         self.threads.remove(self.thread)
 
-    def toggle_publishing(self):
-        if self.publish:
-            self.publish = False
-            self.logger.info("Still measuring, stopped publishing scale values via MQTT.")
-            return
+    # def toggle_publishing(self):
+    #     if self.publish:
+    #         self.publish = False
+    #         self.logger.info("Still measuring, stopped publishing scale values via MQTT.")
+    #         return
             
-        self.publish = True
-        self.logger.info("Publishing scale values via MQTT.")
+    #     self.publish = True
+    #     self.logger.info("Publishing scale values via MQTT.")
 
     def read_value_from_scale(self):
         if self.connection is not None and self.connection.is_open:
@@ -130,12 +141,37 @@ class Scale:
 
     def add_new_value(self, new_value):
         self.last_values.append(new_value)
+        
 
-        #Volumenstrom-Berechnung
-        self.scale_history.extend(new_value)
+        #calculate volume flow
+        if len(self.scale_history) > 2:
+            delta = self.scale_history[0] - self.scale_history[2]
+            delta_weight = abs(delta)
 
-        # publish new_value via mqtt
-        mqttmsg = StatusMessage("scale", new_value, unit="Kg")
+            duration = self.scale_history[1] - self.scale_history[3]
+            abs_duration = abs(duration)
+            delta_time = abs_duration.total_seconds()
+            
+            fraction = delta_weight / delta_time
+
+            # density of water at normal pressure:
+            # 10°C: 0,999702
+            # 15°C: 0,999103
+            # 20°C: 0,998207
+            
+            volume_flow = round(fraction / 0.999103, 10)
+            
+            self.flow_history.appendleft(volume_flow)
+            
+        # publish via mqtt
+        # new_value = weight measured by scale
+        # volume_flow = calculated volume flow 
+        try:
+            mqttmsg = StatusMessage("scale", new_value, "Kg", volume_flow, "L/s")
+        except:
+            mqttmsg = StatusMessage("scale", new_value, "Kg", None, None)
+            
+
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 

@@ -52,12 +52,14 @@ class LogMessage(Message):
 class StatusMessage(Message):
     type = 'status'
 
-    def __init__(self, sensor_id, value, unit):
+    def __init__(self, sensor_id, value1, unit1, value2, unit2):
         super().__init__()
 
         self.sensor_id = sensor_id
-        self.value = value
-        self.unit = unit
+        self.value1 = value1
+        self.unit1 = unit1
+        self.value2 = value2
+        self.unit2 = unit2
 
     @property
     def topic(self):
@@ -66,8 +68,10 @@ class StatusMessage(Message):
     def get_message_object(self):
         message_object = super().get_message_object()
         message_object['sensor_id'] = self.sensor_id
-        message_object['value'] = self.value
-        message_object['unit'] = self.unit
+        message_object['value1'] = self.value1
+        message_object['unit1'] = self.unit1
+        message_object['value2'] = self.value2
+        message_object['unit2'] = self.unit2
 
         return message_object
 
