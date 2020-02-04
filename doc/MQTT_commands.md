@@ -27,7 +27,7 @@
         * command = drain_tank, prepare_to_fill
 * target = scale
     * target_id = scale
-        * command = open_connection, close_connection, start_measurement_thread, stop_measurement_thread, get_stable_value, loop, read_value_from_scale, toggle_publishing(deprecated)
+        * command = open_connection, close_connection, start_measurement_thread, stop_measurement_thread, get_stable_value, read_value_from_scale, toggle_publishing(deprecated), print_dignostics
 * target = system
     * target_id = system
         * command = shutdown*, clean, prepare_measuring, ready_to_measure*

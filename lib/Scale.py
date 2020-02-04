@@ -45,7 +45,7 @@ class Scale:
         self.state = States.NONE
         self.mqtt = self.vosekast.mqtt_client
         self.threads = []
-        self.scale_history = deque([], maxlen=100)
+        self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
 
 
@@ -103,7 +103,7 @@ class Scale:
             #self.logger.info("Starting thread: " + self.thread.getName())
                     
     # diagnostics
-    def print_threads(self):
+    def print_diagnostics(self):
         print(self.threads)
         #print("Thread alive: " + str(self.thread.is_alive()))
         print("self.run = " + str(self.run))

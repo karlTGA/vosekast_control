@@ -322,12 +322,12 @@ class Vosekast():
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'get_stable_value':
                     self.scale.get_stable_value()
-                elif command['command'] == 'print_threads':
+                elif command['command'] == 'print_diagnostics':
                     self.scale.print_threads()
                 elif command['command'] == 'read_value_from_scale':
                     self.scale.read_value_from_scale()
-                elif command['command'] == 'toggle_publishing':
-                    self.scale.toggle_publishing()
+                # elif command['command'] == 'toggle_publishing':
+                #     self.scale.toggle_publishing()
                     
                 else:
                     self.logger.warning(
