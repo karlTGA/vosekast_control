@@ -30,7 +30,7 @@ class Pump():
         self.state = States.STOPPED
 
         # publish States.STOPPED.value via mqtt
-        mqttmsg = StatusMessage(self.name, States.STOPPED.value, unit="%")
+        mqttmsg = StatusMessage(self.name, States.STOPPED.value, "%", None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 
@@ -44,7 +44,7 @@ class Pump():
         self.state = States.RUNNING
 
         # publish States.RUNNING.value via mqtt
-        mqttmsg = StatusMessage(self.name, States.RUNNING.value, unit="%")
+        mqttmsg = StatusMessage(self.name, States.RUNNING.value, "%", None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 

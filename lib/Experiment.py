@@ -64,7 +64,7 @@ class Experiment():
         # self.init_figure_signal.emit()
 
         # publish via mqtt
-        mqttmsg = StatusMessage(self.name, "Calibration started.", unit=None)
+        mqttmsg = StatusMessage(self.name, "Calibration started.", None, None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
         self.timer.start(500)
@@ -104,7 +104,7 @@ class Experiment():
 
         # publish via mqtt
         mqttmsg = StatusMessage(self.name, str(
-            x, y, index, legend), unit="data point")
+            x, y, index, legend), "data point", None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 
@@ -112,7 +112,7 @@ class Experiment():
         # self.state_changed.emit(States(new_state).value)
 
         # publish via mqtt
-        mqttmsg = StatusMessage(self.name, States(new_state).value, unit=None)
+        mqttmsg = StatusMessage(self.name, States(new_state).value, None, None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 

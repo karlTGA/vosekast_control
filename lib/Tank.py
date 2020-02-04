@@ -66,13 +66,13 @@ class Tank():
         else:
             self.logger.debug(
                 "No drain valve on the tank {}".format(self.name))
-            mqttmsg = StatusMessage(self.name, 'Drain valve missing.', unit=None)
+            mqttmsg = StatusMessage(self.name, 'Drain valve missing.', None, None, None)
             self.mqtt.publish_message(mqttmsg)
             return
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
         mqttmsg = StatusMessage(
-            self.name, 'Ready to fill the tank.', unit=None)
+            self.name, 'Ready to fill the tank.', None, None, None)
         self.mqtt.publish_message(mqttmsg)
 
     async def _up_state_changed(self, pin, alert):
@@ -87,7 +87,7 @@ class Tank():
         :return:
         """
         self.state = self.BETWEEN
-        mqttmsg = StatusMessage(self.name, 'DRAINING', unit=None)
+        mqttmsg = StatusMessage(self.name, 'DRAINING', None, None, None)
 
         self.logger.info("Tank {} is being drained.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
@@ -98,7 +98,7 @@ class Tank():
         :return:
         """
         self.state = self.FILLED
-        mqttmsg = StatusMessage(self.name, 'FULL', unit=None)
+        mqttmsg = StatusMessage(self.name, 'FULL', None, None, None)
 
         self.logger.warning("Tank {} is full.".format(self.name))
         self.mqtt.publish_message(mqttmsg)
@@ -118,7 +118,7 @@ class Tank():
         :return:
         """
         self.state = self.BETWEEN
-        mqttmsg = StatusMessage(self.name, 'FILLING', unit=None)
+        mqttmsg = StatusMessage(self.name, 'FILLING', None, None, None)
 
         self.logger.warning("Tank {} is being filled".format(self.name))
         self.mqtt.publish_message(mqttmsg)
@@ -129,7 +129,7 @@ class Tank():
         :return:
         """
         self.state = self.DRAINED
-        mqttmsg = StatusMessage(self.name, 'DRAINED', unit=None)
+        mqttmsg = StatusMessage(self.name, 'DRAINED', None, None, None)
 
         self.logger.warning("Tank {} is drained".format(self.name))
         self.mqtt.publish_message(mqttmsg)

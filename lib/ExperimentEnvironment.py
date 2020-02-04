@@ -71,7 +71,7 @@ class ExperimentEnvironment():
         # self.new_time.emit(0)
 
         # publish via mqtt
-        mqttmsg = StatusMessage(self.name, self.new_time, unit=None)
+        mqttmsg = StatusMessage(self.name, self.new_time, None, None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
 
