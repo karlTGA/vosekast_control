@@ -1,4 +1,4 @@
-from __future__ import division
+#from __future__ import division
 
 import serial
 from collections import deque
@@ -152,14 +152,15 @@ class Scale:
             abs_duration = abs(duration)
             delta_time = abs_duration.total_seconds()
             
-            fraction = delta_weight / delta_time
+            weight_per_time = delta_weight / delta_time
 
             # density of water at normal pressure:
-            # 10°C: 0,999702
-            # 15°C: 0,999103
-            # 20°C: 0,998207
+            # 10°C: 0.999702
+            # 15°C: 0.999103
+            # 20°C: 0.998207
             
-            volume_flow = round(fraction / 0.999103, 10)
+            # weight_per_time divided by density gives volume flow
+            volume_flow = round(weight_per_time / 0.999103, 10)
             
             self.flow_history.appendleft(volume_flow)
             

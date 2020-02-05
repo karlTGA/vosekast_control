@@ -24,25 +24,6 @@ DEBUG = True
 
 
 async def main():
-    # set mqtt host, token, message, topic
-    # host = 'localhost'
-    # token = None
-    # message = "vosekast start"
-    # topic = "system"
-
-    # mqtt client
-    # controller = MQTTController(host)
-
-    # await controller.connect()
-    # await asyncio.sleep(0.1)
-
-    # # mqtt server credentials
-    # if token != None:
-    #     controller.set_credentials(username, password)
-
-    # # mqtt publish message
-    # controller.publish(topic, message)
-    # await asyncio.sleep(0.1)
 
     # process state
     app_control = AppControl()

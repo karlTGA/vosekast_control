@@ -49,10 +49,12 @@ class Vosekast():
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
+        
+        # set mqtt client, host
         self.mqtt_client = MQTTController('localhost')
         self.mqtt_client.on_command = self.handle_command
         add_mqtt_logger_handler(self.mqtt_client)
-        # new
+        
 
         try:
             self._gpio_controller = gpio_controller
@@ -323,7 +325,7 @@ class Vosekast():
                 elif command['command'] == 'get_stable_value':
                     self.scale.get_stable_value()
                 elif command['command'] == 'print_diagnostics':
-                    self.scale.print_threads()
+                    self.scale.print_diagnostics()
                 elif command['command'] == 'read_value_from_scale':
                     self.scale.read_value_from_scale()
                 # elif command['command'] == 'toggle_publishing':
