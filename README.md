@@ -2,7 +2,9 @@
 
 ## How to run
 
-You need Python 3.7, Pip and Pipenv on your System.
+You need Python 3.7, Pip and Pipenv (python -m pip install pipenv) on your System.
+
+## Type:
 
 ```
 pipenv install
@@ -12,7 +14,7 @@ or
 ```
 pipenv run python main.py
 ```
-After starting main.py, the scale/ start_measurement_thread needs to be started. 
+After starting main.py, measuring will begin. 
 
 ## Documentation
 
