@@ -9,7 +9,7 @@ import time
 
 #import numpy as np
 #from numpy import arange, sin, cos, pi, log
-import time
+
 from lib.EnumStates import States
 from lib.Experiment import Experiment
 from lib.utils.Msg import StatusMessage
@@ -17,10 +17,10 @@ from lib.utils.Msg import StatusMessage
 
 class ExperimentEnvironment():
 
-    # signals
-    state_changed = pyqtSignal(int, name="ExpEnvStateChanged")
-    # send_data_point = pyqtSignal(float, float, name="point")
-    new_time = pyqtSignal(int, name="time_exp_env")
+    ## signals
+    #state_changed = pyqtSignal(int, name="ExpEnvStateChanged")
+    ## send_data_point = pyqtSignal(float, float, name="point")
+    #new_time = pyqtSignal(int, name="time_exp_env")
 
     def __init__(
         self,

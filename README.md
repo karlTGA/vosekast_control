@@ -4,7 +4,7 @@
 
 You need Python 3.7, Pip and Pipenv (python -m pip install pipenv) on your System.
 
-## Type:
+### Type:
 
 ```
 pipenv install

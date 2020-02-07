@@ -34,29 +34,29 @@ class Experiment():
         self.index = index
         self.vosekast = vosekast
         self.name = name
-        self.screen = self.ExpEnv._exp_env_tab.screen
+        #self.screen = self.ExpEnv._exp_env_tab.screen
         self.state = default_state
 
         self.mqtt = self.vosekast.mqtt_client
 
-        self.timer = QTimer()
-        self.pause_timer = QTimer()
-        self.pause_timer.timeout.connect(self.continue_time)
-        self.timer.timeout.connect(self.execute_experiment)
-        self.time_count = 0
+        #self.timer = QTimer()
+        #self.pause_timer = QTimer()
+        #self.pause_timer.timeout.connect(self.continue_time)
+        #self.timer.timeout.connect(self.execute_experiment)
+        #self.time_count = 0
 
-        self.send_data_point.connect(self.screen.get_data_point)
-        self.state_changed.connect(
-            self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change
-        )
-        self.state_changed.connect(
-            self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change
-        )
-        self.init_figure_signal.connect(self.screen.init_figure_slot)
+        #self.send_data_point.connect(self.screen.get_data_point)
+        #self.state_changed.connect(
+        #    self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[0].state_change
+        #)
+        #self.state_changed.connect(
+        #    self.ExpEnv._main_window.tabs.tabProgramms.exp_env_buttons[1].state_change
+        #)
+        #self.init_figure_signal.connect(self.screen.init_figure_slot)
 
     def continue_experiment(self):
-        self.timer.start(500)
-        self.pause_timer.stop()
+        #self.timer.start(500)
+        #self.pause_timer.stop()
         self.state = States.RUNNING
         self.change_state(self.state)
 
@@ -67,37 +67,37 @@ class Experiment():
         mqttmsg = StatusMessage(self.name, "Calibration started.", None, None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
-        self.timer.start(500)
+        #self.timer.start(500)
         self.state = States.RUNNING
         self.change_state(self.state)
 
-    def execute_experiment(self):
-        old = self.time_count
-        self.time_count += 0.5
-        for time_toggle in self.course_pump_base:
-            if old < time_toggle <= self.time_count:
-                self.ExpEnv.vosekast.pump_base_tank.toggle()
+    #def execute_experiment(self):
+        #old = self.time_count
+        #self.time_count += 0.5
+        #for time_toggle in self.course_pump_base:
+        #    if old < time_toggle <= self.time_count:
+        #        self.ExpEnv.vosekast.pump_base_tank.toggle()
 
-        for time_toggle in self.course_pump_measuring:
-            if old < time_toggle <= self.time_count:
-                self.ExpEnv.vosekast.pump_measuring_tank.toggle()
+        #for time_toggle in self.course_pump_measuring:
+        #    if old < time_toggle <= self.time_count:
+        #        self.ExpEnv.vosekast.pump_measuring_tank.toggle()
 
-        t = self.time_count
-        store = self.ExpEnv.vosekast.VosekastStore
+        #t = self.time_count
+        #store = self.ExpEnv.vosekast.VosekastStore
 
-        states = store.get_state()
-        for a in states:
-            self.send_new_data_point(t, states[a]["State"], 0, a + " State")
-        self.send_new_data_point(t, states["Scale"]["Value"], 1, "Scale Value")
+        #states = store.get_state()
+        #for a in states:
+        #    self.send_new_data_point(t, states[a]["State"], 0, a + " State")
+        #self.send_new_data_point(t, states["Scale"]["Value"], 1, "Scale Value")
 
     def pause_experiment(self):
-        self.timer.stop()
-        self.pause_timer.start(500)
+        #self.timer.stop()
+        #self.pause_timer.start(500)
         self.state = States.PAUSE
         self.change_state(self.state)
 
-    def continue_time(self):
-        self.time_count += 0.5
+    #def continue_time(self):
+        #self.time_count += 0.5
 
     def send_new_data_point(self, x, y, index, legend):
         # self.send_data_point.emit(x, y, index, legend)
