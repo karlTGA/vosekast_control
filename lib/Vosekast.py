@@ -3,6 +3,7 @@ from lib.Tank import Tank
 from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
 from lib.Scale import Scale
+from lib.TestSequence import TestSequence
 import logging
 import asyncio
 from lib.Log import LOGGER, add_mqtt_logger_handler
@@ -166,6 +167,9 @@ class Vosekast():
             # scale
             self.scale = Scale(self, emulate=self.debug)
             self.scale.open_connection()
+
+            #testsequence
+            self.testsequence = TestSequence()
 
             # experiment_environment
             # expEnv0 = ExperimentEnvironment(
@@ -351,6 +355,13 @@ class Vosekast():
                     self.prepare_measuring()
                 elif command['command'] == 'ready_to_measure':
                     self.ready_to_measure()
+                elif command['command'] == 'test_diagnostics':
+                    self.testsequence.diagnostics()
+                elif command['command'] == 'start_sequence':
+                    self.testsequence.start_sequence()
+                elif command['command'] == 'stop_sequence':
+                    self.testsequence.stop_sequence()
+
                 else:
                     self.logger.warning(
                         f'command {command["command"]} did not execute.')

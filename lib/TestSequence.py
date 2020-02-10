@@ -20,9 +20,9 @@ class TestSequence():
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
         self.state = default_state
-        self.valves = vosekast.valve
-        self.tank = vosekast.tank
-        self.scale = vosekast.scale
+        self.valves = self.vosekast.valve
+        self.tank = self.vosekast.tank
+        self.scale = self.vosekast.scale
         
 
         self.mqtt = self.vosekast.mqtt_client
