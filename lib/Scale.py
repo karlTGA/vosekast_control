@@ -138,11 +138,10 @@ class Scale:
             self.logger.info("Initialising connection to scale. Please retry.")
 
     def add_new_value(self, new_value):
-        self.last_values.append(new_value)
-        
 
         #calculate volume flow
         if len(self.scale_history) > 2:
+            #dictionary: value, timestamp
             delta = self.scale_history[0] - self.scale_history[2]
             delta_weight = abs(delta)
 

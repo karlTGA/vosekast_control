@@ -4,6 +4,8 @@ import asyncio
 from lib.utils.Msg import StatusMessage
 from datetime import datetime
 
+class TankFillingTimeout(Exception):
+    pass
 
 class Tank():
     # tank states
@@ -98,7 +100,7 @@ class Tank():
             if delta_time_filling >= 6:
                 self.logger.error(
                 "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
-                break
+                raise TankFillingTimeout("Tank Filling Timeout.")
 
             print(str(delta_time_filling) + 's < time allotted (6s)')
             await asyncio.sleep(1)

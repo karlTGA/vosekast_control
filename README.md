@@ -14,6 +14,12 @@ or
 ```
 pipenv run python main.py
 ```
+### Emulate:
+
+To run on linux, type:
+```
+EMULATE=True python main.py 
+```
 After starting main.py, measuring will begin. 
 
 ## Documentation

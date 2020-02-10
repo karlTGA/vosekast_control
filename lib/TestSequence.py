@@ -35,43 +35,64 @@ class TestSequence():
         self.logger.info(self.state)
 
     async def start_sequence(self):
-        # check if already running
-        if not self.scale.stop_measurement_thread() and not self.scale.close_connection():
-            self.scale.start_measurement_thread()
-            self.scale.open_connection()
+        try:
+            # check if already running
+            if not self.scale.stop_measurement_thread() and not self.scale.close_connection():
+                self.scale.start_measurement_thread()
+                self.scale.open_connection()
 
-        self.logger.info("Initialising sequence.")
+            self.logger.info("Initialising sequence.")
 
-        # change state
-        self.state = States.RUNNING
-        self.change_state(self.state)
+            # change state
+            self.state = States.RUNNING
+            self.change_state(self.state)
 
-        # prepare measuring
-        self.vosekast.prepare_measuring()
-        # await stock_tank full
-        await self.vosekast.stock_tank.fill()
-        # check
-        self.vosekast.ready_to_measure()
-        # create csv file
-        self.vosekast.create_file()
-        # get t0 timestamp
-        self.timestamp = datetime.now()
+            # prepare measuring
+            self.vosekast.prepare_measuring()
+            # await stock_tank full
+            await self.vosekast.stock_tank.fill()
+            # check
+            self.vosekast.ready_to_measure()
+            # create csv file
+            self.vosekast.create_file()
+            # get t0 timestamp
+            #self.timestamp = datetime.now()
 
-        # loop
-        while not self.vosekast.measuring_tank.is_filled:
-            #write values to csv file
-            with open('sequence_values.csv', 'w', newline='') as file:
-                writer = csv.writer(file, delimiter=',',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow([datetime.now(), self.scale.read_value_from_scale()])
-            #dictionary als Datenspeicher
-            await asyncio.sleep(1)
+            # loop
+            while not self.vosekast.measuring_tank.is_filled:
+                #write values to csv file
+                with open('sequence_values.csv', 'a', newline='') as file:
+                    writer = csv.writer(file, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
+                #dictionary als Datenspeicher
+                await asyncio.sleep(1)
+            
+            #jsondumps
+
+            #interrupt if measuring_tank full
+            if self.vosekast.measuring_tank.is_filled:
+                self.stop_sequence()
         
-        #jsondumps
+        #TankFillingTimeout
+        except:
+            self.logger.error("TankFillingTimeout, aborting test sequence.")
+            
+            # testing>
+            print('continuing for testing purposes')
+            self.vosekast.ready_to_measure()
+            self.vosekast.create_file()
 
-        #interrupt if measuring_tank full
-        if self.vosekast.measuring_tank.is_filled:
-            self.stop_sequence()
+            while not self.vosekast.measuring_tank.is_filled:
+                with open('sequence_values.csv', 'a', newline='') as file:
+                    writer = csv.writer(file, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
+                    print('added value to csv')
+                await asyncio.sleep(1)
+            # <testing
+
+        
 
     def stop_sequence(self):
         #scale_value_stop = self.scale.read_value_from_scale()

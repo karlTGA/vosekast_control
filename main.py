@@ -4,6 +4,7 @@ import sys
 import platform
 import time
 import subprocess
+import os
 
 
 #from lib.ExperimentEnvironment import ExperimentEnvironment
@@ -21,7 +22,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # add logger
 logger = setup_custom_logger()
-DEBUG = True
+EMULATE = os.environ.get('EMULATE', 'False')
 
 
 async def main():
@@ -30,7 +31,7 @@ async def main():
     app_control = AppControl()
 
     # add gui
-    vosekast = Vosekast(GPIO, DEBUG)
+    vosekast = Vosekast(GPIO, EMULATE == 'True')
     await vosekast.run()
 
     # route log messages to status box of main window
