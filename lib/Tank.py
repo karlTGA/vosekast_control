@@ -2,6 +2,7 @@ import logging
 from lib.Log import LOGGER
 import asyncio
 from lib.utils.Msg import StatusMessage
+from datetime import datetime
 
 
 class Tank():
@@ -80,6 +81,29 @@ class Tank():
             self._on_full()
         else:
             self._on_draining()
+
+    async def fill(self):
+        #get time
+        time_filling_t0 = datetime.now()
+        #close valves, start pump
+        self.vosekast.prepare_measuring()
+
+        #check if stock_tank full
+        while not self.vosekast.stock_tank.is_filled:
+            time_filling_t1 = datetime.now()
+            time_filling_passed = time_filling_t1 - time_filling_t0
+            delta_time_filling = time_filling_passed.total_seconds()
+            
+            #if filling takes longer than 600s
+            if delta_time_filling >= 6:
+                self.logger.error(
+                "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
+                break
+
+            print(str(delta_time_filling) + 's < time allotted (6s)')
+            await asyncio.sleep(1)
+                       
+        return
 
     def _on_draining(self):
         """

@@ -6,6 +6,7 @@ from lib.Scale import Scale
 from lib.TestSequence import TestSequence
 import logging
 import asyncio
+import csv
 from lib.Log import LOGGER, add_mqtt_logger_handler
 #from lib.ExperimentEnvironment import ExperimentEnvironment
 from lib.Store import VosekastStore
@@ -50,12 +51,11 @@ class Vosekast():
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
-        
+
         # set mqtt client, host
         self.mqtt_client = MQTTController('localhost')
         self.mqtt_client.on_command = self.handle_command
         add_mqtt_logger_handler(self.mqtt_client)
-        
 
         try:
             self._gpio_controller = gpio_controller
@@ -168,8 +168,8 @@ class Vosekast():
             self.scale = Scale(self, emulate=self.debug)
             self.scale.open_connection()
 
-            #testsequence
-            self.testsequence = TestSequence()
+            # testsequence
+            self.testsequence = TestSequence(self)
 
             # experiment_environment
             # expEnv0 = ExperimentEnvironment(
@@ -214,13 +214,20 @@ class Vosekast():
             and not self.measuring_tank.is_filled
         )
         base_pump_running = self.pump_base_tank.is_running
-        
+
         if base_tank_ready and measuring_tank_ready and base_pump_running:
             self.logger.info("Ready to start measuring.")
 
         return base_tank_ready and measuring_tank_ready and base_pump_running
         # return True
 
+    def create_file(self):
+        # create file, write header to csv file
+        with open('sequence_values.csv', 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(["timestamp", "scale value"])
+        
     async def shutdown(self):
         # drain the measuring tank
         self.measuring_tank.drain_tank()
@@ -334,7 +341,7 @@ class Vosekast():
                     self.scale.read_value_from_scale()
                 # elif command['command'] == 'toggle_publishing':
                 #     self.scale.toggle_publishing()
-                    
+
                 else:
                     self.logger.warning(
                         f'command {command["command"]} did not execute.')
@@ -358,7 +365,7 @@ class Vosekast():
                 elif command['command'] == 'test_diagnostics':
                     self.testsequence.diagnostics()
                 elif command['command'] == 'start_sequence':
-                    self.testsequence.start_sequence()
+                    await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
                     self.testsequence.stop_sequence()
 

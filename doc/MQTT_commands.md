@@ -30,7 +30,7 @@
         * command = open_connection, close_connection, start_measurement_thread, stop_measurement_thread, get_stable_value, read_value_from_scale, toggle_publishing*(deprecated), print_diagnostics
 * target = system
     * target_id = system
-        * command = shutdown*, clean, prepare_measuring, ready_to_measure, test_diagnostics
+        * command = shutdown*, clean, prepare_measuring, ready_to_measure, test_diagnostics, start_sequence*, stop_sequence*
 
 commands with (*) do not work as of now
 

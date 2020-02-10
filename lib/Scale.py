@@ -1,5 +1,3 @@
-#from __future__ import division
-
 import serial
 from collections import deque
 from threading import Thread

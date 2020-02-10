@@ -3,6 +3,7 @@
 .vscode
 *.iml
 *.pyc
+*.csv
 out
 gen
 __pycache__
