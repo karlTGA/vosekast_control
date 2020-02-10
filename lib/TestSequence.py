@@ -47,17 +47,13 @@ class TestSequence():
             self.state = States.RUNNING
             self.change_state(self.state)
 
-            # prepare measuring
-            self.vosekast.prepare_measuring()
             # await stock_tank full
             await self.vosekast.stock_tank.fill()
             # check
             self.vosekast.ready_to_measure()
             # create csv file
             self.vosekast.create_file()
-            # get t0 timestamp
-            #self.timestamp = datetime.now()
-
+            
             # loop
             while not self.vosekast.measuring_tank.is_filled:
                 #write values to csv file

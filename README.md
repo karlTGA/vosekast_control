@@ -16,9 +16,13 @@ pipenv run python main.py
 ```
 ### Emulate:
 
-To run on linux, type:
+To run without scale connection, type:
 ```
 EMULATE=True python main.py 
+```
+or
+```
+EMULATE=True pipenv run python main.py 
 ```
 After starting main.py, measuring will begin. 
 
