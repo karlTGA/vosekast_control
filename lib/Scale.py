@@ -58,11 +58,15 @@ class Scale:
             self.connection = ser
             self.connection.open()
             self.logger.info("Opening connection to scale.")
+        else:
+            self.logger.info("Emulating open_connection scale.")
 
     def close_connection(self):
         if not self.emulate:
             self.connection.close()
             self.logger.info("Closing connection to scale.")
+        else:
+            self.logger.info("Emulating close_connection scale.")
 
     def loop(self):
         self.logger.info("Start measuring with scale.")
@@ -103,6 +107,8 @@ class Scale:
     # diagnostics
     def print_diagnostics(self):
         print(self.threads)
+        print(self.connection)
+        print(self.connection.is_open)
         #print("Thread alive: " + str(self.thread.is_alive()))
         print("self.run = " + str(self.run))
         print(self.scale_history)
@@ -124,7 +130,9 @@ class Scale:
     #     self.logger.info("Publishing scale values via MQTT.")
 
     def read_value_from_scale(self):
-        if self.connection is not None and self.connection.is_open:
+        #if self.connection is not None and self.connection.is_open:
+        if self.connection is not None:
+            print(self.connection.is_open)
             line = self.connection.readline()
             splitted_line = line.split()
 
@@ -134,6 +142,8 @@ class Scale:
                 new_value = "".join(splitted_line[:2])
                 return new_value
         else:
+            print(self.connection.is_open)
+            print(self.connection)
             self.open_connection()
             self.logger.info("Initialising connection to scale. Please retry.")
 

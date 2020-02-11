@@ -22,6 +22,8 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # add logger
 logger = setup_custom_logger()
+
+#emulate default = False
 EMULATE = os.environ.get('EMULATE', 'False')
 
 

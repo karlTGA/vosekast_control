@@ -5,7 +5,6 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
-black = "*"
 rope = "*"
 autopep8 = "*"
 
@@ -16,6 +15,8 @@ raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspb
 pydux = "*"
 uvloop = "*"
 gmqtt = "*"
+"RPi.GPIO" = {version = "*", sys_platform/os_name/platform_machine = "!= 'windows'"}
+GPIO = {version = "*", sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.7"
