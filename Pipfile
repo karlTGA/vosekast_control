@@ -11,12 +11,11 @@ autopep8 = "*"
 [packages]
 pyserial = "*"
 SIP = "*"
-raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspberry-gpio-emulator"}
+raspberry-gpio-emulator = {editable = true,git = "https://github.com/nosix/raspberry-gpio-emulator", sys_platform = "!= 'linux2'"}
 pydux = "*"
 uvloop = "*"
 gmqtt = "*"
-"RPi.GPIO" = {version = "*", sys_platform/os_name/platform_machine = "!= 'windows'"}
-GPIO = {version = "*", sys_platform = "== 'win32'"}
+"RPi.GPIO" = {version = "*", sys_platform = "== 'linux2'"}
 
 [requires]
 python_version = "3.7"
@@ -26,3 +25,7 @@ allow_prereleases = true
 
 [scripts]
 start = "python main.py"
+
+[packages.raspberry-gpio-emulator]
+editable = true
+git = "https://github.com/nosix/raspberry-gpio-emulator"
