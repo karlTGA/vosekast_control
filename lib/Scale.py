@@ -80,6 +80,7 @@ class Scale:
                 self.timestamp = datetime.now()
             else:
                 new_value = self.read_value_from_scale()
+                print(new_value)
                 if new_value is not None:
                     print("reached loop, new value not None")
                     self.add_new_value(new_value)
