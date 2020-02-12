@@ -1,7 +1,7 @@
 # program runs fine when emulated, but otherwise running python3 main.py will raise:
 
+## Pi4:
 ´´´
-
 
 2020-02-12 09:41:15,170 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
@@ -31,4 +31,54 @@ Traceback (most recent call last):
     self.on_subscribe(self, mid, granted_qoses, properties)
 TypeError: on_subscribe() takes 4 positional arguments but 5 were given
 
+´´´
+## Balenafin:
+´´´
+
+2020-02-12 12:47:49,485 - INFO - Scale - Opening connection to scale.
+[CONNACK] 0x1
+2020-02-12 12:47:49,501 - DEBUG - Vosekast - Vosekast started ok.
+Disconnected
+2020-02-12 12:47:49,503 - INFO - Scale - Start measuring with scale.
+True
+[EXC OCCURED] in reconnect future None
+2020-02-12 12:47:49,506 - INFO - Scale - Measured b'\xb7 kg \r\n'
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/threading.py", line 917, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.7/threading.py", line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/pi/vosekast_control/lib/Scale.py", line 87, in loop
+    self.scale_history.appendleft(self.timestamp)
+AttributeError: 'Scale' object has no attribute 'timestamp'
+
+[EXC OCCURED] in reconnect future None
+Connected to host: "localhost"
+Vosekast listening on: "vosekast/commands"
+
+´´´
+
+´´´
+2020-02-12 12:52:24,973 - INFO - Scale - Opening connection to scale.
+[CONNACK] 0x1
+2020-02-12 12:52:24,989 - DEBUG - Vosekast - Vosekast started ok.
+2020-02-12 12:52:24,990 - INFO - Scale - Start measuring with scale.
+True
+Disconnected
+[EXC OCCURED] in reconnect future None
+2020-02-12 12:52:25,102 - INFO - Scale - Measured b'+    0.007 kg \r\n'
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/threading.py", line 917, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.7/threading.py", line 865, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/pi/vosekast_control/lib/Scale.py", line 81, in loop
+    new_value = self.read_value_from_scale()
+  File "/home/pi/vosekast_control/lib/Scale.py", line 142, in read_value_from_scale
+    new_value = "".join(splitted_line[:2])
+TypeError: sequence item 0: expected str instance, bytes found
+
+[EXC OCCURED] in reconnect future None
 ´´´
