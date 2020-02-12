@@ -1,7 +1,7 @@
 # program runs fine when emulated, but otherwise running python3 main.py will raise:
 
 ## Pi4:
-´´´
+```
 
 2020-02-12 09:41:15,170 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
@@ -31,9 +31,9 @@ Traceback (most recent call last):
     self.on_subscribe(self, mid, granted_qoses, properties)
 TypeError: on_subscribe() takes 4 positional arguments but 5 were given
 
-´´´
+```
 ## Balenafin:
-´´´
+```
 
 2020-02-12 12:47:49,485 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
@@ -57,9 +57,9 @@ AttributeError: 'Scale' object has no attribute 'timestamp'
 Connected to host: "localhost"
 Vosekast listening on: "vosekast/commands"
 
-´´´
+```
 
-´´´
+```
 2020-02-12 12:52:24,973 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
 2020-02-12 12:52:24,989 - DEBUG - Vosekast - Vosekast started ok.
@@ -81,4 +81,4 @@ Traceback (most recent call last):
 TypeError: sequence item 0: expected str instance, bytes found
 
 [EXC OCCURED] in reconnect future None
-´´´
+```
