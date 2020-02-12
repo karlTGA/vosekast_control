@@ -4,7 +4,7 @@ For some reason, setting markers in Pipfile does not work or raise errors (Pi). 
 
 ## Pi:
 
-```
+´´´python
 
 [[source]]
 name = "pypi"
@@ -42,7 +42,7 @@ git = "https://github.com/nosix/raspberry-gpio-emulator"
 
 ## other:
 
-```
+´´´python
 [[source]]
 name = "pypi"
 url = "https://pypi.org/simple"
@@ -77,7 +77,8 @@ git = "https://github.com/nosix/raspberry-gpio-emulator"
 ```
 
 # Pi backup:
-```
+
+´´´python
 [[source]]
 name = "pypi"
 url = "https://pypi.org/simple"
@@ -110,8 +111,10 @@ editable = true
 git = "https://github.com/nosix/raspberry-gpio-emulator"
 
 ```
+
 # Balenafin backup:
-´´´
+
+´´´python
 [[source]]
 name = "pypi"
 url = "https://pypi.org/simple"

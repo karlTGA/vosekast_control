@@ -36,6 +36,7 @@ class Scale:
         self.thread = Thread()
         self.emulate = emulate
         self.run = False
+        self.timestamp = datetime.now()
         #self.publish = False
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
@@ -139,15 +140,16 @@ class Scale:
             self.logger.info("Measured {}".format(line))
 
             if len(splitted_line) == 3:
-                new_value = "".join(splitted_line[:2])
-                return new_value
+                str_new_value = str(new_value)
+                str_new_value = "".join(splitted_line[:2])
+                return str_new_value
         else:
             print(self.connection.is_open)
             print(self.connection)
             self.open_connection()
             self.logger.info("Initialising connection to scale. Please retry.")
 
-    def add_new_value(self, new_value):
+    def add_new_value(self, str_new_value):
 
         #calculate volume flow
         if len(self.scale_history) > 2:
