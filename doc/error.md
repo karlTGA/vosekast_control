@@ -1,7 +1,7 @@
 # program runs fine when emulated, but otherwise running python3 main.py will raise:
 
 ## Pi4:
-´´´python
+´´´
 
 2020-02-12 09:41:15,170 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
@@ -33,7 +33,7 @@ TypeError: on_subscribe() takes 4 positional arguments but 5 were given
 
 ´´´
 ## Balenafin:
-´´´python
+´´´
 
 2020-02-12 12:47:49,485 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
@@ -59,7 +59,7 @@ Vosekast listening on: "vosekast/commands"
 
 ´´´
 
-´´´python
+´´´
 2020-02-12 12:52:24,973 - INFO - Scale - Opening connection to scale.
 [CONNACK] 0x1
 2020-02-12 12:52:24,989 - DEBUG - Vosekast - Vosekast started ok.
