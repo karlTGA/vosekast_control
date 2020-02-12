@@ -19,7 +19,7 @@ class Scale:
     def __init__(
         self,
         vosekast,
-        port="/dev/ttyS0",
+        port="/dev/serial0",
         baudrate=9600,
         bytesize=serial.SEVENBITS,
         timeout=1,
