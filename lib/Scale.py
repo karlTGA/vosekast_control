@@ -83,14 +83,14 @@ class Scale:
                 
                 if new_value is not None:
                     # print("reached loop, new value not None")
-                    self.add_new_value(new_value)
+                    self.add_new_value(self.read_value_from_scale())
                     self.timestamp = datetime.now()
                 else:
                     print("reached loop with new value = None")
             
             #deque scale history
             self.scale_history.appendleft(self.timestamp)
-            self.scale_history.appendleft(new_value)
+            self.scale_history.appendleft(self.read_value_from_scale())
             
             sleep(5)
             
