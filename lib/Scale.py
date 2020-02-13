@@ -61,6 +61,7 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
+            self.connection.is_open = True
 
     def close_connection(self):
         if not self.emulate:
@@ -83,14 +84,14 @@ class Scale:
                 
                 if new_value is not None:
                     # print("reached loop, new value not None")
-                    self.add_new_value(self.read_value_from_scale())
+                    self.add_new_value(new_value)
                     self.timestamp = datetime.now()
                 else:
                     print("reached loop with new value = None")
             
             #deque scale history
             self.scale_history.appendleft(self.timestamp)
-            self.scale_history.appendleft(self.read_value_from_scale())
+            self.scale_history.appendleft(new_value)
             
             sleep(5)
             
