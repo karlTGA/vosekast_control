@@ -148,7 +148,8 @@ class Scale:
             
             #print(len(splitted_line))
             if len(splitted_line) == 3:
-                splitted_line_formatted = "".join(splitted_line[:2])
+                splitted_line_formatted = splitted_line[:2]
+                #splitted_line_formatted = "".join(splitted_line[:2])
                 print("splitted_line_formatted: " + str(splitted_line_formatted))
                 new_value = str(splitted_line_formatted)
                 print("new value, len == 3: " + str(new_value))
