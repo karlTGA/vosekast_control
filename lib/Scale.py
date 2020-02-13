@@ -140,19 +140,18 @@ class Scale:
             line = self.connection.readline()
             print("line: " + str(line))
             splitted_line = line.split()
-            print("splitted_line: " + str(splitted_line))
-            #del splitted_line[0]
-            #print("splitted_line formatted: " + str(splitted_line))
-            #print("splitted_line_formatted: " + splitted_line_formatted)
+            print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
+
             self.logger.info("Measured {}".format(line))
             
-            #print(len(splitted_line))
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
                 #splitted_line_formatted = "".join(splitted_line[:2])
-                print("splitted_line_formatted: " + str(splitted_line_formatted))
-                print(splitted_line[1])
-                new_value = str(splitted_line_formatted)
+                print("splitted_line_formatted: " + str(splitted_line_formatted)) #splitted_line_formatted: b'0.019'
+                #remove b''
+                #
+                #new_value = str(splitted_line_formatted)
+                new_value = int(splitted_line_formatted)
                 print("new value, len == 3: " + str(new_value))
                 return new_value
                 
