@@ -61,7 +61,6 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
-            self.connection.is_open = True
 
     def close_connection(self):
         if not self.emulate:
@@ -136,7 +135,8 @@ class Scale:
     #     self.logger.info("Publishing scale values via MQTT.")
 
     def read_value_from_scale(self):
-        if self.connection is not None and self.connection.is_open:
+        #if self.connection is not None and self.connection.is_open:
+        if self.connection is not None:
 
             line = self.connection.readline()
             # print("line: " + str(line))
