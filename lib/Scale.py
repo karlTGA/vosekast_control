@@ -80,13 +80,13 @@ class Scale:
                 self.timestamp = datetime.now()
             else:
                 new_value = self.read_value_from_scale()
-                print(new_value)
+                
                 if new_value is not None:
                     print("reached loop, new value not None")
                     self.add_new_value(new_value)
                     self.timestamp = datetime.now()
                 else:
-                    print("reached loop, new value = None")
+                    print("reached loop with new value = None")
             
             #deque scale history
             self.scale_history.appendleft(self.timestamp)
@@ -136,16 +136,17 @@ class Scale:
 
     def read_value_from_scale(self):
         if self.connection is not None and self.connection.is_open:
-        #if self.connection is not None:
+
             line = self.connection.readline()
             splitted_line = str(line.split())
-            print(splitted_line)
-            print(line)
+            print("splitted_line: " + splitted_line)
+            print("line: " + str(line))
             self.logger.info("Measured {}".format(line))
 
             if len(splitted_line) == 3:
                 new_value = "".join(splitted_line[:2])
                 return new_value
+                print("new value, len == 3: " + str(new_value))
         else:
             print(self.connection.is_open)
             print(self.connection)

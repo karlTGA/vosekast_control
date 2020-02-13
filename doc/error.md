@@ -82,3 +82,23 @@ TypeError: sequence item 0: expected str instance, bytes found
 
 [EXC OCCURED] in reconnect future None
 ```
+
+```
+
+2020-02-13 08:31:57,780 - INFO - Scale - Opening connection to scale.
+[CONNACK] 0x1
+2020-02-13 08:31:57,829 - DEBUG - Vosekast - Vosekast started ok.
+2020-02-13 08:31:57,830 - INFO - Scale - Start measuring with scale.
+Disconnected
+[EXC OCCURED] in reconnect future None
+[EXC OCCURED] in reconnect future None
+Connected to host: "localhost"
+Vosekast listening on: "vosekast/commands"
+
+splitted line:[b'+', b'0.013', b'kg']
+lineb'+    0.013 kg \r\n'
+2020-02-13 08:32:07,937 - INFO - Scale - Measured b'+    0.013 kg \r\n'
+reached loop, new value = None
+
+
+```
