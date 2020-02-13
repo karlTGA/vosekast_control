@@ -151,7 +151,8 @@ class Scale:
                 #remove b''
                 #
                 #new_value = str(splitted_line_formatted)
-                new_value = int(splitted_line_formatted)
+                splitted_line_str = splitted_line_formatted.decode("utf-8")
+                new_value = int(splitted_line_str)
                 print("new value, len == 3: " + str(new_value))
                 return new_value
                 
