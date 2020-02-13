@@ -90,7 +90,7 @@ class Scale:
             
             #deque scale history
             self.scale_history.appendleft(self.timestamp)
-            self.scale_history.appendleft(new_value)
+            self.scale_history.appendleft(new_value) 
             
             sleep(5)
             
@@ -137,6 +137,8 @@ class Scale:
     def read_value_from_scale(self):
         #if self.connection is not None and self.connection.is_open:
         if self.connection is not None:
+
+            self.connection.reset_input_buffer()
 
             line = self.connection.readline()
             # print("line: " + str(line))
