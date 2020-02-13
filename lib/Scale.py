@@ -93,8 +93,7 @@ class Scale:
             self.scale_history.appendleft(new_value)
             
             sleep(5)
-            return
-
+            
         self.logger.info("Stopped measuring with scale.")
 
     def start_measurement_thread(self):
