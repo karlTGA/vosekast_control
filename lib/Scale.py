@@ -139,10 +139,10 @@ class Scale:
 
             line = self.connection.readline()
             print("line: " + str(line))
-            splitted_line = str(line.split())
-            print("splitted_line: " + splitted_line)
+            splitted_line = line.split()
+            print("splitted_line: " + str(splitted_line))
             del splitted_line[0]
-            print("splitted_line formatted: " + splitted_line)
+            print("splitted_line formatted: " + str(splitted_line))
             #print("splitted_line_formatted: " + splitted_line_formatted)
             self.logger.info("Measured {}".format(line))
             
