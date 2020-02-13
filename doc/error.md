@@ -95,10 +95,11 @@ Disconnected
 Connected to host: "localhost"
 Vosekast listening on: "vosekast/commands"
 
-splitted line:[b'+', b'0.013', b'kg']
-lineb'+    0.013 kg \r\n'
-2020-02-13 08:32:07,937 - INFO - Scale - Measured b'+    0.013 kg \r\n'
-reached loop, new value = None
+
+splitted_line: [b'+', b'0.018', b'kg']
+line: b'+    0.018 kg \r\n'
+2020-02-13 08:42:21,763 - INFO - Scale - Measured b'+    0.018 kg \r\n'
+reached loop with new value = None
 
 
 ```
