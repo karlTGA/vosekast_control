@@ -96,10 +96,14 @@ Connected to host: "localhost"
 Vosekast listening on: "vosekast/commands"
 
 
-splitted_line: [b'+', b'0.018', b'kg']
+
 line: b'+    0.018 kg \r\n'
-2020-02-13 08:42:21,763 - INFO - Scale - Measured b'+    0.018 kg \r\n'
+splitted_line: [b'+', b'0.018', b'kg']
+splitted_line formatted: [b'0.018', b'kg']
+2020-02-13 08:56:16,001 - INFO - Scale - Measured b'+    0.018 kg \r\n'
+2
 reached loop with new value = None
+
 
 
 ```

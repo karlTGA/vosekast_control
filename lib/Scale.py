@@ -141,16 +141,17 @@ class Scale:
             print("line: " + str(line))
             splitted_line = line.split()
             print("splitted_line: " + str(splitted_line))
-            del splitted_line[0]
-            print("splitted_line formatted: " + str(splitted_line))
+            #del splitted_line[0]
+            #print("splitted_line formatted: " + str(splitted_line))
             #print("splitted_line_formatted: " + splitted_line_formatted)
             self.logger.info("Measured {}".format(line))
             
             print(len(splitted_line))
             if len(splitted_line) == 3:
                 new_value = "".join(splitted_line[:2])
-                return new_value
                 print("new value, len == 3: " + str(new_value))
+                return new_value
+                
         else:
             print(self.connection.is_open)
             print(self.connection)
