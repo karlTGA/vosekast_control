@@ -55,7 +55,7 @@ class TestSequence():
             self.vosekast.create_file()
             
             # loop
-            while not self.vosekast.measuring_tank.is_filled:
+            while not self.vosekast.measuring_tank.is_filled and self.state == States.RUNNING:
                 #write values to csv file
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
