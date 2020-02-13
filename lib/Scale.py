@@ -147,7 +147,7 @@ class Scale:
             self.logger.info("Measured {}".format(line))
             
             print(len(splitted_line))
-            if len(splitted_line) == :
+            if len(splitted_line) == 3:
                 new_value = "".join(splitted_line[:2])
                 return new_value
                 print("new value, len == 3: " + str(new_value))
