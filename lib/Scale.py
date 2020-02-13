@@ -135,11 +135,12 @@ class Scale:
     #     self.logger.info("Publishing scale values via MQTT.")
 
     def read_value_from_scale(self):
-        #if self.connection is not None and self.connection.is_open:
-        if self.connection is not None:
+        if self.connection is not None and self.connection.is_open:
+        #if self.connection is not None:
             line = self.connection.readline()
             splitted_line = str(line.split())
-
+            print(splitted_line)
+            print(line)
             self.logger.info("Measured {}".format(line))
 
             if len(splitted_line) == 3:
