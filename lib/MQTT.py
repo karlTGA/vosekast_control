@@ -1,6 +1,6 @@
 import json
 from gmqtt import Client as MQTTClient
-import logging
+from lib.Log import LOGGER
 
 
 def noop(*args, **kwargs):
