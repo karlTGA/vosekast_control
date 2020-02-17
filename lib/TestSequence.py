@@ -66,7 +66,7 @@ class TestSequence():
                 #dictionary als Datenspeicher
                 await asyncio.sleep(1)
             
-            #jsondumps
+            #todo jsondumps
 
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:

@@ -31,6 +31,7 @@ PIN_VALVE_MEASURING_DRAIN = 18
 PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
 PIN_LEVEL_CONSTANT_LOW = 5
+PIN_LEVEL_CONSTANT_HIGH = 37
 
 # PUMP IDS
 CONSTANT_PUMP = "CONSTANT_PUMP"
@@ -111,6 +112,13 @@ class Vosekast():
                 LevelSensor.LOW,
                 self._gpio_controller,
             )
+            self.level_constant_high = LevelSensor(
+                "LEVEL_CONSTANT_HIGH",
+                PIN_LEVEL_CONSTANT_HIGH,
+                bool,
+                LevelSensor.HIGH,
+                self._gpio_controller,
+            )
 
             # pumps
             self.pump_constant_tank = Pump(
@@ -144,7 +152,7 @@ class Vosekast():
                 100,
                 None,
                 self.level_constant_low,
-                None,
+                self.level_constant_high,
                 None,
                 self.pump_constant_tank,
                 vosekast=self,
