@@ -139,13 +139,13 @@ class Scale:
         if self.connection is not None:
 
             self.connection.reset_input_buffer()
-
+            sleep(0.1)
             line = self.connection.readline()
             # print("line: " + str(line))
             splitted_line = line.split()
             # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
 
-            self.logger.info("Measured {}".format(line))
+            #self.logger.info("Measured {}".format(line))
             
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]

@@ -80,7 +80,7 @@ class TestSequence():
             self.vosekast.create_file()
 
             #needs to wait til is_filled
-            while not self.vosekast.measuring_tank.is_filled :
+            while not self.vosekast.measuring_tank.is_filled and not self.state == States.STOPPED:
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)

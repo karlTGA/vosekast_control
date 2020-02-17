@@ -218,9 +218,9 @@ class Vosekast():
 
         if base_tank_ready and measuring_tank_ready and base_pump_running:
             self.logger.info("Ready to start measuring.")
-        print(base_tank_ready)
-        print(measuring_tank_ready)
-        print(base_pump_running)
+        print("base_tank_ready: "+ str(base_tank_ready))
+        print("measuring_tank_ready: " + str(measuring_tank_ready))
+        print("base_pump_running: " + str(base_pump_running))
         return base_tank_ready and measuring_tank_ready and base_pump_running
         # return True
 
