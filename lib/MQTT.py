@@ -1,5 +1,6 @@
 import json
 from gmqtt import Client as MQTTClient
+import logging
 
 
 def noop(*args, **kwargs):
@@ -25,6 +26,7 @@ class MQTTController():
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
         self.client.on_subscribe = self.on_subscribe
+        self.logger = logging.getLogger(LOGGER)
 
     async def connect(self):
         await self.client.connect(self.host)
@@ -46,7 +48,7 @@ class MQTTController():
     def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
-            print('Connected to host: \"' + self.host + "\"")
+            self.logger.debug('Connected to host: \"' + self.host + "\"")
 
     async def on_message(self, client, topic, payload, qos, properties):
         message = payload
@@ -58,18 +60,18 @@ class MQTTController():
                 await self.on_command(command)
 
         except ValueError:
-            print("unexpected formatting: " +
+            self.logger.debug("unexpected formatting: " +
                   str(payload.decode("utf-8")))
         except KeyError:
-            print("Got message without type.")
+            self.logger.debug("Got message without type.")
 
         # print('Received: \"' + str(payload.decode("utf-8")) + "\" from client: " + self.client._client_id)
 
     def on_disconnect(self, client, packet, exc=None):
-        print('Disconnected')
+        self.logger.debug('MQTT Client Disconnected')
 
     def on_subscribe(self, client, mid, qos):
-        print('Vosekast listening on: \"' + self.topic + "\"")
+        self.logger.debug('Vosekast listening on: \"' + self.topic + "\"")
 
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)

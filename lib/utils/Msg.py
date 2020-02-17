@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from logging import LogRecord
+import logging
 
 
 class Message:
@@ -34,15 +35,19 @@ class LogMessage(Message):
         message_object['message'] = self.record.message
         message_object['level'] = self.record.levelname
 
-        if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
+        if self.record.levelno == logging.ERROR or self.record.levelno == logging.CRITICAL:
             message_object['type'] = self.record.levelname
 
         return message_object
 
     @property
+    def level(self):
+        return self.record.levelno
+
+    @property
     def topic(self):
 
-        if self.record.levelname == "ERROR" or self.record.levelname == "CRITICAL":
+        if self.record.levelno == logging.ERROR or self.record.levelno == logging.CRITICAL:
             return f'vosekast/error/{self.sensor_id}'
 
         else:

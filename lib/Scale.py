@@ -85,16 +85,25 @@ class Scale:
                     # print("reached loop, new value not None")
                     self.add_new_value(new_value)
                     self.timestamp = datetime.now()
+                    
+                    #deque scale history
+                    self.scale_history.appendleft(self.timestamp)
+                    self.scale_history.appendleft(new_value) 
                 else:
-                    print("reached loop with new value = None")
+                    self.logger.debug("reached loop with new value = None")
             
-            #deque scale history
-            self.scale_history.appendleft(self.timestamp)
-            self.scale_history.appendleft(new_value) 
+
             
             sleep(5)
             
         self.logger.info("Stopped measuring with scale.")
+    
+    def is_running(self):
+        if self.run == True and self.thread.is_alive == True:
+            return True
+        else:
+            self.logger.info("Scale not ready. Printing diagnostics.")
+            self.print_diagnostics()
 
     def start_measurement_thread(self):
         #self.publish = True
@@ -111,13 +120,13 @@ class Scale:
                     
     # diagnostics
     def print_diagnostics(self):
-        print(self.threads)
-        print(self.connection)
-        print(self.connection.is_open)
-        #print("Thread alive: " + str(self.thread.is_alive()))
-        print("self.run = " + str(self.run))
-        print(self.scale_history)
-        print(self.flow_history)
+        self.logger.debug(self.threads)
+        self.logger.debug(self.connection)
+        self.logger.debug(self.connection.is_open)
+        self.logger.debug("Thread alive: " + str(self.thread.is_alive()))
+        self.logger.debug("self.run = " + str(self.run))
+        self.logger.debug(self.scale_history)
+        self.logger.debug(self.flow_history)
        
     def stop_measurement_thread(self):
         self.run = False
@@ -141,11 +150,11 @@ class Scale:
             self.connection.reset_input_buffer()
             sleep(0.2)
             line = self.connection.readline()
-            # print("line: " + str(line))
+            
             splitted_line = line.split()
             # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
 
-            #self.logger.info("Measured {}".format(line))
+            self.logger.debug("Measured {}".format(line))
             
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
@@ -159,8 +168,8 @@ class Scale:
                 
 
         else:
-            print(self.connection.is_open)
-            print(self.connection)
+            self.logger.debug(self.connection.is_open)
+            self.logger.debug(self.connection)
             self.open_connection()
             self.logger.info("Initialising connection to scale. Please retry.")
 
@@ -168,6 +177,8 @@ class Scale:
 
         #calculate volume flow
         if len(self.scale_history) > 2:
+            # todo: check timestamp
+            
             #dictionary: value, timestamp
             delta = self.scale_history[0] - self.scale_history[2]
             delta_weight = abs(delta)

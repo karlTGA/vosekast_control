@@ -37,9 +37,9 @@ class TestSequence():
     async def start_sequence(self):
         try:
             # check if already running
-            #if not self.scale.stop_measurement_thread() and not self.scale.close_connection():
-            #    self.scale.start_measurement_thread()
-            #    self.scale.open_connection()
+            if self.scale.is_running() != True:
+                self.scale.start_measurement_thread()
+                self.scale.open_connection()
 
             self.logger.info("Initialising sequence.")
 
@@ -75,7 +75,7 @@ class TestSequence():
             self.logger.error("TankFillingTimeout, aborting test sequence.")
             
             # testing>
-            print('continuing for testing purposes')
+            self.logger.debug('continuing for testing purposes')
             self.vosekast.ready_to_measure()
             self.vosekast.create_file()
 
@@ -85,7 +85,7 @@ class TestSequence():
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
-                    print('added value to csv')
+                    self.logger.debug('added values to csv')
                 await asyncio.sleep(1)
 
             if self.vosekast.stock_tank.is_filled:

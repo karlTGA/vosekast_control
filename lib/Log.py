@@ -12,8 +12,8 @@ class MQTTLoggingHandler(logging.Handler):
 
     def emit(self, record):
         mqttmsg = LogMessage(record)
-
-        if self.mqtt.connection_test():
+    
+        if self.mqtt.connection_test() and mqttmsg.level != logging.DEBUG:
             self.mqtt.publish_message(mqttmsg)
 
 
