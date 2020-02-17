@@ -79,14 +79,19 @@ class TestSequence():
             self.vosekast.ready_to_measure()
             self.vosekast.create_file()
 
-            while not self.vosekast.measuring_tank.is_filled:
+            #needs to wait til is_filled
+            while not self.vosekast.measuring_tank.is_filled :
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
                     print('added value to csv')
                 await asyncio.sleep(1)
+
+            if self.vosekast.stock_tank.is_filled:
+                self.stop_sequence()
             # <testing
+
 
         
 

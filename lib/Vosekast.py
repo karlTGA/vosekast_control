@@ -12,6 +12,7 @@ from lib.Log import LOGGER, add_mqtt_logger_handler
 from lib.Store import VosekastStore
 from lib.MQTT import MQTTController
 
+import os
 
 # Vosekast States
 INITED = "INITED"
@@ -217,7 +218,9 @@ class Vosekast():
 
         if base_tank_ready and measuring_tank_ready and base_pump_running:
             self.logger.info("Ready to start measuring.")
-
+        print(base_tank_ready)
+        print(measuring_tank_ready)
+        print(base_pump_running)
         return base_tank_ready and measuring_tank_ready and base_pump_running
         # return True
 
@@ -235,6 +238,7 @@ class Vosekast():
         self.clean()
         self.logger.info("Shutting down.")
         await self.mqtt_client.disconnect()
+        os.system('sudo shutdown -r now')
 
     def clean(self):
         # shutdown pumps

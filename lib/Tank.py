@@ -102,7 +102,7 @@ class Tank():
                 "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                 raise TankFillingTimeout("Tank Filling Timeout.")
 
-            print(str(delta_time_filling) + 's < time allotted (6s)')
+            print(str(delta_time_filling) + 's < time allotted (60s)')
             await asyncio.sleep(1)
                        
         return
