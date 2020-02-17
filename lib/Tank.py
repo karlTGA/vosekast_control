@@ -96,13 +96,13 @@ class Tank():
             time_filling_passed = time_filling_t1 - time_filling_t0
             delta_time_filling = time_filling_passed.total_seconds()
             
-            #if filling takes longer than 60s
-            if delta_time_filling >= 60:
+            #if filling takes longer than 90s
+            if delta_time_filling >= 90:
                 self.logger.error(
                 "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                 raise TankFillingTimeout("Tank Filling Timeout.")
 
-            print(str(delta_time_filling) + 's < time allotted (60s)')
+            print(str(delta_time_filling) + 's < time allotted (90s)')
             await asyncio.sleep(1)
                        
         return
