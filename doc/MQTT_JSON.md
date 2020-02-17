@@ -17,7 +17,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "status",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "i.e. BASE_TANK",
+	"sensor_id": "i.e. CONSTANT_TANK",
 	"value1": 100,
 	"unit1": "%",
 	"value2": 100,
@@ -32,7 +32,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "error message",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "i.e. BASE_TANK",
+	"sensor_id": "i.e. CONSTANT_TANK",
 	"message": "Water level low."
 },
 {

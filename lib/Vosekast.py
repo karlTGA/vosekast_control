@@ -24,16 +24,16 @@ WEIGHT_start = "weight_start"
 WEIGHT_stop = "weight_stop"
 
 # GPIO Assignment
-PIN_PUMP_BASE = 17
+PIN_PUMP_CONSTANT = 17
 PIN_PUMP_MEASURING = 27
 PIN_VALVE_MEASURING_SWITCH = 12
 PIN_VALVE_MEASURING_DRAIN = 18
 PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
-PIN_LEVEL_BASE_LOW = 5
+PIN_LEVEL_CONSTANT_LOW = 5
 
 # PUMP IDS
-BASE_PUMP = "BASE_PUMP"
+CONSTANT_PUMP = "CONSTANT_PUMP"
 MEASURING_PUMP = "MEASURING_PUMP"
 
 # VALVE IDS
@@ -42,7 +42,7 @@ MEASURING_TANK_SWITCH = "MEASURING_TANK_SWITCH"
 
 # TANK IDS
 STOCK_TANK = "STOCK_TANK"
-BASE_TANK = "BASE_TANK"
+CONSTANT_TANK = "CONSTANT_TANK"
 MEASURING_TANK = "MEASURING_TANK"
 
 
@@ -104,19 +104,19 @@ class Vosekast():
                 LevelSensor.LOW,
                 self._gpio_controller,
             )
-            self.level_base_low = LevelSensor(
-                "LEVEL_BASE_LOW",
-                PIN_LEVEL_BASE_LOW,
+            self.level_constant_low = LevelSensor(
+                "LEVEL_CONSTANT_LOW",
+                PIN_LEVEL_CONSTANT_LOW,
                 bool,
                 LevelSensor.LOW,
                 self._gpio_controller,
             )
 
             # pumps
-            self.pump_base_tank = Pump(
+            self.pump_constant_tank = Pump(
                 self,
-                "Pump Base Tank",
-                PIN_PUMP_BASE,
+                "Pump Constant Tank",
+                PIN_PUMP_CONSTANT,
                 self._gpio_controller,
             )
             self.pump_measuring_tank = Pump(
@@ -125,7 +125,7 @@ class Vosekast():
                 PIN_PUMP_MEASURING,
                 self._gpio_controller,
             )
-            self.pumps = [self.pump_measuring_tank, self.pump_base_tank]
+            self.pumps = [self.pump_measuring_tank, self.pump_constant_tank]
 
             # tanks
             self.stock_tank = Tank(
@@ -139,14 +139,14 @@ class Vosekast():
                 vosekast=self
             )
 
-            self.base_tank = Tank(
-                "Base Tank",
+            self.constant_tank = Tank(
+                "Constant Tank",
                 100,
                 None,
-                self.level_base_low,
+                self.level_constant_low,
                 None,
                 None,
-                self.pump_base_tank,
+                self.pump_constant_tank,
                 vosekast=self,
                 protect_overflow=False,
             )
@@ -163,7 +163,7 @@ class Vosekast():
                 protect_draining=False,
             )
 
-            self.tanks = [self.stock_tank, self.base_tank, self.measuring_tank]
+            self.tanks = [self.stock_tank, self.constant_tank, self.measuring_tank]
 
             # scale
             self.scale = Scale(self, emulate=self.debug)
@@ -198,9 +198,9 @@ class Vosekast():
         before we can measure we have to prepare the station
         :return:
         """
-        # fill the base tank
-        self.base_tank.prepare_to_fill()
-        self.pump_base_tank.start()
+        # fill the constant tank
+        self.constant_tank.prepare_to_fill()
+        self.pump_constant_tank.start()
         self.state = PREPARING_MEASURMENT
 
     def ready_to_measure(self):
@@ -209,19 +209,19 @@ class Vosekast():
         :return: measuring ready
         """
 
-        base_tank_ready = self.base_tank.is_filled
+        constant_tank_ready = self.constant_tank.is_filled
         measuring_tank_ready = (
             self.measuring_drain_valve.is_closed
             and not self.measuring_tank.is_filled
         )
-        base_pump_running = self.pump_base_tank.is_running
+        constant_pump_running = self.pump_constant_tank.is_running
 
-        if base_tank_ready and measuring_tank_ready and base_pump_running:
+        if constant_tank_ready and measuring_tank_ready and constant_pump_running:
             self.logger.info("Ready to start measuring.")
-        self.logger.debug("base_tank_ready: "+ str(base_tank_ready))
+        self.logger.debug("constant_tank_ready: "+ str(constant_tank_ready))
         self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
-        self.logger.debug("base_pump_running: " + str(base_pump_running))
-        return base_tank_ready and measuring_tank_ready and base_pump_running
+        self.logger.debug("constant_pump_running: " + str(constant_pump_running))
+        return constant_tank_ready and measuring_tank_ready and constant_pump_running
         # return True
 
     def create_file(self):

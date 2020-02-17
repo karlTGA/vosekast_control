@@ -24,11 +24,11 @@ import matplotlib.pyplot as plt
 
 from lib.Vosekast import (
     Vosekast,
-    BASE_PUMP,
+    CONSTANT_PUMP,
     MEASURING_PUMP,
     MEASURING_TANK_SWITCH,
     MEASURING_TANK_VALVE,
-    BASE_TANK,
+    CONSTANT_TANK,
     MEASURING_TANK,
 )
 from functools import partial

@@ -20,10 +20,10 @@
     * target_id = Measuring Drain Valve, Measuring Tank Switch
         * command = open, close
 * target = pump
-    * target_id = Pump Base Tank, Pump Measuring Tank
+    * target_id = Pump Constant Tank, Pump Measuring Tank
         * command = start, stop, toggle
 * target = tank
-    * target_id = Stock Tank, Base Tank, Measuring Tank (only Measuring Tank has a drain valve)
+    * target_id = Stock Tank, Constant Tank, Measuring Tank (only Measuring Tank has a drain valve)
         * command = drain_tank, prepare_to_fill
 * target = scale
     * target_id = scale

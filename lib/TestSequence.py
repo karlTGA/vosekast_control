@@ -47,8 +47,8 @@ class TestSequence():
             self.state = States.RUNNING
             self.change_state(self.state)
 
-            # await base_tank full
-            await self.vosekast.base_tank.fill()
+            # await constant_tank full
+            await self.vosekast.constant_tank.fill()
             # check
             self.vosekast.ready_to_measure()
             # create csv file
@@ -88,7 +88,7 @@ class TestSequence():
                     self.logger.debug('added values to csv')
                 await asyncio.sleep(1)
 
-            if self.vosekast.base_tank.is_filled:
+            if self.vosekast.constant_tank.is_filled:
                 self.stop_sequence()
             # <testing
 

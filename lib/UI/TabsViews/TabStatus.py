@@ -11,11 +11,11 @@ from lib.UI.ValveControl import ValveControl
 from lib.UI.TankStatus import TankStatus
 from lib.UI.ScaleStatus import ScaleStatus
 from lib.Vosekast import (
-    BASE_PUMP,
+    CONSTANT_PUMP,
     MEASURING_PUMP,
     MEASURING_TANK_SWITCH,
     MEASURING_TANK_VALVE,
-    BASE_TANK,
+    CONSTANT_TANK,
     MEASURING_TANK,
 )
 
@@ -35,14 +35,14 @@ class TabStatus(QWidget):
         valves_group_box = self.create_valves()
         scale_box = self.create_scale()
         measurement_tank = self.create_tank_measurement()
-        base_tank = self.create_tank_base()
+        constant_tank = self.create_tank_constant()
 
         windowLayout = QGridLayout()
         windowLayout.addWidget(pumps_group_box, 0, 0, 1, 2)
         windowLayout.addWidget(valves_group_box, 1, 0, 1, 2)
         windowLayout.addWidget(scale_box, 0, 3, 1, 1)
         windowLayout.addWidget(measurement_tank, 1, 3, 1, 2)
-        windowLayout.addWidget(base_tank, 1, 5, 1, 2)
+        windowLayout.addWidget(constant_tank, 1, 5, 1, 2)
 
         self.setLayout(windowLayout)
 
@@ -52,9 +52,9 @@ class TabStatus(QWidget):
         layout.setColumnStretch(0, 0)
         layout.setColumnStretch(1, 0)
 
-        pump_base = PumpControl("Pump Base")
-        self.pump_buttons[BASE_PUMP] = pump_base
-        layout.addWidget(pump_base, 0, 0)
+        pump_constant = PumpControl("Pump Constant")
+        self.pump_buttons[CONSTANT_PUMP] = pump_constant
+        layout.addWidget(pump_constant, 0, 0)
 
         pump_measuring = PumpControl("Pump Measuring")
         self.pump_buttons[MEASURING_PUMP] = pump_measuring
@@ -100,12 +100,12 @@ class TabStatus(QWidget):
         self.tank_statuses[MEASURING_TANK] = tank_status
         return tank_measurement_box
 
-    def create_tank_base(self):
-        tank_base_box = QGroupBox("Base")
+    def create_tank_constant(self):
+        tank_constant_box = QGroupBox("Constant")
         layout = QGridLayout()
-        tank_status = TankStatus(BASE_TANK)
+        tank_status = TankStatus(CONSTANT_TANK)
         layout.addWidget(tank_status, 0, 0)
-        tank_base_box.setLayout(layout)
+        tank_constant_box.setLayout(layout)
 
-        self.tank_statuses[BASE_TANK] = tank_status
-        return tank_base_box
+        self.tank_statuses[CONSTANT_TANK] = tank_status
+        return tank_constant_box

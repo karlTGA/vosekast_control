@@ -90,8 +90,8 @@ class Tank():
         #close valves, start pump
         self.vosekast.prepare_measuring()
 
-        #check if base_tank full
-        while not self.vosekast.base_tank.is_filled:
+        #check if constant_tank full
+        while not self.vosekast.constant_tank.is_filled:
             time_filling_t1 = datetime.now()
             time_filling_passed = time_filling_t1 - time_filling_t0
             delta_time_filling = time_filling_passed.total_seconds()

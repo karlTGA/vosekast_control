@@ -22,8 +22,8 @@ class VosekastStore:
                     if action["type"] == "Update Pump Measuring Tank":
                         newState["Pump Measuring Tank"] = deepcopy(action.get("body"))
                         return newState
-                    elif action["type"] == "Update Pump Base Tank":
-                        newState["Pump Base Tank"] = deepcopy(action.get("body"))
+                    elif action["type"] == "Update Pump Constant Tank":
+                        newState["Pump Constant Tank"] = deepcopy(action.get("body"))
                         return newState
                     elif action["type"] == "UPDATE_SCALE":
                         newState["Scale"] = deepcopy(action.get("body"))
@@ -37,7 +37,7 @@ class VosekastStore:
 
         default_state = {
             "Pump Measuring Tank": {"State": 0},
-            "Pump Base Tank": {"State": 0},
+            "Pump Constant Tank": {"State": 0},
             "Scale": {"State": 0, "Value": 0},
             "Measuring Drain Valve": {"State": 5},
             "Measuring Switch Valve": {"State": 5},

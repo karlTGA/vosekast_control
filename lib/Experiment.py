@@ -18,7 +18,7 @@ class Experiment():
         ExperimentEnvironment,
         name,
         course_pump_measuring,
-        course_pump_base,
+        course_pump_constant,
         index,
         vosekast,
         default_state=States.READY,
@@ -30,7 +30,7 @@ class Experiment():
         self.logger = logging.getLogger(LOGGER)
         self.ExpEnv = ExperimentEnvironment
         self.course_pump_measuring = course_pump_measuring
-        self.course_pump_base = course_pump_base
+        self.course_pump_constant = course_pump_constant
         self.index = index
         self.vosekast = vosekast
         self.name = name
@@ -74,9 +74,9 @@ class Experiment():
     #def execute_experiment(self):
         #old = self.time_count
         #self.time_count += 0.5
-        #for time_toggle in self.course_pump_base:
+        #for time_toggle in self.course_pump_constant:
         #    if old < time_toggle <= self.time_count:
-        #        self.ExpEnv.vosekast.pump_base_tank.toggle()
+        #        self.ExpEnv.vosekast.pump_constant_tank.toggle()
 
         #for time_toggle in self.course_pump_measuring:
         #    if old < time_toggle <= self.time_count:
