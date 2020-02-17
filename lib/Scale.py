@@ -95,10 +95,8 @@ class Scale:
                     self.scale_history.appendleft(self.timestamp)
                     self.scale_history.appendleft(new_value) 
                 else:
-                    self.logger.debug("reached loop with new value = None")
-            
-
-            
+                    self.logger.warning("Reached loop with new value = None. Did you remember to turn on the scale?")
+                
             sleep(5)
             
         self.logger.info("Stopped measuring with scale.")
@@ -153,7 +151,7 @@ class Scale:
         #if self.connection is not None and self.connection.is_open:
         if self.connection is not None:
 
-            self.connection.reset_output_buffer()
+            self.connection.reset_input_buffer()
             #sleep(0.5)
             line = self.connection.readline()
             
