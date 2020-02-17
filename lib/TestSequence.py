@@ -113,7 +113,7 @@ class TestSequence():
 
     def change_state(self, new_state):
         # publish via mqtt
-        mqttmsg = StatusMessage("TestSequence", States(
+        mqttmsg = StatusMessage("TestSequence State:", States(
             new_state).value, None, None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)

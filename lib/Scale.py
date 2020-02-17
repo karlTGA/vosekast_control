@@ -139,7 +139,7 @@ class Scale:
         if self.connection is not None:
 
             self.connection.reset_input_buffer()
-            sleep(0.1)
+            sleep(0.2)
             line = self.connection.readline()
             # print("line: " + str(line))
             splitted_line = line.split()
