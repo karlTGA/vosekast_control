@@ -148,7 +148,7 @@ class Scale:
         if self.connection is not None:
 
             self.connection.reset_input_buffer()
-            sleep(0.2)
+            sleep(0.5)
             line = self.connection.readline()
             
             splitted_line = line.split()
@@ -178,7 +178,7 @@ class Scale:
         #calculate volume flow
         if len(self.scale_history) > 2:
             # todo: check timestamp
-            
+
             #dictionary: value, timestamp
             delta = self.scale_history[0] - self.scale_history[2]
             delta_weight = abs(delta)
