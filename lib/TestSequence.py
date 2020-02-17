@@ -33,6 +33,8 @@ class TestSequence():
 
     def diagnostics(self):
         self.logger.info(self.state)
+        self.logger.info(self.vosekast.measuring_drain_valve.is_closed)
+        self.logger.info(self.vosekast.measuring_tank.is_filled)
 
     async def start_sequence(self):
         try:
@@ -96,11 +98,9 @@ class TestSequence():
         
 
     def stop_sequence(self):
-        #scale_value_stop = self.scale.read_value_from_scale()
-
         self.state = States.STOPPED
         self.change_state(self.state)
-
+        self.logger.debug('stop_sequence')
         self.vosekast.clean()
 
     def pause_sequence(self):

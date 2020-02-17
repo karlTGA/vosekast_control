@@ -100,6 +100,7 @@ class Scale:
     
     def is_running(self):
         if self.run == True and self.thread.is_alive == True:
+            self.logger.info("Scale ready.")
             return True
         else:
             self.logger.info("Scale not ready. Printing diagnostics.")
@@ -147,8 +148,8 @@ class Scale:
         #if self.connection is not None and self.connection.is_open:
         if self.connection is not None:
 
-            self.connection.reset_input_buffer()
-            sleep(0.5)
+            self.connection.reset_output_buffer()
+            #sleep(0.5)
             line = self.connection.readline()
             
             splitted_line = line.split()

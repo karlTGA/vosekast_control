@@ -209,7 +209,9 @@ class Vosekast():
         :return: measuring ready
         """
 
+        #todo install level_sensor
         constant_tank_ready = self.constant_tank.is_filled
+        #todo fix
         measuring_tank_ready = (
             self.measuring_drain_valve.is_closed
             and not self.measuring_tank.is_filled
