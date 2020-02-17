@@ -71,7 +71,12 @@ class Scale:
 
     def loop(self):
         self.logger.info("Start measuring with scale.")
-       
+
+        # check if already running
+        if self.is_running() != True:
+            self.open_connection()
+            self.start_measurement_thread()
+
         while self.run:
             
             if self.emulate:
