@@ -266,11 +266,11 @@ class Vosekast():
         self.scale.close_connection()
 
     async def run(self):
+        self.scale.start_measurement_thread()
         self.scale.open_connection()
         await self.mqtt_client.connect()
         self.logger.debug("Vosekast started ok.")
-        self.scale.start_measurement_thread()
-        
+                
     # handle incoming mqtt commands
     async def handle_command(self, command):
         # valves
