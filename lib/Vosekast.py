@@ -116,7 +116,7 @@ class Vosekast():
                 "LEVEL_CONSTANT_HIGH",
                 PIN_LEVEL_CONSTANT_HIGH,
                 bool,
-                LevelSensor.HIGH,
+                LevelSensor.LOW,
                 self._gpio_controller,
             )
 
