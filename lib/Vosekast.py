@@ -152,7 +152,7 @@ class Vosekast():
                 100,
                 None,
                 self.level_constant_low,
-                self.level_constant_high,
+                None,
                 None,
                 self.pump_constant_tank,
                 vosekast=self,
