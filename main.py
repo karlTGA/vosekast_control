@@ -37,12 +37,12 @@ async def main():
     await vosekast.run()
 
     # route log messages to status box of main window
-    app_control.start()
+    #app_control.start()
     
     # res = app.exec_()
 
     while True:
-        print("main.py loop wait")
+        #print("main.py loop wait")
         await asyncio.sleep(1)
 
     logger.info('start thread')

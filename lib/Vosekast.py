@@ -65,7 +65,7 @@ class Vosekast():
             self._gpio_controller.setmode(self._gpio_controller.BCM)
 
             # add store to create checkboxes
-            self.VosekastStore = VosekastStore(self)
+            #self.VosekastStore = VosekastStore(self)
 
             # valves
             self.measuring_drain_valve = Valve(
