@@ -103,8 +103,11 @@ class Tank():
                 raise TankFillingTimeout("Tank Filling Timeout.")
 
             self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
-            await asyncio.sleep(1)
-                       
+            #await asyncio.sleep(1)
+            #time_start = time.time()
+            #if (time.time() - time.start > 90):
+            #    time_start = time.time()
+            #    function irgendwas          
         return
 
     def _on_draining(self):
