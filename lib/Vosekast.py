@@ -112,13 +112,13 @@ class Vosekast():
                 LevelSensor.LOW,
                 self._gpio_controller,
             )
-            #self.level_constant_high = LevelSensor(
-            #    "LEVEL_CONSTANT_HIGH",
-            #    PIN_LEVEL_CONSTANT_HIGH,
-            #    bool,
-            #    LevelSensor.HIGH,
-            #    self._gpio_controller,
-            #)
+            self.level_constant_high = LevelSensor(
+                "LEVEL_CONSTANT_HIGH",
+                PIN_LEVEL_CONSTANT_HIGH,
+                bool,
+                LevelSensor.HIGH,
+                self._gpio_controller,
+            )
 
             # pumps
             self.pump_constant_tank = Pump(
@@ -152,7 +152,7 @@ class Vosekast():
                 100,
                 None,
                 self.level_constant_low,
-                None,
+                self.level_constant_high,
                 None,
                 self.pump_constant_tank,
                 vosekast=self,
@@ -175,7 +175,7 @@ class Vosekast():
 
             # scale
             self.scale = Scale(self, emulate=self.debug)
-            self.scale.open_connection()
+            
 
             # testsequence
             self.testsequence = TestSequence(self)
@@ -266,10 +266,11 @@ class Vosekast():
         self.scale.close_connection()
 
     async def run(self):
+        self.scale.open_connection()
         await self.mqtt_client.connect()
         self.logger.debug("Vosekast started ok.")
         self.scale.start_measurement_thread()
-
+        
     # handle incoming mqtt commands
     async def handle_command(self, command):
         # valves
