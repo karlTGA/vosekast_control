@@ -74,7 +74,7 @@ class Scale:
         self.logger.info("Start measuring with scale.")
 
         # check if already running
-        if self.is_running() != True:
+        if self.is_running != True:
             self.open_connection()
             self.start_measurement_thread()
 
@@ -102,6 +102,7 @@ class Scale:
             
         self.logger.info("Stopped measuring with scale.")
     
+    @property
     def is_running(self):
         if self.run == True and self.thread_loop.is_alive == True:
             self.logger.info("Scale ready.")

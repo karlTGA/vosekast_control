@@ -39,7 +39,7 @@ class TestSequence():
     async def start_sequence(self):
         try:
             # check if already running
-            if self.scale.is_running() != True:
+            if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
 
