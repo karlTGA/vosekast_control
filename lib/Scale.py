@@ -77,7 +77,7 @@ class Scale:
         # check if already running
         if self.is_running != True:
             self.open_connection()
-            self.start_measurement_thread()
+            await self.start_measurement_thread()
 
         while self.run:
             
@@ -124,7 +124,7 @@ class Scale:
             self.thread_readscale = Thread(target = self._scale_input_buffer)
             self.thread_readscale.start()
             self.threads.append(self.thread_readscale)
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.5)
 
             self.thread_loop.start()
                     

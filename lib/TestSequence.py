@@ -41,7 +41,7 @@ class TestSequence():
             # check if already running
             if self.scale.is_running != True:
                 self.scale.open_connection()
-                self.scale.start_measurement_thread()
+                await self.scale.start_measurement_thread()
 
             self.logger.info("Initialising sequence.")
 
