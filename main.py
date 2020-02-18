@@ -38,13 +38,12 @@ async def main():
 
     # route log messages to status box of main window
     #app_control.start()
-    print("main")
-
+    
     # res = app.exec_()
 
-    #while True:
-    #    print("main loop wait")
-    #    await asyncio.sleep(1)
+    while True:
+        print("main.py loop wait")
+        await asyncio.sleep(1)
 
     logger.info('start thread')
 
