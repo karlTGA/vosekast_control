@@ -112,13 +112,13 @@ class Vosekast():
                 LevelSensor.LOW,
                 self._gpio_controller,
             )
-            self.level_constant_high = LevelSensor(
-                "LEVEL_CONSTANT_HIGH",
-                PIN_LEVEL_CONSTANT_HIGH,
-                bool,
-                LevelSensor.HIGH,
-                self._gpio_controller,
-            )
+            #self.level_constant_high = LevelSensor(
+            #    "LEVEL_CONSTANT_HIGH",
+            #    PIN_LEVEL_CONSTANT_HIGH,
+            #    bool,
+            #    LevelSensor.HIGH,
+            #    self._gpio_controller,
+            #)
 
             # pumps
             self.pump_constant_tank = Pump(
