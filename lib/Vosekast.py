@@ -31,7 +31,7 @@ PIN_VALVE_MEASURING_DRAIN = 18
 PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
 PIN_LEVEL_CONSTANT_LOW = 5
-PIN_LEVEL_CONSTANT_HIGH = 37
+PIN_LEVEL_CONSTANT_HIGH = 26
 
 # PUMP IDS
 CONSTANT_PUMP = "CONSTANT_PUMP"
@@ -138,7 +138,7 @@ class Vosekast():
             # tanks
             self.stock_tank = Tank(
                 "Stock Tank",
-                100,
+                200,
                 None,
                 None,
                 None,
