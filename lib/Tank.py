@@ -113,10 +113,10 @@ class Tank():
         :return:
         """
         self.state = self.BETWEEN
-        mqttmsg = StatusMessage(self.name, 'DRAINING', None, None, None)
+        #mqttmsg = StatusMessage(self.name, 'DRAINING', None, None, None)
 
-        self.logger.info("Tank {} is being drained.".format(self.name))
-        self.mqtt.publish_message(mqttmsg)
+        self.logger.info("{} is being drained.".format(self.name))
+        #self.mqtt.publish_message(mqttmsg)
 
     def _on_full(self):
         """
@@ -124,10 +124,10 @@ class Tank():
         :return:
         """
         self.state = self.FILLED
-        mqttmsg = StatusMessage(self.name, 'FULL', None, None, None)
+        #mqttmsg = StatusMessage(self.name, 'FULL', None, None, None)
 
-        self.logger.warning("Tank {} is full.".format(self.name))
-        self.mqtt.publish_message(mqttmsg)
+        self.logger.warning("{} is full.".format(self.name))
+        #self.mqtt.publish_message(mqttmsg)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
