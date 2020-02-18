@@ -174,7 +174,8 @@ class Scale:
                 new_value = float(splitted_line_str)
                 return new_value
                 
-                
+        elif self.connection is not None:
+            return        
 
         else:
             self.logger.debug(self.connection.is_open)
