@@ -64,8 +64,8 @@ class Vosekast():
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
 
-            # add store to create checkboxes
-            self.VosekastStore = VosekastStore(self)
+            ## add store to create checkboxes
+            #self.VosekastStore = VosekastStore(self)
 
             # valves
             self.measuring_drain_valve = Valve(
