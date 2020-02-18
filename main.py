@@ -42,9 +42,9 @@ async def main():
 
     # res = app.exec_()
 
-    while True:
-        print("main loop")
-        await asyncio.sleep(1)
+    #while True:
+    #    print("main loop wait")
+    #    await asyncio.sleep(1)
 
     logger.info('start thread')
 

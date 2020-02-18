@@ -88,7 +88,7 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
                     self.logger.debug('added values to csv')
-                #await asyncio.sleep(1)
+                await asyncio.sleep(1)
 
             if self.vosekast.constant_tank.is_filled:
                 self.stop_sequence()
