@@ -33,11 +33,11 @@ class Scale:
         self.timeout = timeout
         self.connection = None
         self.last_values = deque([], 10)
-        self.thread = Thread()
+        self.thread_loop = Thread()
+        self.thread_readscale = Thread()
         self.emulate = emulate
         self.run = False
         self.timestamp = datetime.now()
-        #self.publish = False
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
@@ -46,6 +46,7 @@ class Scale:
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
+        self.scale_input_buffer = deque([], maxlen=10)
 
 
     def open_connection(self):
@@ -102,7 +103,7 @@ class Scale:
         self.logger.info("Stopped measuring with scale.")
     
     def is_running(self):
-        if self.run == True and self.thread.is_alive == True:
+        if self.run == True and self.thread_loop.is_alive == True:
             self.logger.info("Scale ready.")
             return True
         else:
@@ -110,50 +111,54 @@ class Scale:
             self.print_diagnostics()
 
     def start_measurement_thread(self):
-        #self.publish = True
         self.run = True
 
-        if self.thread.is_alive():
+        if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
             self.logger.info("Already measuring.")
             return
         else:
-            self.thread = Thread(target = self.loop)
-            self.thread.start()
-            self.threads.append(self.thread)
-            #self.logger.info("Starting thread: " + self.thread.getName())
+            self.thread_loop = Thread(target = self.loop)
+            self.thread_loop.start()
+            self.threads.append(self.thread_loop)
+            self.thread_readscale = Thread(target = self._scale_input_buffer)
+            self.thread_readscale.start()
+            self.threads.append(self.thread_readscale)
                     
     # diagnostics
     def print_diagnostics(self):
         self.logger.debug(self.threads)
         self.logger.debug(self.connection)
         self.logger.debug(self.connection.is_open)
-        self.logger.debug("Thread alive: " + str(self.thread.is_alive()))
+        self.logger.debug("Thread loop alive: " + str(self.thread_loop.is_alive()))
+        self.logger.debug("Thread readscale alive: " + str(self.thread_readscale.is_alive()))
         self.logger.debug("self.run = " + str(self.run))
         self.logger.debug(self.scale_history)
         self.logger.debug(self.flow_history)
        
     def stop_measurement_thread(self):
         self.run = False
-        self.thread.join()
-        #self.logger.info("Exiting Main Thread, Thread alive: " + str(self.thread.is_alive()))
-        self.threads.remove(self.thread)
 
-    # def toggle_publishing(self):
-    #     if self.publish:
-    #         self.publish = False
-    #         self.logger.info("Still measuring, stopped publishing scale values via MQTT.")
-    #         return
+        #terminate threads
+        self.thread_loop.join()
+        self.thread_readscale.join()
+        self.threads.remove(self.thread_loop)
+        self.threads.remove(self.thread_readscale)
+
+
+    def _scale_input_buffer(self):
+        if self.connection is not None and self.connection.is_open:
+            while self.run:
+                self.scale_input_buffer.appendleft(self.connection.readline())
+                sleep(0.1)
             
-    #     self.publish = True
-    #     self.logger.info("Publishing scale values via MQTT.")
-
     def read_value_from_scale(self):
         #if self.connection is not None and self.connection.is_open:
         if self.connection is not None:
 
-            self.connection.reset_input_buffer()
-            #sleep(0.5)
-            line = self.connection.readline()
+            #self.connection.reset_input_buffer()
+            #line = self.connection.readline()
+
+            line = self.scale_input_buffer[0]
             
             splitted_line = line.split()
             # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']

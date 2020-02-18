@@ -230,6 +230,8 @@ class Vosekast():
             self.logger.info("Ready to start measuring.")
         self.logger.debug("constant_tank_ready: "+ str(constant_tank_ready))
         self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
+        self.logger.debug("measuring_drain_valve.is_closed: " + str(self.measuring_drain_valve.is_closed))
+        self.logger.debug("measuring_tank.is_filled: " + str(self.measuring_tank.is_filled))
         self.logger.debug("constant_pump_running: " + str(constant_pump_running))
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
         # return True
@@ -248,7 +250,7 @@ class Vosekast():
         self.clean()
         self.logger.info("Shutting down.")
         await self.mqtt_client.disconnect()
-        os.system('sudo shutdown -r now')
+        os.system('sudo shutdown -h now')
 
     def clean(self):
         # shutdown pumps
