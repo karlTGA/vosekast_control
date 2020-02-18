@@ -37,7 +37,7 @@ async def main():
     await vosekast.run()
 
     # route log messages to status box of main window
-    #app_control.start()
+    app_control.start()
     
     # res = app.exec_()
 
