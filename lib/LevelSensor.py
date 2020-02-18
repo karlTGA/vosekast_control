@@ -21,7 +21,7 @@ class LevelSensor:
             self._pin, self._gpio_controller.BOTH, bouncetime=200
         )
 
-    def add_callback(self, callback_function):
+    async def add_callback(self, callback_function):
         """
         add callback function that fires every time the sensor is triggered
         the callback function gets modified to add the information if it encounters an alert or revoke
@@ -30,12 +30,12 @@ class LevelSensor:
         """
         loop = asyncio.get_event_loop()
 
-        def extra_callback_function(pin):
+        async def extra_callback_function(pin):
             new_value = self._gpio_controller.input(self._pin)
             alert = (
                 self.position == self.HIGH and new_value == self._gpio_controller.HIGH
             ) or (self.position == self.LOW and new_value == self._gpio_controller.HIGH)
-
+            await asyncio.sleep(0.1)
             loop.create_task(callback_function(pin, alert))
 
         self._gpio_controller.add_event_callback(

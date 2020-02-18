@@ -50,10 +50,10 @@ class Tank():
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
-            self.overflow_sensor.add_callback(self._up_state_changed)
+            await self.overflow_sensor.add_callback(self._up_state_changed)
 
         if drain_sensor is not None:
-            self.drain_sensor.add_callback(self._low_position_changed)
+            await self.drain_sensor.add_callback(self._low_position_changed)
 
     def drain_tank(self):
         if self.drain_valve is not None:
