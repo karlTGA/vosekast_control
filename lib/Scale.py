@@ -115,15 +115,15 @@ class Scale:
         self.run = True
 
         if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
-            self.logger.info("Already measuring.")
+            self.logger.info("Threads alive.")
             return
         else:
             self.thread_loop = Thread(target = self.loop)
-            self.thread_loop.start()
             self.threads.append(self.thread_loop)
             self.thread_readscale = Thread(target = self._scale_input_buffer)
             self.thread_readscale.start()
             self.threads.append(self.thread_readscale)
+            self.thread_loop.start()
                     
     # diagnostics
     def print_diagnostics(self):
