@@ -30,7 +30,7 @@ class LevelSensor:
         """
         loop = asyncio.get_event_loop()
 
-        async def extra_callback_function(pin):
+        def extra_callback_function(pin):
             new_value = self._gpio_controller.input(self._pin)
             alert = (
                 self.position == self.HIGH and new_value == self._gpio_controller.HIGH
