@@ -153,7 +153,7 @@ class Scale:
             
     def read_value_from_scale(self):
         #if self.connection is not None and self.connection.is_open:
-        if self.connection is not None:
+        if self.connection is not None and len(self.scale_history) > 0:
 
             #self.connection.reset_input_buffer()
             #line = self.connection.readline()
