@@ -68,9 +68,9 @@ class Tank():
             self.drain_valve.close()
         else:
             self.logger.debug(
-                "No drain valve on the tank {}".format(self.name))
+                "No drain valve on the {}".format(self.name))
             #mqttmsg = StatusMessage(self.name, 'Drain valve missing.', None, None, None)
-            self.mqtt.publish_message(mqttmsg)
+            #self.mqtt.publish_message(mqttmsg)
             return
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
@@ -85,6 +85,7 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
+        print("reached fill function")
         #get time
         time_filling_t0 = datetime.now()
         #close valves, start pump
