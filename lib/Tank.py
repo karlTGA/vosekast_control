@@ -15,6 +15,7 @@ class Tank():
     EMPTY = 0
     FILLED = 1
     BETWEEN = 0.5
+    STOPPED = 3
 
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
@@ -91,11 +92,11 @@ class Tank():
         time_filling_t0 = datetime.now()
         #close valves, start pump
         self.vosekast.prepare_measuring()
-        self.logger.debug("fill/vosekast/prepare_measuring completed")
-        self.logger.debug(self.state)
-        
+        self.logger.debug("tank/fill/vosekast/prepare_measuring completed")
+        self.state = self.BETWEEN
+
         #check if constant_tank full
-        while not self.vosekast.constant_tank.is_filled and self.state == States.RUNNING:
+        while not self.vosekast.constant_tank.is_filled and self.state != self.STOPPED:
             time_filling_t1 = datetime.now()
             time_filling_passed = time_filling_t1 - time_filling_t0
             delta_time_filling = time_filling_passed.total_seconds()
@@ -110,6 +111,9 @@ class Tank():
             await asyncio.sleep(1)
         
         return
+
+    def stop_fill(self):
+        self.state = self.STOPPED
 
     def _on_draining(self):
         """
