@@ -155,7 +155,10 @@ class Scale:
     def _scale_input_buffer(self):
         if self.connection is not None and self.connection.is_open:
             while self.run:
-                self.scale_input_buffer.appendleft(self.connection.readline())
+                scale_input = self.connection.readline()
+                print(scale_input)
+                print(len(scale_input))
+                self.scale_input_buffer.appendleft(scale_input)
                 sleep(0.1)
             
     def read_value_from_scale(self):
