@@ -17,7 +17,7 @@ PIN_LEVEL_CONSTANT_HIGH = 6
 GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(5, GPIO.IN)
-GPIO.setup(6, GPIO.IN)
+GPIO.setup(6, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 print("printing GPIO.input:")        
 
