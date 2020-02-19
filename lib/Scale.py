@@ -134,8 +134,8 @@ class Scale:
     # diagnostics
     def print_diagnostics(self):
         self.logger.debug(self.threads)
-        self.logger.debug(self.connection)
-        self.logger.debug(self.connection.is_open)
+        #self.logger.debug("self.connection: "+ str(self.connection))
+        self.logger.debug("self.connection.is_open: " +str(self.connection.is_open))
         self.logger.debug("Thread loop alive: " + str(self.thread_loop.is_alive()))
         self.logger.debug("Thread readscale alive: " + str(self.thread_readscale.is_alive()))
         self.logger.debug("self.run = " + str(self.run))
@@ -154,6 +154,7 @@ class Scale:
 
     def _scale_input_buffer(self):
         if self.connection is not None and self.connection.is_open:
+            self.scale_input_buffer.appendleft('+ 0.000 kg')
             while self.run:
                 scale_input = self.connection.readline()
                 
