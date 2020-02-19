@@ -104,6 +104,7 @@ class Scale:
     
     @property
     def is_running(self):
+        sleep(0.1)
         if self.run == True and self.thread_loop.is_alive == True:
             self.logger.info("Scale ready.")
             return True
