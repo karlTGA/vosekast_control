@@ -44,10 +44,12 @@ class TestSequence():
                 self.scale.start_measurement_thread()
 
             self.logger.info("Initialising sequence.")
-
+            
+            print("soon set state")
             # change state
             self.state = States.RUNNING
             self.change_state(self.state)
+            print("state set, now await fill")
 
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
@@ -56,7 +58,7 @@ class TestSequence():
             if not self.vosekast.ready_to_measure():
                 print("Vosekast not ready to measure.")
                 pass
-            print("here")
+            print("soon create file")
             # create csv file
             self.vosekast.create_file()
             print("created file")
@@ -84,19 +86,8 @@ class TestSequence():
             self.logger.error("TankFillingTimeout, aborting test sequence.")
             
             # testing>
-            self.logger.debug('continuing for testing purposes')
-            self.vosekast.ready_to_measure()
-            self.vosekast.create_file()
-
-            #needs to wait til is_filled
-            while not self.vosekast.measuring_tank.is_filled and not self.state == States.STOPPED:
-                with open('sequence_values.csv', 'a', newline='') as file:
-                    writer = csv.writer(file, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
-                    self.logger.debug('added values to csv')
-                await asyncio.sleep(1)
-
+            self.logger.debug(self.vosekast.ready_to_measure())
+            
             if self.vosekast.constant_tank.is_filled:
                 self.stop_sequence()
             # <testing
