@@ -14,13 +14,14 @@ PIN_LEVEL_CONSTANT_HIGH = 6
 
 GPIO.setmode(GPIO.BCM)
 
+GPIO.setup(5, GPIO.IN)
 GPIO.setup(6, GPIO.IN)
 
-print("starting")        
+print("printing GPIO.input:")        
 
 while True:
-    print(GPIO.input(6))
-    print("sleep")
-    sleep(1)
+    print("LEVEL_CONSTANT_HIGH = " + str(GPIO.input(6)))
+    print("LEVEL_CONSTANT_LOW = " + str(GPIO.input(5)))
+    sleep(0.5)
 
        
