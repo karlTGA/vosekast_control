@@ -349,7 +349,7 @@ class Vosekast():
                 elif command['command'] == 'close_connection':
                     self.scale.close_connection()
                 elif command['command'] == 'start_measurement_thread':
-                    self.scale.start_measurement_thread()
+                    await self.scale.start_measurement_thread()
                 elif command['command'] == 'stop_measurement_thread':
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'get_stable_value':

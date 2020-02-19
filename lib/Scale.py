@@ -71,7 +71,7 @@ class Scale:
         else:
             self.logger.info("Emulating close_connection scale.")
 
-    def loop(self):
+    async def loop(self):
         self.logger.info("Start measuring loop.")
 
         # check if already running
