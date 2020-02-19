@@ -90,7 +90,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             self.stop_sequence()
-            self.tank.stop_fill()
+            self.vosekast.constant_tank.stop_fill()
             self.logger.error("Stopped sequence.")
             
 
@@ -101,7 +101,7 @@ class TestSequence():
         self.state = States.STOPPED
         self.change_state(self.state)
         self.logger.debug('Stop sequence')
-        self.tank.stop_fill()
+        self.vosekast.constant_tank.stop_fill()
         self.vosekast.clean()
 
     def pause_sequence(self):
