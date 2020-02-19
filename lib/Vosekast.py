@@ -212,7 +212,7 @@ class Vosekast():
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.state = PREPARING_MEASURMENT
-
+        
     def ready_to_measure(self):
         """
         is vosekast ready to measure

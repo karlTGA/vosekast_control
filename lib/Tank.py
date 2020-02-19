@@ -91,7 +91,8 @@ class Tank():
         time_filling_t0 = datetime.now()
         #close valves, start pump
         self.vosekast.prepare_measuring()
-
+        self.logger.debug("fill/vosekast/prepare_measuring completed")
+        self.logger.debug(self.state)
         #check if constant_tank full
         while not self.vosekast.constant_tank.is_filled and self.state == States.RUNNING:
             time_filling_t1 = datetime.now()

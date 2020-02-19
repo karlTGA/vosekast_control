@@ -48,8 +48,9 @@ class TestSequence():
             #print("soon set state")
             # change state
             self.state = States.RUNNING
+            self.tank.state = States.RUNNING
             self.change_state(self.state)
-            #print("state set, now await fill")
+            print("state set, now await fill")
 
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
@@ -66,7 +67,7 @@ class TestSequence():
             # create csv file
             self.vosekast.create_file()
             self.logger.info("Created file.")
-            
+            print("here2")
             # todo turn on pump
 
             # loop
@@ -99,6 +100,7 @@ class TestSequence():
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
+        self.tank.state = States.STOPPED
         self.logger.debug('Stop sequence')
         self.vosekast.clean()
 
