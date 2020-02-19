@@ -31,7 +31,7 @@ PIN_VALVE_MEASURING_DRAIN = 18
 PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
 PIN_LEVEL_CONSTANT_LOW = 5
-PIN_LEVEL_CONSTANT_HIGH = 26
+PIN_LEVEL_CONSTANT_HIGH = 6
 
 # PUMP IDS
 CONSTANT_PUMP = "CONSTANT_PUMP"
@@ -268,7 +268,7 @@ class Vosekast():
     async def run(self):
         self.scale.open_connection()
         await asyncio.sleep(1)
-        await self.scale.start_measurement_thread()
+        self.scale.start_measurement_thread()
                 
         await self.mqtt_client.connect()
         self.logger.debug("Vosekast started ok.")
@@ -349,7 +349,7 @@ class Vosekast():
                 elif command['command'] == 'close_connection':
                     self.scale.close_connection()
                 elif command['command'] == 'start_measurement_thread':
-                    await self.scale.start_measurement_thread()
+                    self.scale.start_measurement_thread()
                 elif command['command'] == 'stop_measurement_thread':
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'get_stable_value':

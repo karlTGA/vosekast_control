@@ -1,5 +1,4 @@
 import serial
-import asyncio
 from collections import deque
 from threading import Thread
 from time import sleep
@@ -71,13 +70,13 @@ class Scale:
         else:
             self.logger.info("Emulating close_connection scale.")
 
-    async def loop(self):
+    def loop(self):
         self.logger.info("Start measuring loop.")
 
         # check if already running
         if self.is_running != True:
             self.open_connection()
-            await self.start_measurement_thread()
+            self.start_measurement_thread()
 
         while self.run:
             
@@ -112,7 +111,7 @@ class Scale:
             self.logger.info("Scale not ready. Printing diagnostics.")
             self.print_diagnostics()
 
-    async def start_measurement_thread(self):
+    def start_measurement_thread(self):
         self.run = True
 
         if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
@@ -124,7 +123,6 @@ class Scale:
             self.thread_readscale = Thread(target = self._scale_input_buffer)
             self.thread_readscale.start()
             self.threads.append(self.thread_readscale)
-            await asyncio.sleep(0.5)
 
             self.thread_loop.start()
                     
