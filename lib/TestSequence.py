@@ -45,24 +45,24 @@ class TestSequence():
 
             self.logger.info("Initialising sequence.")
             
-            print("soon set state")
+            #print("soon set state")
             # change state
             self.state = States.RUNNING
             self.change_state(self.state)
-            print("state set, now await fill")
+            #print("state set, now await fill")
 
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
+            
             # check
-            print(self.vosekast.ready_to_measure())
             if not self.vosekast.ready_to_measure():
                 print("Vosekast not ready to measure.")
                 pass
-            print("soon create file")
+
             # create csv file
             self.vosekast.create_file()
-            print("created file")
-
+            self.logger.info("Created file.")
+            
             # todo turn on pump
 
             # loop
@@ -87,10 +87,11 @@ class TestSequence():
             
             # testing>
             self.logger.debug(self.vosekast.ready_to_measure())
-            
-            if self.vosekast.constant_tank.is_filled:
-                self.stop_sequence()
             # <testing
+
+            self.stop_sequence()
+            self.logger.error("Stopped sequence.")
+            
 
 
         

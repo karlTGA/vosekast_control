@@ -85,14 +85,14 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        print("reached fill function")
+        #print("reached fill function")
         #get time
         time_filling_t0 = datetime.now()
         #close valves, start pump
         self.vosekast.prepare_measuring()
 
         #check if constant_tank full
-        while not self.vosekast.constant_tank.is_filled:
+        while not self.vosekast.constant_tank.is_filled and self.state == States.RUNNING:
             time_filling_t1 = datetime.now()
             time_filling_passed = time_filling_t1 - time_filling_t0
             delta_time_filling = time_filling_passed.total_seconds()
