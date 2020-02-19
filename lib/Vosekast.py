@@ -267,7 +267,7 @@ class Vosekast():
 
     async def run(self):
         self.scale.open_connection()
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         self.scale.start_measurement_thread()
                 
         await self.mqtt_client.connect()

@@ -121,9 +121,9 @@ class Scale:
             self.thread_loop = Thread(target = self.loop)
             self.threads.append(self.thread_loop)
             self.thread_readscale = Thread(target = self._scale_input_buffer)
-            self.thread_readscale.start()
             self.threads.append(self.thread_readscale)
-
+            self.logger.info("Starting Threads loop & readscale.")
+            self.thread_readscale.start()
             self.thread_loop.start()
                     
     # diagnostics
