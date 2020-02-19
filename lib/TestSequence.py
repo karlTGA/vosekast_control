@@ -48,7 +48,6 @@ class TestSequence():
             #print("soon set state")
             # change state
             self.state = States.RUNNING
-            self.tank.state = States.RUNNING
             self.change_state(self.state)
             print("state set, now await fill")
 
@@ -88,7 +87,7 @@ class TestSequence():
         
         #TankFillingTimeout
         except:
-            self.logger.error("TankFillingTimeout, aborting test sequence.")
+            self.logger.error("Error, aborting test sequence.")
             
             self.stop_sequence()
             self.logger.error("Stopped sequence.")
@@ -100,7 +99,6 @@ class TestSequence():
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
-        self.tank.state = States.STOPPED
         self.logger.debug('Stop sequence')
         self.vosekast.clean()
 
