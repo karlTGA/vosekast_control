@@ -16,7 +16,8 @@ GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(6, GPIO.IN)
 
-        
+print("starting")        
+
 while True:
     print(GPIO.input(6))
     print("sleep")
