@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
+from datetime import datetime
+
 
 
 # GPIO Assignment
@@ -27,7 +29,7 @@ while True:
     if constant_high_old == constant_high_new:
         pass
     else:
-        print("LEVEL_CONSTANT_HIGH = " + str(GPIO.input(6)))
+        print("LEVEL_CONSTANT_HIGH = " + str(GPIO.input(6)) + " " + str(datetime.now()))
         #print("LEVEL_CONSTANT_LOW = " + str(GPIO.input(5)))
     
 
