@@ -57,7 +57,8 @@ class TestSequence():
             # check
             if not self.vosekast.ready_to_measure():
                 self.logger.debug("Vosekast not ready to measure.")
-                self.logger.debug("constant_tank_ready: "+ str(constant_tank_ready))
+                print("here")
+                self.logger.debug("constant_tank_ready: " + str(constant_tank_ready))
                 self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
                 self.logger.debug("constant_pump_running: " + str(constant_pump_running))
                 return
