@@ -14,7 +14,7 @@ class LevelSensor:
         self._gpio_controller = gpio_controller
 
         # init gpio_pins
-        self._gpio_controller.setup(self._pin, self._gpio_controller.IN)
+        self._gpio_controller.setup(self._pin, self._gpio_controller.IN, pull_up_down=GPIO.PUD_DOWN)
 
         # add a thread for event detection
         self._gpio_controller.add_event_detect(
