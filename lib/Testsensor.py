@@ -12,25 +12,14 @@ PIN_LEVEL_MEASURING_LOW = 25
 PIN_LEVEL_CONSTANT_LOW = 5
 PIN_LEVEL_CONSTANT_HIGH = 6
 
-class Testsensor():
+GPIO.setmode(GPIO.BCM)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-
-        try:
-            self._gpio_controller = GPIO
-            # define how the pins are numbered on the board
-            self._gpio_controller.setmode(self._gpio_controller.BCM)
-            self._gpio_controller.setup(6, GPIO.IN)
-
-        except:
-            pass
+GPIO.setup(6, GPIO.IN)
 
         
-    def loop(self):
-        while True:
-            print(self._gpio_controller.input(6))
-            sleep(1)
+while True:
+    print(GPIO.input(6))
+    print("sleep")
+    sleep(1)
 
        
