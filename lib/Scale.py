@@ -156,10 +156,13 @@ class Scale:
         if self.connection is not None and self.connection.is_open:
             while self.run:
                 scale_input = self.connection.readline()
-                print(scale_input)
-                print(len(scale_input))
+                
+                # if readline reads less than 16 char reuse last value 
+                if len(scale_input) != 16:
+                    scale_input = self.scale_input_buffer[0]
+
                 self.scale_input_buffer.appendleft(scale_input)
-                sleep(0.1)
+                sleep(0.05)
             
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
