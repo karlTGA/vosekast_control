@@ -38,14 +38,15 @@ class TestSequence():
 
     async def start_sequence(self):
         try:
+            self.logger.info("Initialising sequence.")
+
             # check if already running
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
+                self.logger.info("Initialising connection, measurement thread.")
+                sleep(3)
 
-            self.logger.info("Initialising sequence.")
-            
-            #print("soon set state")
             # change state
             self.state = States.RUNNING
             self.change_state(self.state)
@@ -57,7 +58,6 @@ class TestSequence():
             # check
             if not self.vosekast.ready_to_measure():
                 self.logger.debug("Vosekast not ready to measure.")
-                print("here")
                 self.logger.debug("constant_tank_ready: " + str(constant_tank_ready))
                 self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
                 self.logger.debug("constant_pump_running: " + str(constant_pump_running))
@@ -66,7 +66,7 @@ class TestSequence():
             # create csv file
             self.vosekast.create_file()
             self.logger.info("Created file.")
-            print("here2")
+            
             # todo turn on pump
 
             # loop
@@ -90,6 +90,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             self.stop_sequence()
+            self.tank.stop_fill()
             self.logger.error("Stopped sequence.")
             
 
@@ -100,6 +101,7 @@ class TestSequence():
         self.state = States.STOPPED
         self.change_state(self.state)
         self.logger.debug('Stop sequence')
+        self.tank.stop_fill()
         self.vosekast.clean()
 
     def pause_sequence(self):
