@@ -230,7 +230,9 @@ class Vosekast():
 
         if constant_tank_ready and measuring_tank_ready and constant_pump_running:
             self.logger.info("Ready to start measuring.")
-
+        self.logger.debug("constant_tank_ready: " + str(constant_tank_ready))
+        self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
+        self.logger.debug("constant_pump_running: " + str(constant_pump_running))
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
         # return True
 
