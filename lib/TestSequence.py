@@ -39,6 +39,7 @@ class TestSequence():
     async def start_sequence(self):
         try:
             # check if already running
+            print(self.scale.is_running)
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
@@ -52,10 +53,16 @@ class TestSequence():
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
             # check
-            self.vosekast.ready_to_measure()
+            if not self.vosekast.ready_to_measure():
+                print("Vosekast not ready to measure.")
+                pass
+
             # create csv file
             self.vosekast.create_file()
-            
+            print("created file")
+
+            # todo turn on pump
+
             # loop
             while not self.vosekast.measuring_tank.is_filled and self.state == States.RUNNING:
                 #write values to csv file

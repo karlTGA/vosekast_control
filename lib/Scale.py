@@ -160,6 +160,7 @@ class Scale:
                 # if readline reads less than 16 char reuse last value 
                 if len(scale_input) != 16:
                     scale_input = self.scale_input_buffer[0]
+                    print("readline() read less than 16 char. Reusing last value.")
 
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(0.05)
@@ -199,9 +200,8 @@ class Scale:
 
         #calculate volume flow
         if len(self.scale_history) > 2:
-            # todo: check timestamp
 
-            #dictionary: value, timestamp
+            #todo dictionary: value, timestamp
             delta = self.scale_history[0] - self.scale_history[2]
             delta_weight = abs(delta)
 

@@ -69,14 +69,14 @@ class Tank():
         else:
             self.logger.debug(
                 "No drain valve on the tank {}".format(self.name))
-            mqttmsg = StatusMessage(self.name, 'Drain valve missing.', None, None, None)
+            #mqttmsg = StatusMessage(self.name, 'Drain valve missing.', None, None, None)
             self.mqtt.publish_message(mqttmsg)
             return
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
-        mqttmsg = StatusMessage(
-            self.name, 'Ready to fill the tank.', None, None, None)
-        self.mqtt.publish_message(mqttmsg)
+        #mqttmsg = StatusMessage(
+        #    self.name, 'Ready to fill the tank.', None, None, None)
+        #self.mqtt.publish_message(mqttmsg)
 
     async def _up_state_changed(self, pin, alert):
         if alert:
@@ -104,10 +104,7 @@ class Tank():
 
             self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
             await asyncio.sleep(1)
-            #time_start = time.time()
-            #if (time.time() - time.start > 90):
-            #    time_start = time.time()
-            #    function irgendwas          
+        
         return
 
     def _on_draining(self):

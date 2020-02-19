@@ -206,7 +206,9 @@ class Vosekast():
         before we can measure we have to prepare the station
         :return:
         """
+        # close MDV,
         # fill the constant tank
+        self.measuring_drain_valve.close()
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.state = PREPARING_MEASURMENT
@@ -217,7 +219,7 @@ class Vosekast():
         :return: measuring ready
         """
 
-        #todo install level_sensor
+        #constant tank ready
         constant_tank_ready = self.constant_tank.is_filled
         #todo fix
         measuring_tank_ready = (
@@ -228,11 +230,9 @@ class Vosekast():
 
         if constant_tank_ready and measuring_tank_ready and constant_pump_running:
             self.logger.info("Ready to start measuring.")
-        self.logger.debug("constant_tank_ready: "+ str(constant_tank_ready))
-        self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
-        self.logger.debug("measuring_drain_valve.is_closed: " + str(self.measuring_drain_valve.is_closed))
-        self.logger.debug("measuring_tank.is_filled: " + str(self.measuring_tank.is_filled))
-        self.logger.debug("constant_pump_running: " + str(constant_pump_running))
+        #self.logger.debug("constant_tank_ready: "+ str(constant_tank_ready))
+        #self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
+        #self.logger.debug("constant_pump_running: " + str(constant_pump_running))
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
         # return True
 
