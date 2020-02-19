@@ -20,8 +20,15 @@ GPIO.setup(6, GPIO.IN)
 print("printing GPIO.input:")        
 
 while True:
-    print("LEVEL_CONSTANT_HIGH = " + str(GPIO.input(6)))
-    print("LEVEL_CONSTANT_LOW = " + str(GPIO.input(5)))
-    sleep(0.5)
+    constant_high_old = GPIO.input(6)
+    sleep(0.1)
+    constant_high_new = GPIO.input(6)
+
+    if constant_high_old == constant_high_new:
+        pass
+    else:
+        print("LEVEL_CONSTANT_HIGH = " + str(GPIO.input(6)))
+        #print("LEVEL_CONSTANT_LOW = " + str(GPIO.input(5)))
+    
 
        
