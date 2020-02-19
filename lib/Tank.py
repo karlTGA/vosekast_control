@@ -2,6 +2,7 @@ import logging
 from lib.Log import LOGGER
 import asyncio
 from lib.utils.Msg import StatusMessage
+from lib.EnumStates import States
 from datetime import datetime
 
 class TankFillingTimeout(Exception):

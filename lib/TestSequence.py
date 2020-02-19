@@ -85,10 +85,6 @@ class TestSequence():
         except:
             self.logger.error("TankFillingTimeout, aborting test sequence.")
             
-            # testing>
-            self.logger.debug(self.vosekast.ready_to_measure())
-            # <testing
-
             self.stop_sequence()
             self.logger.error("Stopped sequence.")
             
@@ -99,7 +95,7 @@ class TestSequence():
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
-        self.logger.debug('stop_sequence')
+        self.logger.debug('Stop sequence')
         self.vosekast.clean()
 
     def pause_sequence(self):
