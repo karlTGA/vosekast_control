@@ -48,8 +48,8 @@ class TestSequence():
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
-                self.logger.info("Initialising connection, measurement thread.")
-                await asyncio.sleep(3)
+                self.logger.info("Initialising connection, measurement thread. Please wait.")
+                await asyncio.sleep(10)
 
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
@@ -67,6 +67,7 @@ class TestSequence():
             self.logger.info("Created file.")
             
             # todo turn on pump
+            await self.vosekast.measuring_tank.fill()
 
             # loop
             while not self.vosekast.measuring_tank.is_filled and self.state == States.RUNNING:

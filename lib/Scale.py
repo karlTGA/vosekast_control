@@ -155,7 +155,7 @@ class Scale:
 
     def _scale_input_buffer(self):
         if self.connection is not None and self.connection.is_open:
-            self.scale_input_buffer.appendleft('+ 0.000 kg')
+            self.scale_input_buffer.appendleft(b'+ 0.000 kg')
             while self.run:
                 scale_input = self.connection.readline()
                 
