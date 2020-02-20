@@ -141,6 +141,7 @@ class Scale:
         self.logger.debug("self.run = " + str(self.run))
         self.logger.debug(self.scale_history)
         self.logger.debug(self.flow_history)
+        self.logger.debug(self.scale_input_buffer)
        
     def stop_measurement_thread(self):
         self.run = False
@@ -179,7 +180,7 @@ class Scale:
             line = self.scale_input_buffer[0]
             
             splitted_line = line.split()
-            # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
+            print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
 
             self.logger.debug("Measured {}".format(line))
             
