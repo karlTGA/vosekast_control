@@ -273,8 +273,8 @@ class Vosekast():
         #    valve.close()
 
         # stop scale
-        self.scale.stop_measurement_thread()
-        self.scale.close_connection()
+        #self.scale.stop_measurement_thread()
+        #self.scale.close_connection()
 
         # GPIO cleanup
         self._gpio_controller.cleanup()

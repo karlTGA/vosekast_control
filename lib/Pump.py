@@ -26,13 +26,15 @@ class Pump():
         :return:
         """
         self.logger.debug("Stopping pump {}".format(self.name))
+        self.vosekast._gpio_controller.setmode(self.vosekast._gpio_controller.BCM)
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
+        
 
         # publish States.STOPPED.value via mqtt
-        mqttmsg = StatusMessage(self.name, States.STOPPED.value, "%", None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
+        #mqttmsg = StatusMessage(self.name, States.STOPPED.value, "%", None, None)
+        #if self.mqtt.connection_test():
+        #    self.mqtt.publish_message(mqttmsg)
 
     def start(self):
         """
