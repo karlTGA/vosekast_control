@@ -269,15 +269,15 @@ class Vosekast():
             pump.stop()
 
         # close valves
-        for valve in self.valves:
-            valve.close()
+        #for valve in self.valves:
+        #    valve.close()
 
         # stop scale
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-        # todo RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
-
+        # GPIO cleanup
+        self._gpio_controller.cleanup()
 
     async def run(self):
         self.scale.open_connection()
