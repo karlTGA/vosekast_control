@@ -71,7 +71,7 @@ class Scale:
             self.logger.info("Emulating close_connection scale.")
 
     def loop(self):
-        self.logger.info("Start measuring loop.")
+        self.logger.debug("Start measuring loop.")
 
         # check if already running
         if self.is_running != True:
@@ -105,15 +105,15 @@ class Scale:
     @property
     def is_running(self):
         if self.run == True and self.thread_loop.is_alive == True:
-            self.logger.info("Scale ready.")
+            self.logger.debug("Scale ready.")
             return True
         elif self.run == True:
-            self.logger.info("Waiting for thread_loop.")
+            self.logger.debug("Waiting for thread_loop.")
             return True
         elif self.run != True:
-            self.logger.info("self.run != True")
+            self.logger.warning("self.run != True")
         else:
-            self.logger.info("Scale not ready. Printing diagnostics.")
+            self.logger.warning("Scale not ready. Printing diagnostics.")
             self.print_diagnostics()
 
     def start_measurement_thread(self):
@@ -127,21 +127,28 @@ class Scale:
             self.threads.append(self.thread_loop)
             self.thread_readscale = Thread(target = self._scale_input_buffer)
             self.threads.append(self.thread_readscale)
-            self.logger.info("Starting Threads loop & readscale.")
+            self.logger.debug("Starting Threads loop & readscale.")
             self.thread_readscale.start()
             self.thread_loop.start()
                     
     # diagnostics
     def print_diagnostics(self):
-        self.logger.debug(self.threads)
-        #self.logger.debug("self.connection: "+ str(self.connection))
+        self.logger.debug("Printing diagnostics:")
+        self.logger.debug("self.threads: " + str(self.threads))
         self.logger.debug("self.connection.is_open: " +str(self.connection.is_open))
         self.logger.debug("Thread loop alive: " + str(self.thread_loop.is_alive()))
         self.logger.debug("Thread readscale alive: " + str(self.thread_readscale.is_alive()))
         self.logger.debug("self.run = " + str(self.run))
+        self.logger.debug("constant_tank_ready: " + str(self.vosekast.constant_tank_ready))
+        self.logger.debug("measuring_tank_ready: " + str(self.vosekast.measuring_tank_ready))
+        self.logger.debug("constant_pump_running: " + str(self.vosekast.constant_pump_running))
+        self.logger.info("measuring_drain_valve.is_closed: " + str(self.vosekast.measuring_drain_valve.is_closed))
+        self.logger.info("measuring_tank.is_filled: " + str(self.vosekast.measuring_tank.is_filled))
+        self.logger.debug("deques: (self.scale_history, self.flow_history, self.scale_input_buffer)")
         self.logger.debug(self.scale_history)
         self.logger.debug(self.flow_history)
         self.logger.debug(self.scale_input_buffer)
+
        
     def stop_measurement_thread(self):
         self.run = False
@@ -196,8 +203,9 @@ class Scale:
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
                 return new_value
+
             elif len(splitted_line) == 2:
-                splitted_line_formatted = splitted_line[0]
+                splitted_line_formatted = splitted_line[1]
 
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")

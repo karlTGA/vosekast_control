@@ -212,7 +212,19 @@ class Vosekast():
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.state = PREPARING_MEASURMENT
-        
+
+    async def test(self):
+        try:
+            self.measuring_tank.prepare_to_fill()
+            self.pump_measuring_tank.start()
+            self.state = PREPARING_MEASURMENT
+            await asyncio.sleep(60)
+            self.measuring_drain_valve.open()
+            self.pump_measuring_tank.stop()
+            self.logger.debug("Test completed.")
+        except:
+            self.logger.debug("Test aborted.")
+      
     def ready_to_measure(self):
         """
         is vosekast ready to measure
@@ -230,9 +242,7 @@ class Vosekast():
 
         if constant_tank_ready and measuring_tank_ready and constant_pump_running:
             self.logger.info("Ready to start measuring.")
-        self.logger.debug("constant_tank_ready: " + str(constant_tank_ready))
-        self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
-        self.logger.debug("constant_pump_running: " + str(constant_pump_running))
+
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
         # return True
 
@@ -381,12 +391,12 @@ class Vosekast():
                     self.prepare_measuring()
                 elif command['command'] == 'ready_to_measure':
                     self.ready_to_measure()
-                elif command['command'] == 'test_diagnostics':
-                    self.testsequence.diagnostics()
                 elif command['command'] == 'start_sequence':
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
                     self.testsequence.stop_sequence()
+                elif command['command'] == 'test':
+                    await self.test()
 
                 else:
                     self.logger.warning(

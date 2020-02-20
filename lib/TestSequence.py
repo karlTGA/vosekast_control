@@ -31,11 +31,6 @@ class TestSequence():
         self.scale_value_start = []
         self.scale_value_stop = []
 
-    def diagnostics(self):
-        self.logger.info(self.state)
-        self.logger.info(self.vosekast.measuring_drain_valve.is_closed)
-        self.logger.info(self.vosekast.measuring_tank.is_filled)
-
     async def start_sequence(self):
         try:
             self.logger.info("Initialising sequence.")
@@ -57,9 +52,7 @@ class TestSequence():
             # check
             if not self.vosekast.ready_to_measure():
                 self.logger.debug("Vosekast not ready to measure.")
-                self.logger.debug("constant_tank_ready: " + str(constant_tank_ready))
-                self.logger.debug("measuring_tank_ready: " + str(measuring_tank_ready))
-                self.logger.debug("constant_pump_running: " + str(constant_pump_running))
+                self.scale.print_diagnostics()
                 return
 
             # create csv file
@@ -83,6 +76,7 @@ class TestSequence():
 
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
+                self.logger.info("Measuring Tank full, stopping sequence.")
                 self.stop_sequence()
         
         #TankFillingTimeout
