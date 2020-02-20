@@ -26,7 +26,7 @@ WEIGHT_stop = "weight_stop"
 # GPIO Assignment
 PIN_PUMP_CONSTANT = 17
 PIN_PUMP_MEASURING = 27
-PIN_VALVE_MEASURING_SWITCH = 12
+PIN_VALVE_MEASURING_SWITCH = 22
 PIN_VALVE_MEASURING_DRAIN = 18
 PIN_LEVEL_MEASURING_HIGH = 24
 PIN_LEVEL_MEASURING_LOW = 25
@@ -277,6 +277,9 @@ class Vosekast():
         # stop scale
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
+
+        # todo RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+
 
     async def run(self):
         self.scale.open_connection()
