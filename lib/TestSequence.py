@@ -86,7 +86,6 @@ class TestSequence():
             
             self.stop_sequence()
             self.vosekast.constant_tank.stop_fill()
-            self.logger.error("Stopped sequence.")
             
 
 
@@ -95,8 +94,9 @@ class TestSequence():
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
-        self.logger.debug('Stop sequence')
-        self.vosekast.constant_tank.stop_fill()
+        self.logger.debug('Stopped test sequence')
+        #self.vosekast.constant_tank.stop_fill()
+        self.vosekast.measuring_drain_valve.open()
         self.vosekast.clean()
 
     def pause_sequence(self):
