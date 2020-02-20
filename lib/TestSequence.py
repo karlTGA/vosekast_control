@@ -40,17 +40,16 @@ class TestSequence():
         try:
             self.logger.info("Initialising sequence.")
 
+            # change state
+            self.state = States.RUNNING
+            self.change_state(self.state)
+
             # check if already running
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
                 self.logger.info("Initialising connection, measurement thread.")
-                sleep(3)
-
-            # change state
-            self.state = States.RUNNING
-            self.change_state(self.state)
-            print("state set, now await fill")
+                await asyncio.sleep(3)
 
             # await constant_tank full
             await self.vosekast.constant_tank.fill()

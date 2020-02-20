@@ -180,13 +180,13 @@ class Scale:
             line = self.scale_input_buffer[0]
             
             splitted_line = line.split()
-            print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
+            # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
 
             self.logger.debug("Measured {}".format(line))
             
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
-                #splitted_line_formatted = "".join(splitted_line[:2])
+                
                 # print("splitted_line_formatted: " + str(splitted_line_formatted)) #splitted_line_formatted: b'0.019'
                 
                 if splitted_line[0] == b'-':
@@ -202,7 +202,7 @@ class Scale:
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")
                     return
-                              
+
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
                 return new_value
