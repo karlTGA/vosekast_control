@@ -96,7 +96,7 @@ class TestSequence():
         self.change_state(self.state)
         self.logger.debug('Stopped test sequence')
         #self.vosekast.constant_tank.stop_fill()
-        self.vosekast.measuring_tank.drain_tank()
+        
 
         self.vosekast.clean()
 

@@ -271,6 +271,7 @@ class Vosekast():
         # close valves
         #for valve in self.valves:
         #    valve.close()
+        self.measuring_tank.drain_tank()
 
         # stop scale
         #self.scale.stop_measurement_thread()

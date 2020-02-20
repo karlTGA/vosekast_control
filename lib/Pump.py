@@ -26,7 +26,6 @@ class Pump():
         :return:
         """
         self.logger.debug("Stopping pump {}".format(self.name))
-        self.vosekast._gpio_controller.setmode(self.vosekast._gpio_controller.BCM)
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
         
