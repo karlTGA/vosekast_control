@@ -210,6 +210,9 @@ class Scale:
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")
                     return
+                if splitted_line[1] == b'kg':
+                    self.logger.info("No input.")
+                    return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
