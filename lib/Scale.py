@@ -189,9 +189,20 @@ class Scale:
                 #splitted_line_formatted = "".join(splitted_line[:2])
                 # print("splitted_line_formatted: " + str(splitted_line_formatted)) #splitted_line_formatted: b'0.019'
                 
+                if splitted_line[0] == b'-':
+                    self.logger.warning("Negative weight. Discarding value.")
+                    return
+
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
                 return new_value
+            elif len(splitted_line) == 2:
+                splitted_line_formatted = splitted_line[0]          
+                splitted_line_str = splitted_line_formatted.decode("utf-8")
+                new_value = float(splitted_line_str)
+                return new_value
+            else:
+                self.logger.warning("Scale output too short.")
                 
         elif self.connection is not None:
             return 0.00        
