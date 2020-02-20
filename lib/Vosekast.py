@@ -218,11 +218,9 @@ class Vosekast():
             self.measuring_tank.prepare_to_fill()
             self.pump_measuring_tank.start()
             self.state = PREPARING_MEASURMENT
-            self.measuring_tank_switch.close()
-            await asyncio.sleep(20)
             self.measuring_tank_switch.open()
-            await asyncio.sleep(20)
-            self.measuring_drain_valve.open()
+            await asyncio.sleep(100)
+            self.measuring_drain_valve.close()
             self.pump_measuring_tank.stop()
             self.logger.debug("Test completed.")
         except:
