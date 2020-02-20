@@ -197,7 +197,12 @@ class Scale:
                 new_value = float(splitted_line_str)
                 return new_value
             elif len(splitted_line) == 2:
-                splitted_line_formatted = splitted_line[0]          
+                splitted_line_formatted = splitted_line[0]
+
+                if splitted_line[0] == b'-':
+                    self.logger.warning("Negative weight. Discarding value.")
+                    return
+                              
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
                 return new_value
