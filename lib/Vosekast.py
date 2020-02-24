@@ -252,12 +252,16 @@ class Vosekast():
             writer.writerow(["timestamp", "scale value"])
         
     async def shutdown(self):
-        # drain the measuring tank
-        self.measuring_tank.drain_tank()
-        self.logger.info("Measuring tank is empty.")
+        
         self.clean()
         self.logger.info("Shutting down.")
+
+        # GPIO cleanup
+        self._gpio_controller.cleanup()
+        self.logger.debug("GPIO cleanup.")  
+
         await self.mqtt_client.disconnect()
+        self.logger.debug("MQTT client disconnected.")
         os.system('sudo shutdown -h now')
 
     def clean(self):
@@ -279,19 +283,15 @@ class Vosekast():
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-        
-        # GPIO cleanup
-        self._gpio_controller.cleanup()
-        self.logger.debug("GPIO cleanup.")     
 
-    def initialise_gpio(self):
-        try:
-            # define how the pins are numbered on the board
-            self._gpio_controller.setmode(self._gpio_controller.BCM)
-            self.logger.debug("GPIO setmode ok.")
-            sleep(0.5)
-        except:
-            self.logger.error("GPIO setmode failed.")
+    #def initialise_gpio(self):
+    #   try:
+    #      # define how the pins are numbered on the board
+    #      self._gpio_controller.setmode(self._gpio_controller.BCM)
+    #      self.logger.debug("GPIO setmode ok.")
+    #      sleep(0.5)
+    #   except:
+    #        self.logger.error("GPIO setmode failed.")
 
     async def run(self):
         self.scale.open_connection()
