@@ -64,9 +64,6 @@ class Vosekast():
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
 
-            # add store to create checkboxes
-            #self.VosekastStore = VosekastStore(self)
-
             # valves
             self.measuring_drain_valve = Valve(
                 self,
@@ -275,16 +272,19 @@ class Vosekast():
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
 
-        self.measuring_tank_switch.open()
+        self.measuring_tank_switch.close()
         self.logger.debug("Open measuring tank switch.")
 
         # stop scale
         #self.scale.stop_measurement_thread()
         #self.scale.close_connection()
 
-        # GPIO cleanup
-        self._gpio_controller.cleanup()
-        self.logger.debug("GPIO cleanup.")
+        try:
+            # GPIO cleanup
+            self._gpio_controller.cleanup()
+            self.logger.debug("GPIO cleanup.")
+        except:
+            self.logger.warning("GPIO mode not set. Run start_measurement_thread to set GPIO mode.")
 
     def initialise_gpio(self):
         try:
@@ -296,7 +296,6 @@ class Vosekast():
 
     async def run(self):
         self.scale.open_connection()
-        #await asyncio.sleep(2)
         self.scale.start_measurement_thread()
                 
         await self.mqtt_client.connect()

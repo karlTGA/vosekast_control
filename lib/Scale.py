@@ -96,7 +96,7 @@ class Scale:
                     self.scale_history.appendleft(self.timestamp)
                     self.scale_history.appendleft(new_value) 
                 else:
-                    self.logger.warning("Reached loop with new value = None. Did you remember to turn on the scale?")
+                    self.logger.warning("Reached loop with new value = None.")
                 
             sleep(5)
             
