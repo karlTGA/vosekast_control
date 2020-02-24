@@ -267,16 +267,16 @@ class Vosekast():
         # shutdown pumps
         #for pump in self.pumps:
         #    pump.stop()
-        self.logger.info("All pumps switched off.")
+        self.logger.debug("All pumps switched off.")
 
         # close valves
         #for valve in self.valves:
         #    valve.close()
         self.measuring_tank.drain_tank()
-        self.logger.info("Draining measuring tank.")
+        self.logger.debug("Draining measuring tank.")
 
         self.measuring_tank_switch.open()
-        self.logger.info("Open measuring tank switch.")
+        self.logger.debug("Open measuring tank switch.")
 
         # stop scale
         #self.scale.stop_measurement_thread()
@@ -284,6 +284,7 @@ class Vosekast():
 
         # GPIO cleanup
         self._gpio_controller.cleanup()
+        self.logger.debug("GPIO cleanup.")
 
     async def run(self):
         self.scale.open_connection()

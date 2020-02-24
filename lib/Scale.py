@@ -108,7 +108,7 @@ class Scale:
             self.logger.debug("Scale ready.")
             return True
         elif self.run == True:
-            self.logger.debug("Waiting for thread_loop.")
+            self.logger.info("Waiting for thread_loop.")
             return True
         elif self.run != True:
             self.logger.warning("self.run != True")
