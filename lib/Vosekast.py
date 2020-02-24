@@ -265,8 +265,8 @@ class Vosekast():
 
     def clean(self):
         # shutdown pumps
-        #for pump in self.pumps:
-        #    pump.stop()
+        for pump in self.pumps:
+            pump.stop()
         self.logger.debug("All pumps switched off.")
 
         # close valves
@@ -285,6 +285,14 @@ class Vosekast():
         # GPIO cleanup
         self._gpio_controller.cleanup()
         self.logger.debug("GPIO cleanup.")
+
+    def initialise_gpio(self):
+        try:
+            self._gpio_controller = gpio_controller
+            # define how the pins are numbered on the board
+            self._gpio_controller.setmode(self._gpio_controller.BCM)
+        except:
+            self.logger.error("GPIO setmode failed.")
 
     async def run(self):
         self.scale.open_connection()
