@@ -276,8 +276,8 @@ class Vosekast():
         self.logger.debug("Open measuring tank switch.")
 
         # stop scale
-        #self.scale.stop_measurement_thread()
-        #self.scale.close_connection()
+        self.scale.stop_measurement_thread()
+        self.scale.close_connection()
 
         
         # GPIO cleanup
@@ -286,7 +286,6 @@ class Vosekast():
 
     def initialise_gpio(self):
         try:
-            self._gpio_controller = gpio_controller
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
             self.logger.debug("GPIO setmode ok.")

@@ -41,7 +41,7 @@ class TestSequence():
 
             # check if already running
             if self.scale.is_running != True:
-                self.vosekast.initialise_gpio()
+                await self.vosekast.initialise_gpio()
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
                 self.logger.info("Initialising connection, measurement thread. Please wait.")
@@ -91,15 +91,12 @@ class TestSequence():
             self.vosekast.constant_tank.stop_fill()
             
 
-
-        
-
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
         self.logger.debug('Stopped test sequence')
-        #self.vosekast.constant_tank.stop_fill()
         self.vosekast.constant_tank.stop_fill()
+        #self.scale.stop_measurement_thread()
 
         self.vosekast.clean()
 
