@@ -267,12 +267,16 @@ class Vosekast():
         # shutdown pumps
         for pump in self.pumps:
             pump.stop()
+        self.logger.info("All pumps switched off.")
 
         # close valves
         #for valve in self.valves:
         #    valve.close()
         self.measuring_tank.drain_tank()
-        self.measuring_tank_switch.close()
+        self.logger.info("Draining measuring tank.")
+
+        self.measuring_tank_switch.open()
+        self.logger.info("Open measuring tank switch.")
 
         # stop scale
         #self.scale.stop_measurement_thread()
@@ -403,6 +407,8 @@ class Vosekast():
                     self.testsequence.stop_sequence()
                 elif command['command'] == 'test':
                     await self.test()
+                elif command['command'] == 'clean':
+                    self.clean()
 
                 else:
                     self.logger.warning(
