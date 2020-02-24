@@ -63,6 +63,7 @@ class MQTTController():
         except ValueError:
             self.logger.debug("unexpected formatting: " +
                   str(payload.decode("utf-8")))
+            self.logger.debug(ValueError)
         except KeyError:
             self.logger.debug("Got message without type.")
 
