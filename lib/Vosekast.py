@@ -279,12 +279,10 @@ class Vosekast():
         #self.scale.stop_measurement_thread()
         #self.scale.close_connection()
 
-        try:
-            # GPIO cleanup
-            self._gpio_controller.cleanup()
-            self.logger.debug("GPIO cleanup.")
-        except:
-            self.logger.warning("GPIO mode not set. Run start_measurement_thread to set GPIO mode.")
+        
+        # GPIO cleanup
+        self._gpio_controller.cleanup()
+        self.logger.debug("GPIO cleanup.")     
 
     def initialise_gpio(self):
         try:

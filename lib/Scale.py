@@ -118,7 +118,7 @@ class Scale:
 
     def start_measurement_thread(self):
         self.run = True
-        self.vosekast.initialise_gpio()
+        #self.vosekast.initialise_gpio()
 
         if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
             self.logger.info("Threads alive.")
