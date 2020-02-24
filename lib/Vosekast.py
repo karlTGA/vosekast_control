@@ -289,6 +289,8 @@ class Vosekast():
             self._gpio_controller = gpio_controller
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
+            self.logger.debug("GPIO setmode ok.")
+            sleep(0.5)
         except:
             self.logger.error("GPIO setmode failed.")
 
