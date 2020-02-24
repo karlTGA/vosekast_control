@@ -41,7 +41,7 @@ class TestSequence():
 
             # check if already running
             if self.scale.is_running != True:
-                await self.vosekast.initialise_gpio()
+                self.vosekast.initialise_gpio()
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
                 self.logger.info("Initialising connection, measurement thread. Please wait.")
