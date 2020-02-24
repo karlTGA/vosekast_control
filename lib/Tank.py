@@ -92,7 +92,7 @@ class Tank():
         #close valves, start pump
         self.vosekast.prepare_measuring()
         self.state = self.BETWEEN
-        self.logger.debug(self.state)
+        self.logger.debug("{} state".format(self.name) + str(self.state))
 
         #check if constant_tank full
         while not self.vosekast.constant_tank.is_filled and self.state != self.STOPPED:
@@ -113,7 +113,7 @@ class Tank():
 
     def stop_fill(self):
         self.state = self.STOPPED
-        self.logger.debug(self.state)
+        self.logger.debug("{} state".format(self.name) + str(self.state))
 
     def _on_draining(self):
         """
