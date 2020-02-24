@@ -168,13 +168,14 @@ class Scale:
                 scale_input = self.connection.readline()
                 
                 # if readline reads less than 16 char reuse last value 
-                if len(scale_input) != 16:
-                    scale_input = self.scale_input_buffer[0]
-                    print("readline() read less than 16 char. Reusing last value.")
-                elif len(scale_input) == 0:
+                if len(scale_input) == 0:
                     scale_input = self.scale_input_buffer[0]
                     print("Cannot read from scale. Did you remember to turn on the scale?")
                     sleep(5)
+                elif len(scale_input) != 16:
+                    scale_input = self.scale_input_buffer[0]
+                    print("readline() read less than 16 char. Reusing last value.")
+                
 
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(0.05)
