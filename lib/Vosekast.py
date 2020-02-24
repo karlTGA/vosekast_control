@@ -265,8 +265,8 @@ class Vosekast():
 
     def clean(self):
         # shutdown pumps
-        for pump in self.pumps:
-            pump.stop()
+        #for pump in self.pumps:
+        #    pump.stop()
         self.logger.info("All pumps switched off.")
 
         # close valves
