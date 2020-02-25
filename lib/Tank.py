@@ -95,7 +95,9 @@ class Tank():
         self.logger.debug("{} state: ".format(self.name) + str(self.state))
 
         #check if constant_tank full
+        #todo fix self.state, MQTT
         while not self.vosekast.constant_tank.is_filled and self.state != 3:
+
             time_filling_t1 = datetime.now()
             time_filling_passed = time_filling_t1 - time_filling_t0
             delta_time_filling = time_filling_passed.total_seconds()
@@ -105,7 +107,8 @@ class Tank():
                 self.logger.error(
                 "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                 raise TankFillingTimeout("Tank Filling Timeout.")
-
+            
+            self.logger.debug("state: " + str(self.state))
             self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
             await asyncio.sleep(1)
         
