@@ -17,7 +17,7 @@ import os
 # Vosekast States
 INITED = "INITED"
 MEASURING = "MEASURING"
-PREPARING_MEASURMENT = "PREPARING_MEASUREMENT"
+PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
 TIME_stop = "time_stop"
 WAS_MEASURE = "was_measure"
 WEIGHT_start = "weight_start"
@@ -208,13 +208,13 @@ class Vosekast():
         self.measuring_drain_valve.close()
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
-        self.state = PREPARING_MEASURMENT
+        self.state = PREPARING_MEASUREMENT
 
     async def test(self):
         try:
             self.measuring_tank.prepare_to_fill()
             self.pump_measuring_tank.start()
-            self.state = PREPARING_MEASURMENT
+            self.state = PREPARING_MEASUREMENT
             self.measuring_tank_switch.open()
             await asyncio.sleep(10)
             self.measuring_drain_valve.close()

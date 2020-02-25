@@ -64,8 +64,8 @@ class TestSequence():
             self.logger.info("Created file.")
             
             # todo turn on pump
-            #await self.vosekast.measuring_tank.fill()
-            await self.vosekast.test()
+            await self.vosekast.measuring_tank.measure()
+            #await self.vosekast.test()
 
             # loop
             while not self.vosekast.measuring_tank.is_filled and self.state == States.RUNNING:
