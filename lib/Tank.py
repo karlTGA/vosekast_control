@@ -92,10 +92,9 @@ class Tank():
         #close valves, start pump
         self.vosekast.prepare_measuring()
         self.state = self.BETWEEN
-        self.logger.debug("{} state: ".format(self.name) + str(self.state))
-
+        
         #check if constant_tank full
-        #todo fix self.state, MQTT
+        #todo fix MQTT
         while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
 
             time_filling_t1 = datetime.now()
@@ -116,12 +115,10 @@ class Tank():
     @property
     def start_fill(self):
         self.fill_state = True
-        self.logger.debug("{} state: ".format(self.name) + str(self.fill))
 
     @property
     def stop_fill(self):
         self.fill_state = False
-        self.logger.debug("{} state: ".format(self.name) + str(self.fill))
 
     def _on_draining(self):
         """
