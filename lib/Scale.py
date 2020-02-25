@@ -98,7 +98,7 @@ class Scale:
                 else:
                     self.logger.warning("Reached loop with new value = None.")
                 
-            sleep(5)
+            sleep(1)
             
         self.logger.info("Stopped measuring with scale.")
     
