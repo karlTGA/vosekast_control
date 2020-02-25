@@ -96,7 +96,7 @@ class Tank():
 
         #check if constant_tank full
         #todo fix self.state, MQTT
-        while not self.vosekast.constant_tank.is_filled and self.state != 3:
+        while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
 
             time_filling_t1 = datetime.now()
             time_filling_passed = time_filling_t1 - time_filling_t0
@@ -108,15 +108,21 @@ class Tank():
                 "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                 raise TankFillingTimeout("Tank Filling Timeout.")
             
-            self.logger.debug("state: " + str(self.state))
+            self.logger.debug("state: " + str(self.fill_state))
             self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
             await asyncio.sleep(1)
         
         return
+    
+    @property
+    def start_fill(self):
+        self.fill_state = True
+        self.logger.debug("{} state: ".format(self.name) + str(self.fill))
 
+    @property
     def stop_fill(self):
-        self.state = self.STOPPED
-        self.logger.debug("{} state: ".format(self.name) + str(self.state))
+        self.fill_state = False
+        self.logger.debug("{} state: ".format(self.name) + str(self.fill))
 
     def _on_draining(self):
         """

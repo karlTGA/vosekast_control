@@ -48,6 +48,8 @@ class TestSequence():
             else:
                 self.logger.debug("Scale running, continuing.")
 
+            # set fill to True
+            self.vosekast.constant_tank.start_fill()
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
             
