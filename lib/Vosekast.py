@@ -231,7 +231,7 @@ class Vosekast():
 
         #constant tank ready
         constant_tank_ready = self.constant_tank.is_filled
-        #todo fix
+
         measuring_tank_ready = (
             self.measuring_drain_valve.is_closed
             and not self.measuring_tank.is_filled
@@ -242,7 +242,7 @@ class Vosekast():
             self.logger.info("Ready to start measuring.")
 
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
-        # return True
+   
 
     def create_file(self):
         # create file, write header to csv file

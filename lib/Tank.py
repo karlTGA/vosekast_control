@@ -118,7 +118,7 @@ class Tank():
             self.vosekast.measuring_tank.prepare_to_fill()
             self.vosekast.pump_measuring_tank.start()
             #todo change vosekast state
-            self.vosekast.state = MEASURING
+            #self.vosekast.state = MEASURING
             self.logger.debug(self.vosekast.state)
             self.vosekast.measuring_tank_switch.open()
             await asyncio.sleep(10)

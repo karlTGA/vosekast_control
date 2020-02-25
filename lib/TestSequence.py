@@ -44,7 +44,7 @@ class TestSequence():
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
                 self.logger.info("Initialising connection, measurement thread. Please wait.")
-                await asyncio.sleep(5)
+                await asyncio.sleep(2)
             else:
                 self.logger.debug("Scale running, continuing.")
 
