@@ -49,7 +49,7 @@ class TestSequence():
                 self.logger.debug("Scale running, continuing.")
 
             # set fill to True
-            self.vosekast.constant_tank.start_fill()
+            self.vosekast.constant_tank.start_fill
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
             
@@ -89,17 +89,15 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             self.stop_sequence()
-            self.vosekast.constant_tank.stop_fill()
+            self.vosekast.constant_tank.stop_fill
             
 
     def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
         self.logger.debug('Stopped test sequence')
-        #self.vosekast.constant_tank.stop_fill()
         for tank in self.vosekast.tanks:
-            tank.stop_fill()
-        #self.vosekast.tanks.stop_fill()
+            tank.stop_fill
         #self.scale.stop_measurement_thread()
 
         self.vosekast.clean()
