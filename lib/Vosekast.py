@@ -210,6 +210,11 @@ class Vosekast():
         self.pump_constant_tank.start()
         self.state = PREPARING_MEASUREMENT
 
+    def change_state(self, state):
+        vosekast_state = state
+        self.state = vosekast_state
+        self.logger.debug(self.state)
+
     async def test(self):
         try:
             self.measuring_tank.prepare_to_fill()

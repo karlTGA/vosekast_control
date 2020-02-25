@@ -118,8 +118,8 @@ class Tank():
             self.vosekast.measuring_tank.prepare_to_fill()
             self.vosekast.pump_measuring_tank.start()
             #todo change vosekast state
-            self.vosekast.state = MEASURING
-            self.logger.debug(self.vosekast.state)
+            self.vosekast.change_state(MEASURING)
+            
             self.vosekast.measuring_tank_switch.open()
             while not self.vosekast.measuring_tank.is_filled:
                 await asyncio.sleep(0.1)
@@ -129,7 +129,7 @@ class Tank():
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
-            # self.vosekast.state = INITED
+            self.vosekast.change_state(PREPARING_MEASUREMENT)
 
     @property
     def start_fill(self):
