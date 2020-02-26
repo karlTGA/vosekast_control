@@ -110,7 +110,7 @@ class Scale:
             self.logger.debug("Scale ready.")
             return True
         elif self.run == True:
-            self.logger.info("Waiting for thread_loop.")
+            self.logger.debug("Waiting for thread_loop.")
             return True
         elif self.run != True:
             self.logger.warning("self.run != True")
@@ -290,9 +290,11 @@ class Scale:
         self.state = States.PAUSE
     
     def flow_average(self):
-        flow_average = mean(self.flow_history_average)
-        
-        return flow_average
+        if len(self.flow_history) == 5:
+            flow_average = mean(self.flow_history_average)
+            return flow_average
+        else:
+            return
 
     def get_stable_value(self):
         if self.stable:
