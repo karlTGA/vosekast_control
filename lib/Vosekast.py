@@ -55,6 +55,7 @@ class Vosekast():
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
+        self.state = States.NONE
 
         # set mqtt client, host
         self.mqtt_client = MQTTController('localhost')
@@ -198,6 +199,7 @@ class Vosekast():
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.state = States.PREPARING_MEASUREMENT
+        print("vosekast state: " + str(self.state))
 
     @property
     def change_state(self, new_state):
@@ -208,7 +210,8 @@ class Vosekast():
         try:
             self.measuring_tank.prepare_to_fill()
             self.pump_measuring_tank.start()
-            self.state = States.PREPARING_MEASUREMENT
+            self.state = States.MEASURING
+            print("vosekast state: " + str(self.state))
             self.measuring_tank_switch.open()
             await asyncio.sleep(10)
             self.measuring_drain_valve.close()
