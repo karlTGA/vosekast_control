@@ -9,3 +9,8 @@ class States(Enum):
     NONE = 4
     OPEN = 5
     CLOSED = 6
+    INITED = 7
+    PREPARING_MEASUREMENT = 8
+    MEASURING = 9
+    
+

@@ -210,10 +210,10 @@ class Vosekast():
         self.pump_constant_tank.start()
         self.state = PREPARING_MEASUREMENT
 
-    def change_state(self, state):
-        vosekast_state = state
-        self.state = vosekast_state
-        self.logger.debug(self.state)
+    @property
+    def state(self, new_state):
+        self.state = new_state
+        self.logger.debug(f"New Vosekast state is: {new_state}")
 
     async def test(self):
         try:
