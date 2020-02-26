@@ -17,13 +17,13 @@ from lib.MQTT import MQTTController
 import os
 
 # Vosekast States
-INITED = "INITED"
-MEASURING = "MEASURING"
-PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
-TIME_stop = "time_stop"
-WAS_MEASURE = "was_measure"
-WEIGHT_start = "weight_start"
-WEIGHT_stop = "weight_stop"
+#INITED = "INITED"
+#MEASURING = "MEASURING"
+#PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
+#TIME_stop = "time_stop"
+#WAS_MEASURE = "was_measure"
+#WEIGHT_start = "weight_start"
+#WEIGHT_stop = "weight_stop"
 
 # GPIO Assignment
 PIN_PUMP_CONSTANT = 17
@@ -199,7 +199,6 @@ class Vosekast():
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.state = States.PREPARING_MEASUREMENT
-        print("vosekast state: " + str(self.state))
 
     @property
     def change_state(self, new_state):
@@ -211,7 +210,6 @@ class Vosekast():
             self.measuring_tank.prepare_to_fill()
             self.pump_measuring_tank.start()
             self.state = States.MEASURING
-            print("vosekast state: " + str(self.state))
             self.measuring_tank_switch.open()
             await asyncio.sleep(10)
             self.measuring_drain_valve.close()
@@ -277,15 +275,15 @@ class Vosekast():
         self.logger.debug("Open measuring tank switch.")
 
         #todo is_drained happens too soon
-        while not self.measuring_tank.is_drained:
-            await asyncio.sleep(1)
+        #while not self.measuring_tank.is_drained:
+        #    await asyncio.sleep(1)
         
         self.logger.debug("Now stopping measurement thread.")
         # stop scale
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-    #todo
+    #todo reinitialise after gpio.cleanup
     #def initialise_gpio(self):
     #   try:
     #      # define how the pins are numbered on the board
@@ -416,6 +414,10 @@ class Vosekast():
                     await self.testsequence.stop_sequence()
                 elif command['command'] == 'test':
                     await self.test()
+                elif command['command'] == 'pause_sequence':
+                    self.testsequence.pause_sequence()
+                elif command['command'] == 'continue_sequence':
+                    self.testsequence.continue_sequence()    
 
                 else:
                     self.logger.warning(

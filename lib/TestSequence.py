@@ -78,7 +78,7 @@ class TestSequence():
                 await asyncio.sleep(1)
                             
             #todo jsondumps
-            print("loop testsequence ended")
+            self.logger.debug("loop testsequence ended")
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.logger.info("Measuring Tank full, stopping sequence.")
@@ -108,10 +108,12 @@ class TestSequence():
     def pause_sequence(self):
         self.state = States.PAUSE
         self.change_state(self.state)
+        self.vosekast.measuring_tank_switch.close()
 
     def continue_sequence(self):
         self.state = States.RUNNING
         self.change_state(self.state)
+        self.vosekast.measuring_tank_switch.open()
 
     def change_state(self, new_state):
         # publish via mqtt
