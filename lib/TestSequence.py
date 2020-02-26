@@ -64,11 +64,10 @@ class TestSequence():
             self.logger.info("Created file.")
             
             # turn on measuring pump, start measuring
-            #await self.vosekast.measuring_tank.measure()
+            self.vosekast.measuring_tank.start_measuring()
 
             # loop
             while self.state == States.RUNNING and not self.vosekast.measuring_tank.is_filled:
-                self.vosekast.measuring_tank.measure()
                 #write values to csv file
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',

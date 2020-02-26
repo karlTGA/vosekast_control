@@ -113,9 +113,8 @@ class Tank():
         return
     
     #start measuring
-    def measure(self):
+    def start_measuring(self):
         try:
-            
             self.vosekast.measuring_tank.prepare_to_fill()
             print("prepare to fill")
             self.vosekast.pump_measuring_tank.start()
@@ -130,10 +129,6 @@ class Tank():
             
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
-            #while not self.vosekast.measuring_tank.is_filled:
-            #    await asyncio.sleep(0.1)
-            #self.vosekast.measuring_drain_valve.close()
-            #self.vosekast.pump_measuring_tank.stop()
             
         except:
             self.logger.debug("Measuring aborted.")
