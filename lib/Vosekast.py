@@ -246,7 +246,7 @@ class Vosekast():
         with open('sequence_values.csv', 'w', newline='') as file:
             writer = csv.writer(file, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["timestamp", "scale value"])
+            writer.writerow(["timestamp", "scale value", "flow", "average flow from last 5 values"])
         
     async def shutdown(self):
         
@@ -280,6 +280,7 @@ class Vosekast():
         while not self.measuring_tank.is_drained:
             await asyncio.sleep(1)
         
+        self.logger.debug("Now stopping measurement thread.")
         # stop scale
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
