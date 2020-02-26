@@ -109,7 +109,7 @@ class TestSequence():
 
         # todo kill start_measurement
 
-        await self.vosekast.clean()
+        self.vosekast.clean()
 
     async def pause_sequence(self):
         self.state = States.PAUSE

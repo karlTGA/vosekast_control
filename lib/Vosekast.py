@@ -248,7 +248,7 @@ class Vosekast():
         
     async def shutdown(self):
         
-        await self.clean()
+        self.clean()
         self.logger.info("Shutting down.")
 
         # GPIO cleanup
@@ -259,7 +259,7 @@ class Vosekast():
         self.logger.debug("MQTT client disconnected.")
         os.system('sudo shutdown -h now')
 
-    async def clean(self):
+    def clean(self):
         # shutdown pumps
         for pump in self.pumps:
             pump.stop()
@@ -403,7 +403,7 @@ class Vosekast():
                 if command['command'] == 'shutdown':
                     await self.shutdown()
                 elif command['command'] == 'clean':
-                    await self.clean()
+                    self.clean()
                 elif command['command'] == 'prepare_measuring':
                     self.prepare_measuring()
                 elif command['command'] == 'ready_to_measure':
