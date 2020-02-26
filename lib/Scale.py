@@ -6,6 +6,7 @@ import logging
 from lib.Log import LOGGER
 from random import uniform
 from itertools import islice
+from statistics import mean
 from lib.utils.Msg import StatusMessage
 
 from lib.EnumStates import States
@@ -47,6 +48,7 @@ class Scale:
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
         self.scale_input_buffer = deque([], maxlen=10)
+        self.flow_history_average = deque([], maxlen=5)
 
 
     def open_connection(self):
@@ -257,6 +259,7 @@ class Scale:
             volume_flow = round(weight_per_time / 0.999103, 10)
             
             self.flow_history.appendleft(volume_flow)
+            self.flow_history_average.appendleft(volume_flow)
             
         # publish via mqtt
         # new_value = weight measured by scale
@@ -285,6 +288,11 @@ class Scale:
 
         self.stable = False
         self.state = States.PAUSE
+    
+    def flow_average(self):
+        flow_average = mean(self.flow_history_average)
+        
+        return flow_average
 
     def get_stable_value(self):
         if self.stable:

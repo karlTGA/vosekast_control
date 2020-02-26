@@ -276,10 +276,11 @@ class Vosekast():
         self.measuring_tank_switch.close()
         self.logger.debug("Open measuring tank switch.")
 
-        # stop scale
+        #todo is_drained happens too soon
         while not self.measuring_tank.is_drained:
             await asyncio.sleep(1)
-    
+        
+        # stop scale
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 

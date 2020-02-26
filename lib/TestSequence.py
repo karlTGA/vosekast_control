@@ -74,6 +74,7 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0]])
                 #dictionary als Datenspeicher
+                self.logger.debug("flow average: " + str(self.scale.flow_average()))                
                 await asyncio.sleep(1)
                             
             #todo jsondumps
