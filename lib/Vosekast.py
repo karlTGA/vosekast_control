@@ -211,7 +211,7 @@ class Vosekast():
         self.state = PREPARING_MEASUREMENT
 
     @property
-    def state(self, new_state):
+    def change_state(self, new_state):
         self.state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
