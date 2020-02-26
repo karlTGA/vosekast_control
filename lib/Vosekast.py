@@ -4,6 +4,8 @@ from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
 from lib.Scale import Scale
 from lib.TestSequence import TestSequence
+from lib.EnumStates import States
+
 import logging
 import asyncio
 import csv
@@ -173,25 +175,12 @@ class Vosekast():
             # scale
             self.scale = Scale(self, emulate=self.debug)
             
-
             # testsequence
             self.testsequence = TestSequence(self)
-
-            # experiment_environment
-            # expEnv0 = ExperimentEnvironment(
-            #     20, vosekast=self, main_window=self._main_window
-            # )
-
-            # button_start_pause_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[
-            #     0
-            # ]
-            # button_stop_exp = self._main_window.tabs.tabProgramms.exp_env_buttons[1]
-
-            # button_start_pause_exp.set_control_instance(
-            #     expEnv0.actual_experiment)
-            # button_stop_exp.set_control_instance(expEnv0.actual_experiment)
-
-            self.state = INITED
+           
+            # change state if ok
+            self.state = States.INITED
+            #self.state = INITED
 
         except NoGPIOControllerError:
             self.logger.error(
@@ -208,7 +197,7 @@ class Vosekast():
         self.measuring_drain_valve.close()
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
-        self.state = PREPARING_MEASUREMENT
+        self.state = States.PREPARING_MEASUREMENT
 
     @property
     def change_state(self, new_state):
@@ -219,7 +208,7 @@ class Vosekast():
         try:
             self.measuring_tank.prepare_to_fill()
             self.pump_measuring_tank.start()
-            self.state = PREPARING_MEASUREMENT
+            self.state = States.PREPARING_MEASUREMENT
             self.measuring_tank_switch.open()
             await asyncio.sleep(10)
             self.measuring_drain_valve.close()
