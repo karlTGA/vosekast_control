@@ -121,8 +121,11 @@ class Tank():
             print("pump started")
 
             #todo change vosekast state
-            self.vosekast.change_state(States.MEASURING)
-            print("changed state")
+            try:
+                self.vosekast.change_state(States.MEASURING.value)
+                print("changed state")
+            except:
+                print("changing state did not work, continuing.")
             
             self.vosekast.measuring_tank_switch.open()
             while not self.vosekast.measuring_tank.is_filled:
