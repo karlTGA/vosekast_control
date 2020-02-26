@@ -63,12 +63,12 @@ class TestSequence():
             self.vosekast.create_file()
             self.logger.info("Created file.")
             
-            # todo turn on pump
-            await self.vosekast.measuring_tank.measure()
-            #await self.vosekast.test()
+            # turn on measuring pump, start measuring
+            #await self.vosekast.measuring_tank.measure()
 
             # loop
-            while not self.vosekast.measuring_tank.is_filled and self.state == States.RUNNING:
+            while self.state == States.RUNNING and not self.vosekast.measuring_tank.is_filled:
+                self.vosekast.measuring_tank.measure()
                 #write values to csv file
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
@@ -76,23 +76,23 @@ class TestSequence():
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
                 #dictionary als Datenspeicher
                 await asyncio.sleep(1)
-            
+                            
             #todo jsondumps
 
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.logger.info("Measuring Tank full, stopping sequence.")
-                self.stop_sequence()
+                await self.stop_sequence()
         
         #TankFillingTimeout
         except:
             self.logger.error("Error, aborting test sequence.")
             
-            self.stop_sequence()
+            await self.stop_sequence()
             self.vosekast.constant_tank.stop_fill
             
 
-    def stop_sequence(self):
+    async def stop_sequence(self):
         self.state = States.STOPPED
         self.change_state(self.state)
         self.logger.debug('Stopped test sequence')
@@ -103,7 +103,7 @@ class TestSequence():
 
         # todo kill start_measurement
 
-        self.vosekast.clean()
+        await self.vosekast.clean()
 
     def pause_sequence(self):
         self.state = States.PAUSE
@@ -121,7 +121,6 @@ class TestSequence():
             self.mqtt.publish_message(mqttmsg)
 
     def send_new_data_point(self, x, y, index, legend):
-        # self.send_data_point.emit(x, y, index, legend)
 
         # publish via mqtt
         mqttmsg = StatusMessage("TestSequence", str(

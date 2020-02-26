@@ -250,7 +250,7 @@ class Vosekast():
         
     async def shutdown(self):
         
-        self.clean()
+        await self.clean()
         self.logger.info("Shutting down.")
 
         # GPIO cleanup
@@ -261,7 +261,7 @@ class Vosekast():
         self.logger.debug("MQTT client disconnected.")
         os.system('sudo shutdown -h now')
 
-    def clean(self):
+    async def clean(self):
         # shutdown pumps
         for pump in self.pumps:
             pump.stop()
@@ -277,10 +277,13 @@ class Vosekast():
         self.logger.debug("Open measuring tank switch.")
 
         # stop scale
+        while not self.measuring_tank.is_drained:
+            asyncio.sleep(1)
+    
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-
+    #todo
     #def initialise_gpio(self):
     #   try:
     #      # define how the pins are numbered on the board
@@ -400,7 +403,7 @@ class Vosekast():
                 if command['command'] == 'shutdown':
                     await self.shutdown()
                 elif command['command'] == 'clean':
-                    self.clean()
+                    await self.clean()
                 elif command['command'] == 'prepare_measuring':
                     self.prepare_measuring()
                 elif command['command'] == 'ready_to_measure':
@@ -408,11 +411,9 @@ class Vosekast():
                 elif command['command'] == 'start_sequence':
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
-                    self.testsequence.stop_sequence()
+                    await self.testsequence.stop_sequence()
                 elif command['command'] == 'test':
                     await self.test()
-                elif command['command'] == 'clean':
-                    self.clean()
 
                 else:
                     self.logger.warning(

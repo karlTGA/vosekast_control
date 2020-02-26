@@ -112,27 +112,29 @@ class Tank():
         
         return
     
-    #todo measure
-    async def measure(self):
+    #start measuring
+    def measure(self):
         try:
+            
             self.vosekast.measuring_tank.prepare_to_fill()
             print("prepare to fill")
             self.vosekast.pump_measuring_tank.start()
             print("pump started")
 
-            #todo change vosekast state
+            #change vosekast state
             try:
-                self.vosekast.change_state(States.MEASURING.value)
+                self.vosekast.change_state(States.MEASURING)
                 print("changed state")
             except:
                 print("changing state did not work, continuing.")
             
             self.vosekast.measuring_tank_switch.open()
-            while not self.vosekast.measuring_tank.is_filled:
-                await asyncio.sleep(0.1)
-            self.vosekast.measuring_drain_valve.close()
-            self.vosekast.pump_measuring_tank.stop()
-            self.logger.debug("Measuring completed.")
+            self.logger.debug("Measuring started.")
+            #while not self.vosekast.measuring_tank.is_filled:
+            #    await asyncio.sleep(0.1)
+            #self.vosekast.measuring_drain_valve.close()
+            #self.vosekast.pump_measuring_tank.stop()
+            
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
