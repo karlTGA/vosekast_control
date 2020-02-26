@@ -278,7 +278,7 @@ class Vosekast():
 
         # stop scale
         while not self.measuring_tank.is_drained:
-            asyncio.sleep(1)
+            await asyncio.sleep(1)
     
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
