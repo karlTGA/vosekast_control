@@ -72,12 +72,12 @@ class TestSequence():
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0]])
+                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0]])
                 #dictionary als Datenspeicher
                 await asyncio.sleep(1)
                             
             #todo jsondumps
-
+            print("loop testsequence ended")
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.logger.info("Measuring Tank full, stopping sequence.")
