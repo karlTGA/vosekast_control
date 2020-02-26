@@ -415,9 +415,9 @@ class Vosekast():
                 elif command['command'] == 'test':
                     await self.test()
                 elif command['command'] == 'pause_sequence':
-                    self.testsequence.pause_sequence()
+                    await self.testsequence.pause_sequence()
                 elif command['command'] == 'continue_sequence':
-                    self.testsequence.continue_sequence()    
+                    await self.testsequence.continue_sequence()    
 
                 else:
                     self.logger.warning(

@@ -65,7 +65,17 @@ class TestSequence():
             
             # turn on measuring pump, start measuring
             self.vosekast.measuring_tank.start_measuring()
+            await self.write_loop()
+        
+        #TankFillingTimeout
+        except:
+            self.logger.error("Error, aborting test sequence.")
+            
+            await self.stop_sequence()
+            self.vosekast.constant_tank.stop_fill            
 
+    async def write_loop(self):
+        try:
             # loop
             while self.state == States.RUNNING and not self.vosekast.measuring_tank.is_filled:
                 #write values to csv file
@@ -84,12 +94,8 @@ class TestSequence():
                 self.logger.info("Measuring Tank full, stopping sequence.")
                 await self.stop_sequence()
         
-        #TankFillingTimeout
         except:
-            self.logger.error("Error, aborting test sequence.")
-            
-            await self.stop_sequence()
-            self.vosekast.constant_tank.stop_fill
+            self.logger.info("Write loop killed.")
             
 
     async def stop_sequence(self):
@@ -105,15 +111,16 @@ class TestSequence():
 
         await self.vosekast.clean()
 
-    def pause_sequence(self):
+    async def pause_sequence(self):
         self.state = States.PAUSE
         self.change_state(self.state)
         self.vosekast.measuring_tank_switch.close()
 
-    def continue_sequence(self):
+    async def continue_sequence(self):
         self.state = States.RUNNING
         self.change_state(self.state)
         self.vosekast.measuring_tank_switch.open()
+        await self.write_loop()
 
     def change_state(self, new_state):
         # publish via mqtt
