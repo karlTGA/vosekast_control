@@ -60,6 +60,7 @@ class Tank():
     def drain_tank(self):
         if self.drain_valve is not None:
             self.drain_valve.open()
+            #todo why progress
             self.progress = self.IS_DRAINING
         else:
             self.logger.warning(

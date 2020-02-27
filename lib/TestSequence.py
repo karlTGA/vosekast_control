@@ -84,18 +84,18 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], self.scale.flow_average()])
                 #todo dictionary als Datenspeicher
-                #self.logger.debug("flow average: " + str(self.scale.flow_average()))                
                 await asyncio.sleep(1)
                             
             #todo jsondumps
-            self.logger.debug("loop testsequence ended")
+            
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
-                self.logger.info("Measuring Tank full, stopping sequence.")
-                await self.stop_sequence()
+                self.logger.info("Measuring Tank full, opening Measuring Tank bypass.")
+                self.vosekast.measuring_tank_switch.close()
         
         except:
-            self.logger.info("Write loop killed.")
+            self.logger.info("Write loop killed, stopping sequence.")
+            await self.stop_sequence()
             
 
     async def stop_sequence(self):
@@ -103,25 +103,33 @@ class TestSequence():
         self.change_state(self.state)
         self.logger.debug('Stopped test sequence')
 
-        # set fill to False
+        # todo kill start_measurement
+        
+        self.vosekast.clean()
+        
+    def pause_sequence(self):
+        self.state = States.PAUSE
+        self.change_state(self.state)
+
+        # set fill countdown to False
         for tank in self.vosekast.tanks:
             tank.stop_fill
 
-        # todo kill start_measurement
-
-        self.vosekast.clean()
-
-    async def pause_sequence(self):
-        self.state = States.PAUSE
-        self.change_state(self.state)
         self.vosekast.measuring_tank_switch.close()
+        self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
         self.state = States.RUNNING
         self.change_state(self.state)
-        self.vosekast.measuring_tank_switch.open()
-        await self.write_loop()
 
+        # set fill countdown to True
+        for tank in self.vosekast.tanks:
+            tank.start_fill
+
+        self.vosekast.measuring_tank_switch.open()
+        self.logger.info("Continuing. Measuring Tank is being filled.")
+        await self.write_loop()
+    
     def change_state(self, new_state):
         # publish via mqtt
         mqttmsg = StatusMessage("TestSequence State:", States(

@@ -205,19 +205,7 @@ class Vosekast():
         self.state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
-    async def test(self):
-        try:
-            self.measuring_tank.prepare_to_fill()
-            self.pump_measuring_tank.start()
-            self.state = States.MEASURING
-            self.measuring_tank_switch.open()
-            await asyncio.sleep(10)
-            self.measuring_drain_valve.close()
-            self.pump_measuring_tank.stop()
-            self.logger.debug("Test completed.")
-        except:
-            self.logger.debug("Test aborted.")
-      
+     
     def ready_to_measure(self):
         """
         is vosekast ready to measure
@@ -260,26 +248,26 @@ class Vosekast():
         os.system('sudo shutdown -h now')
 
     def clean(self):
-        # shutdown pumps
-        for pump in self.pumps:
-            pump.stop()
-        self.logger.debug("All pumps switched off.")
-
-        # close valves
-        #for valve in self.valves:
-        #    valve.close()
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
 
-        self.measuring_tank_switch.close()
-        self.logger.debug("Open measuring tank switch.")
+        self.measuring_tank.drain_tank()
+        self.logger.debug("Draining measuring tank.")
+
+        # set fill countdown to False
+        for tank in self.tanks:
+            tank.stop_fill
+        
+        # shutdown pumps
+        for pump in self.pumps:
+            pump.stop()
+        
+        self.logger.debug("All pumps switched off.")
 
         #todo is_drained happens too soon
-        #while not self.measuring_tank.is_drained:
-        #    await asyncio.sleep(1)
         
-        self.logger.debug("Now stopping measurement thread.")
         # stop scale
+        self.logger.debug("Now stopping measurement thread.")
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
@@ -412,10 +400,10 @@ class Vosekast():
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
                     await self.testsequence.stop_sequence()
-                elif command['command'] == 'test':
-                    await self.test()
+                #elif command['command'] == 'test':
+                #    await self.test()
                 elif command['command'] == 'pause_sequence':
-                    await self.testsequence.pause_sequence()
+                    self.testsequence.pause_sequence()
                 elif command['command'] == 'continue_sequence':
                     await self.testsequence.continue_sequence()    
 
