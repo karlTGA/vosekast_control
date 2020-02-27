@@ -28,33 +28,26 @@ EMULATE = os.environ.get('EMULATE', 'False')
 
 
 async def main():
+    try:
+        GPIO.cleanup()
 
-    # process state
-    app_control = AppControl()
+        # process state
+        app_control = AppControl()
 
-    # initialise vosekast
-    vosekast = Vosekast(GPIO, EMULATE == 'True')
-    await vosekast.run()
+        # initialise vosekast
+        vosekast = Vosekast(app_control, GPIO, EMULATE == 'True')
+        app_control.start()
+        await vosekast.run()
 
-    # route log messages to status box of main window
-    #app_control.start()
-    
-    # res = app.exec_()
-
-    while True:
-        #print("main.py loop wait")
-        await asyncio.sleep(1)
-
-    logger.info('start thread')
-
-    logger.info("GUI closed. Shutdown Vosekast.")
-    app_control.shutdown()
-
-    if DEBUG:
-        sys.exit(0)
-    else:
-        cmdCommand = "shutdown -h now"
-        process = subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
+        if EMULATE == 'True':
+            sys.exit(0)
+        else:
+            #cmdCommand = "shutdown -h now"
+            #subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
+            pass
+        
+    finally:
+        GPIO.cleanup()
 
 if __name__ == "__main__":
     asyncio.run(main())

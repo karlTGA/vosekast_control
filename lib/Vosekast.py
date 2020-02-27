@@ -4,26 +4,18 @@ from lib.LevelSensor import LevelSensor
 from lib.Valve import Valve
 from lib.Scale import Scale
 from lib.TestSequence import TestSequence
-from lib.EnumStates import States
 
 import logging
 import asyncio
 import csv
 from lib.Log import LOGGER, add_mqtt_logger_handler
-#from lib.ExperimentEnvironment import ExperimentEnvironment
-#from lib.Store import VosekastStore
+
 from lib.MQTT import MQTTController
 
 import os
 
-# Vosekast States
-#INITED = "INITED"
-#MEASURING = "MEASURING"
-#PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
-#TIME_stop = "time_stop"
-#WAS_MEASURE = "was_measure"
-#WEIGHT_start = "weight_start"
-#WEIGHT_stop = "weight_stop"
+
+
 
 # GPIO Assignment
 PIN_PUMP_CONSTANT = 17
@@ -50,13 +42,20 @@ MEASURING_TANK = "MEASURING_TANK"
 
 
 class Vosekast():
-    def __init__(self, gpio_controller, debug=False, *args, **kwargs):
+
+    # Vosekast States
+    INITED = "INITED"
+    RUNNING = "RUNNING"
+    MEASURING = "MEASURING"
+    PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
+
+    def __init__(self, app_control, gpio_controller, debug=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.debug = debug
         self.logger = logging.getLogger(LOGGER)
-        self.state = States.NONE
-
+        self._app_control = app_control
+        
         # set mqtt client, host
         self.mqtt_client = MQTTController('localhost')
         self.mqtt_client.on_command = self.handle_command
@@ -180,8 +179,7 @@ class Vosekast():
             self.testsequence = TestSequence(self)
            
             # change state if ok
-            self.state = States.INITED
-            #self.state = INITED
+            self._state = self.INITED
 
         except NoGPIOControllerError:
             self.logger.error(
@@ -199,11 +197,15 @@ class Vosekast():
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
         self.pump_measuring_tank.stop()
-        self.state = States.PREPARING_MEASUREMENT
+        self._state = self.PREPARING_MEASUREMENT
 
     @property
-    def change_state(self, new_state):
-        self.state = new_state
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
      
@@ -246,7 +248,9 @@ class Vosekast():
 
         await self.mqtt_client.disconnect()
         self.logger.debug("MQTT client disconnected.")
-        os.system('sudo shutdown -h now')
+        
+        self._app_control.shutdown()
+        #os.system('sudo shutdown -h now')
 
     def clean(self):
         self.measuring_tank.drain_tank()
@@ -272,22 +276,18 @@ class Vosekast():
         self.scale.stop_measurement_thread()
         self.scale.close_connection()
 
-    #todo reinitialise after gpio.cleanup
-    #def initialise_gpio(self):
-    #   try:
-    #      # define how the pins are numbered on the board
-    #      self._gpio_controller.setmode(self._gpio_controller.BCM)
-    #      self.logger.debug("GPIO setmode ok.")
-    #      sleep(0.5)
-    #   except:
-    #        self.logger.error("GPIO setmode failed.")
-
     async def run(self):
         self.scale.open_connection()
         self.scale.start_measurement_thread()
-                
+
         await self.mqtt_client.connect()
+        self._state = self.RUNNING
         self.logger.debug("Vosekast started ok.")
+
+        while not self._app_control.is_terminating():
+            await asyncio.sleep(1)
+
+        self.logger.debug('Vosekast stopped.')
                 
     # handle incoming mqtt commands
     async def handle_command(self, command):

@@ -2,7 +2,6 @@ import logging
 from lib.Log import LOGGER
 import asyncio
 from lib.utils.Msg import StatusMessage
-from lib.EnumStates import States
 from datetime import datetime
 
 class TankFillingTimeout(Exception):
@@ -44,7 +43,6 @@ class Tank():
         self.source_pump = source_pump
         self.vosekast = vosekast
         self.state = self.UNKNOWN
-        self.progress = None
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
@@ -60,8 +58,7 @@ class Tank():
     def drain_tank(self):
         if self.drain_valve is not None:
             self.drain_valve.open()
-            #todo why progress
-            self.progress = self.IS_DRAINING
+            self.state = self.IS_DRAINING
         else:
             self.logger.warning(
                 "No valve to drain the tank {}".format(self.name))
@@ -123,12 +120,11 @@ class Tank():
             self.vosekast.measuring_tank.prepare_to_fill()
             self.vosekast.pump_measuring_tank.start()
 
-            #todo change vosekast state
+            #change vosekast state
             try:
-                self.vosekast.change_state(States.MEASURING)
-                print("changed state")
+                self.vosekast.state = MEASURING
             except:
-                print("changing state did not work, continuing.")
+                self.logger.debug("Changing Vosekast state did not work, continuing.")
             
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
@@ -136,7 +132,7 @@ class Tank():
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
-            self.vosekast.change_state(States.PREPARING_MEASUREMENT)
+            self.vosekast.state = RUNNING
 
     @property
     def start_fill(self):

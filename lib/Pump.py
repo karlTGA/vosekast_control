@@ -29,12 +29,6 @@ class Pump():
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
         
-
-        # publish States.STOPPED.value via mqtt
-        #mqttmsg = StatusMessage(self.name, States.STOPPED.value, "%", None, None)
-        #if self.mqtt.connection_test():
-        #    self.mqtt.publish_message(mqttmsg)
-
     def start(self):
         """
         start the pump
@@ -43,11 +37,6 @@ class Pump():
         self.logger.debug("Starting pump {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
-
-        # publish States.RUNNING.value via mqtt
-        mqttmsg = StatusMessage(self.name, States.RUNNING.value, "%", None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
 
     def toggle(self):
         """

@@ -3,25 +3,30 @@ import threading
 import time
 import asyncio
 import csv
+#from lib.EnumStates import States
 
 from lib.Log import LOGGER
 
-from lib.EnumStates import States
 from lib.utils.Msg import StatusMessage
 from datetime import datetime
 
 
 class TestSequence():
+    # TestSequence states
+    UNKNOWN = -1
+    WAITING = 0
+    MEASURING = 1
+    PAUSED = 0.5
+    STOPPED = 3
+
     def __init__(
         self,
-        vosekast,
-        default_state=States.READY
+        vosekast
     ):
 
         super().__init__()
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
-        self.state = default_state
         self.valves = self.vosekast.valves
         self.tank = self.vosekast.tanks
         self.pumps = self.vosekast.pumps
@@ -36,8 +41,7 @@ class TestSequence():
             self.logger.info("Initialising sequence.")
 
             # change state
-            self.state = States.RUNNING
-            self.change_state(self.state)
+            self.vosekast.state = MEASURING
 
             # check if already running
             if self.scale.is_running != True:
@@ -51,7 +55,11 @@ class TestSequence():
             # set fill to True
             self.vosekast.constant_tank.start_fill
 
-            # await constant_tank full
+            #todo  await constant_tank full
+
+            #todo if already full
+
+            #if self.vosekast.state == self.vosekast.INITED:
             await self.vosekast.constant_tank.fill()
 
             # check
@@ -73,12 +81,13 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             await self.stop_sequence()
-            self.vosekast.constant_tank.stop_fill            
+            self.vosekast.constant_tank.stop_fill   
+            self.vosekast.state = RUNNING         
 
     async def write_loop(self):
         try:
             # loop
-            while self.state == States.RUNNING and not self.vosekast.measuring_tank.is_filled:
+            while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 #get flow average
                 flow_average = self.scale.flow_average()
                 #write values to csv file
@@ -104,40 +113,33 @@ class TestSequence():
             
 
     async def stop_sequence(self):
-        self.state = States.STOPPED
-        self.change_state(self.state)
+        self.state = self.STOPPED
         self.logger.debug('Stopped test sequence')
+        self.vosekast.state = RUNNING
 
         # todo kill start_measurement
         
         self.vosekast.clean()
         
     def pause_sequence(self):
-        self.state = States.PAUSE
-        self.change_state(self.state)
+        self.state = self.PAUSED
 
         # set fill countdown to False
         for tank in self.vosekast.tanks:
             tank.stop_fill
 
         self.vosekast.measuring_tank_switch.close()
+        self.vosekast.state = RUNNING
         self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
-        self.state = States.RUNNING
-        self.change_state(self.state)
+        self.state = self.MEASURING
 
         # set fill countdown to True
         for tank in self.vosekast.tanks:
             tank.start_fill
 
         self.vosekast.measuring_tank_switch.open()
+        self.vosekast.state = MEASURING
         self.logger.info("Continuing. Measuring Tank is being filled.")
         await self.write_loop()
-    
-    def change_state(self, new_state):
-        # publish via mqtt
-        mqttmsg = StatusMessage("TestSequence State:", States(
-            new_state).value, None, None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)

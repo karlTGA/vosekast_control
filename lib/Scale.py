@@ -153,8 +153,6 @@ class Scale:
         self.logger.debug(self.flow_history)
         self.logger.debug(self.scale_input_buffer)
 
-    #todo pause
-
     def stop_measurement_thread(self):
         self.run = False
 
