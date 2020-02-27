@@ -123,7 +123,7 @@ class Tank():
             self.vosekast.measuring_tank.prepare_to_fill()
             self.vosekast.pump_measuring_tank.start()
 
-            #change vosekast state
+            #todo change vosekast state
             try:
                 self.vosekast.change_state(States.MEASURING)
                 print("changed state")

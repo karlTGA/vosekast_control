@@ -84,18 +84,19 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], self.scale.flow_average()])
                 #todo dictionary als Datenspeicher
+                self.logger.debug(str(self.scale.scale_history[1]) +" "+ str(self.scale.scale_history[0]) +" "+ str(self.scale.flow_average()))
                 await asyncio.sleep(1)
                             
             #todo jsondumps
             
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
-                #self.vosekast.measuring_tank_switch.close()
+                self.vosekast.measuring_tank_switch.close()
                 self.measuring_tank.drain_tank()
                 self.logger.debug("Draining measuring tank, opening Measuring Tank bypass.")
         
         except:
-            self.logger.info("Write loop killed, stopping sequence.")
+            self.logger.warning("Write loop killed, stopping sequence.")
             await self.stop_sequence()
             
 
