@@ -84,6 +84,7 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], self.scale.flow_average()])
                 #todo dictionary als Datenspeicher
+                print(self.scale.flow_average())
                 self.logger.debug(str(self.scale.scale_history[1]) +" "+ str(self.scale.scale_history[0]) +" "+ str(self.scale.flow_average()))
                 await asyncio.sleep(1)
                             
