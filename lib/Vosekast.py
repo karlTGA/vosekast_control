@@ -198,6 +198,7 @@ class Vosekast():
         self.measuring_drain_valve.close()
         self.constant_tank.prepare_to_fill()
         self.pump_constant_tank.start()
+        self.pump_measuring_tank.stop()
         self.state = States.PREPARING_MEASUREMENT
 
     @property

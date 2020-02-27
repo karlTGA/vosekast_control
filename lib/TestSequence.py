@@ -50,9 +50,10 @@ class TestSequence():
 
             # set fill to True
             self.vosekast.constant_tank.start_fill
+
             # await constant_tank full
             await self.vosekast.constant_tank.fill()
-            
+
             # check
             if not self.vosekast.ready_to_measure():
                 self.logger.debug("Vosekast not ready to measure.")
@@ -84,8 +85,7 @@ class TestSequence():
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], self.scale.flow_average()])
                 #todo dictionary als Datenspeicher
-                print(self.scale.flow_average())
-                self.logger.debug(str(self.scale.scale_history[1]) +" "+ str(self.scale.scale_history[0]) +" "+ str(self.scale.flow_average()))
+                self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(self.scale.flow_average())+ " L/s")
                 await asyncio.sleep(1)
                             
             #todo jsondumps
