@@ -186,22 +186,15 @@ class Scale:
             
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
-
-            #self.connection.reset_input_buffer()
-            #line = self.connection.readline()
-
             line = self.scale_input_buffer[0]
             
             splitted_line = line.split()
-            # print("splitted_line: " + str(splitted_line)) #splitted_line: [b'+', b'0.019', b'kg']
 
-            self.logger.debug("Measured {}".format(line))
+            #self.logger.debug("Measured {}".format(line))
             
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
-                
-                # print("splitted_line_formatted: " + str(splitted_line_formatted)) #splitted_line_formatted: b'0.019'
-                
+                            
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")
                     return

@@ -90,8 +90,9 @@ class TestSequence():
             
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
-                self.logger.info("Measuring Tank full, opening Measuring Tank bypass.")
-                self.vosekast.measuring_tank_switch.close()
+                #self.vosekast.measuring_tank_switch.close()
+                self.measuring_tank.drain_tank()
+                self.logger.debug("Draining measuring tank, opening Measuring Tank bypass.")
         
         except:
             self.logger.info("Write loop killed, stopping sequence.")
@@ -134,13 +135,5 @@ class TestSequence():
         # publish via mqtt
         mqttmsg = StatusMessage("TestSequence State:", States(
             new_state).value, None, None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
-
-    def send_new_data_point(self, x, y, index, legend):
-
-        # publish via mqtt
-        mqttmsg = StatusMessage("TestSequence", str(
-            x, y, index, legend), "data point", None, None)
         if self.mqtt.connection_test():
             self.mqtt.publish_message(mqttmsg)
