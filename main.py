@@ -44,7 +44,7 @@ async def main():
         else:
             #cmdCommand = "shutdown -h now"
             #subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
-            pass
+            os.system('sudo shutdown -h now')
         
     finally:
         GPIO.cleanup()

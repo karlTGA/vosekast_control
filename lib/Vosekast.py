@@ -250,8 +250,7 @@ class Vosekast():
         self.logger.debug("MQTT client disconnected.")
         
         self._app_control.shutdown()
-        #os.system('sudo shutdown -h now')
-
+        
     def clean(self):
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
