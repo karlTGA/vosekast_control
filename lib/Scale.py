@@ -284,11 +284,11 @@ class Scale:
     
     def flow_average(self):
         if len(self.flow_history_average) == 5:
-            flow_average = mean(self.flow_history_average)
-            print(flow_average)
+            volume_flow_average = mean(self.flow_history_average)
+            flow_average = round(volume_flow_average, 5)
             return flow_average
         else:
-            return "not enough values"
+            return
 
     def get_stable_value(self):
         if self.stable:

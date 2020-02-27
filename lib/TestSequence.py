@@ -79,13 +79,15 @@ class TestSequence():
         try:
             # loop
             while self.state == States.RUNNING and not self.vosekast.measuring_tank.is_filled:
+                #get flow average
+                flow_average = self.scale.flow_average()
                 #write values to csv file
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], self.scale.flow_average()])
+                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], flow_average])
                 #todo dictionary als Datenspeicher
-                self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(self.scale.flow_average())+ " L/s")
+                self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
                             
             #todo jsondumps
@@ -93,7 +95,7 @@ class TestSequence():
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.vosekast.measuring_tank_switch.close()
-                self.measuring_tank.drain_tank()
+                self.vosekast.measuring_tank.drain_tank()
                 self.logger.debug("Draining measuring tank, opening Measuring Tank bypass.")
         
         except:
