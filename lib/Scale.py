@@ -283,6 +283,7 @@ class Scale:
         self.state = States.PAUSE
     
     def flow_average(self):
+        print(len(self.flow_history))
         if len(self.flow_history) == 5:
             flow_average = mean(self.flow_history_average)
             return flow_average
