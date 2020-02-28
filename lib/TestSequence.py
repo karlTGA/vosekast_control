@@ -42,7 +42,7 @@ class TestSequence():
 
             # change state
             self.state = self.MEASURING
-            self.vosekast.state = self.state
+            self.vosekast.state = "PREPARING MEASUREMENT"
 
             # check if already running
             if self.scale.is_running != True:
@@ -70,10 +70,12 @@ class TestSequence():
 
             # create csv file
             self.vosekast.create_file()
-            self.logger.info("Created file.")
+            self.logger.info("Created csv file.")
             
             # turn on measuring pump, start measuring
-            self.start_measuring()
+            await self.start_measuring()
+
+            self.vosekast.state = "MEASURING"
 
             #write to file
             await self.write_loop()
@@ -85,6 +87,8 @@ class TestSequence():
             await self.stop_sequence()
             self.vosekast.constant_tank.stop_fill   
             self.vosekast.state = "RUNNING"         
+
+    #todo fix drain
 
     async def write_loop(self):
         try:
@@ -101,7 +105,9 @@ class TestSequence():
                 self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
 
-            await asyncio.sleep(0.5) 
+            await asyncio.sleep(0.5)
+            
+            print(self.vosekast.measuring_tank.is_filled)
             #todo sqlite
             
             #interrupt if measuring_tank full
@@ -114,17 +120,16 @@ class TestSequence():
             self.logger.warning("Write loop killed, stopping sequence.")
             await self.stop_sequence()
     
-    def start_measuring(self):
+    async def start_measuring(self):
         try:
             self.vosekast.measuring_tank.prepare_to_fill()
+            self.vosekast.measuring_tank_switch.close()
             self.vosekast.pump_measuring_tank.start()
+            self.logger.debug("Measuring Pump spin up. Please wait.")
 
-            #change vosekast state
-            try:
-                self.vosekast.state = "MEASURING"
-            except:
-                self.logger.debug("Changing Vosekast state did not work, continuing.")
-            
+            await asyncio.sleep(5)
+
+                                 
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
             
