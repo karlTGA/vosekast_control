@@ -114,25 +114,7 @@ class Tank():
             self.logger.info("Filling aborted.")
             return
     
-    #start measuring
-    def start_measuring(self):
-        try:
-            self.vosekast.measuring_tank.prepare_to_fill()
-            self.vosekast.pump_measuring_tank.start()
 
-            #change vosekast state
-            try:
-                self.vosekast.state = MEASURING
-            except:
-                self.logger.debug("Changing Vosekast state did not work, continuing.")
-            
-            self.vosekast.measuring_tank_switch.open()
-            self.logger.debug("Measuring started.")
-            
-        except:
-            self.logger.debug("Measuring aborted.")
-            self.vosekast.pump_measuring_tank.stop()
-            self.vosekast.state = RUNNING
 
     @property
     def start_fill(self):

@@ -41,7 +41,7 @@ class TestSequence():
             self.logger.info("Initialising sequence.")
 
             # change state
-            self.vosekast.state = MEASURING
+            self.vosekast.state = "MEASURING"
 
             # check if already running
             if self.scale.is_running != True:
@@ -55,10 +55,9 @@ class TestSequence():
             # set fill to True
             self.vosekast.constant_tank.start_fill
 
-            #todo  await constant_tank full
-
             #todo if already full
-
+            
+            #await constant_tank full
             #if self.vosekast.state == self.vosekast.INITED:
             await self.vosekast.constant_tank.fill()
 
@@ -73,7 +72,9 @@ class TestSequence():
             self.logger.info("Created file.")
             
             # turn on measuring pump, start measuring
-            self.vosekast.measuring_tank.start_measuring()
+            self.start_measuring()
+
+            #write to file
             await self.write_loop()
         
         #TankFillingTimeout
@@ -82,7 +83,7 @@ class TestSequence():
             
             await self.stop_sequence()
             self.vosekast.constant_tank.stop_fill   
-            self.vosekast.state = RUNNING         
+            self.vosekast.state = "RUNNING"         
 
     async def write_loop(self):
         try:
@@ -110,12 +111,30 @@ class TestSequence():
         except:
             self.logger.warning("Write loop killed, stopping sequence.")
             await self.stop_sequence()
+    
+    def start_measuring(self):
+        try:
+            self.vosekast.measuring_tank.prepare_to_fill()
+            self.vosekast.pump_measuring_tank.start()
+
+            #change vosekast state
+            try:
+                self.vosekast.state = MEASURING
+            except:
+                self.logger.debug("Changing Vosekast state did not work, continuing.")
             
+            self.vosekast.measuring_tank_switch.open()
+            self.logger.debug("Measuring started.")
+            
+        except:
+            self.logger.debug("Measuring aborted.")
+            self.vosekast.pump_measuring_tank.stop()
+            self.vosekast.state = "RUNNING"
 
     async def stop_sequence(self):
         self.state = self.STOPPED
         self.logger.debug('Stopped test sequence')
-        self.vosekast.state = RUNNING
+        self.vosekast.state = "RUNNING"
 
         # todo kill start_measurement
         
@@ -129,7 +148,7 @@ class TestSequence():
             tank.stop_fill
 
         self.vosekast.measuring_tank_switch.close()
-        self.vosekast.state = RUNNING
+        self.vosekast.state = "RUNNING"
         self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
@@ -140,6 +159,6 @@ class TestSequence():
             tank.start_fill
 
         self.vosekast.measuring_tank_switch.open()
-        self.vosekast.state = MEASURING
+        self.vosekast.state = "MEASURING"
         self.logger.info("Continuing. Measuring Tank is being filled.")
         await self.write_loop()
