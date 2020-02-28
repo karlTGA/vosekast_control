@@ -41,7 +41,8 @@ class TestSequence():
             self.logger.info("Initialising sequence.")
 
             # change state
-            self.vosekast.state = "MEASURING"
+            self.state = self.MEASURING
+            self.vosekast.state = self.state
 
             # check if already running
             if self.scale.is_running != True:

@@ -148,10 +148,10 @@ class Scale:
         self.logger.debug("constant_pump_running: " + str(self.vosekast.pump_constant_tank.is_running))
         self.logger.info("measuring_drain_valve.is_closed: " + str(self.vosekast.measuring_drain_valve.is_closed))
         self.logger.info("measuring_tank.is_filled: " + str(self.vosekast.measuring_tank.is_filled))
-        self.logger.debug("deques: (self.scale_history, self.flow_history, self.scale_input_buffer)")
-        self.logger.debug(self.scale_history)
-        self.logger.debug(self.flow_history)
-        self.logger.debug(self.scale_input_buffer)
+        #self.logger.debug("deques: (self.scale_history, self.flow_history, self.scale_input_buffer)")
+        #self.logger.debug(self.scale_history)
+        #self.logger.debug(self.flow_history)
+        #self.logger.debug(self.scale_input_buffer)
 
     def stop_measurement_thread(self):
         self.run = False
