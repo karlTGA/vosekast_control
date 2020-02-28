@@ -48,6 +48,7 @@ class Vosekast():
     RUNNING = "RUNNING"
     MEASURING = "MEASURING"
     PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
+    EMPTYING = "EMPTYING"
 
     def __init__(self, app_control, gpio_controller, debug=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -229,6 +230,17 @@ class Vosekast():
 
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
    
+    async def empty(self):
+        self._state = self.EMPTYING
+        self.logger.warning("Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow.")
+        self.pump_measuring_tank.start()
+        self.measuring_tank_switch.close()
+        self.measuring_drain_valve.open()
+
+        while self._state == self.EMPTYING:
+            await asyncio.sleep(1)
+
+        self.pump_measuring_tank.stop()
 
     def create_file(self):
         # create file, write header to csv file
@@ -399,8 +411,8 @@ class Vosekast():
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
                     await self.testsequence.stop_sequence()
-                #elif command['command'] == 'test':
-                #    await self.test()
+                elif command['command'] == 'empty':
+                    await self.empty()
                 elif command['command'] == 'pause_sequence':
                     self.testsequence.pause_sequence()
                 elif command['command'] == 'continue_sequence':

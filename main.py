@@ -47,6 +47,7 @@ async def main():
             os.system('sudo shutdown -h now')
         
     finally:
+        vosekast.clean()
         GPIO.cleanup()
 
 if __name__ == "__main__":

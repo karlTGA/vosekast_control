@@ -18,7 +18,7 @@ class LevelSensor:
 
         # add a thread for event detection
         self._gpio_controller.add_event_detect(
-            self._pin, self._gpio_controller.BOTH, bouncetime=200
+            self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
 
     def add_callback(self, callback_function):
@@ -39,7 +39,7 @@ class LevelSensor:
             loop.create_task(callback_function(pin, alert))
 
         self._gpio_controller.add_event_callback(
-            self._pin, extra_callback_function)
+            self._pin, extra_callback_function, bouncetime=500)
 
     def clear_callbacks(self):
         """
@@ -48,5 +48,5 @@ class LevelSensor:
         """
         self._gpio_controller.remove_event_detect(self._pin)
         self._gpio_controller.add_event_detect(
-            self._pin, self._gpio_controller.BOTH, bouncetime=200
+            self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
