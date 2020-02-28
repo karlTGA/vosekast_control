@@ -100,9 +100,9 @@ class TestSequence():
                 #todo dictionary als Datenspeicher
                 self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
-            
+
             await asyncio.sleep(0.5) 
-            #todo jsondumps
+            #todo sqlite
             
             #interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:

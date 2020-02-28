@@ -69,14 +69,8 @@ class Tank():
         else:
             self.logger.debug(
                 "No drain valve on the {}".format(self.name))
-            #mqttmsg = StatusMessage(self.name, 'Drain valve missing.', None, None, None)
-            #self.mqtt.publish_message(mqttmsg)
             return
         self.logger.info("Ready to fill the tank {}".format(self.name))
-
-        #mqttmsg = StatusMessage(
-        #    self.name, 'Ready to fill the tank.', None, None, None)
-        #self.mqtt.publish_message(mqttmsg)
 
     async def _up_state_changed(self, pin, alert):
         if alert:
@@ -130,10 +124,8 @@ class Tank():
         :return:
         """
         self.state = self.BETWEEN
-        #mqttmsg = StatusMessage(self.name, 'DRAINING', None, None, None)
 
         self.logger.info("{} is being drained.".format(self.name))
-        #self.mqtt.publish_message(mqttmsg)
 
     def _on_full(self):
         """
@@ -141,10 +133,8 @@ class Tank():
         :return:
         """
         self.state = self.FILLED
-        #mqttmsg = StatusMessage(self.name, 'FULL', None, None, None)
 
-        self.logger.warning("{} is full.".format(self.name))
-        #self.mqtt.publish_message(mqttmsg)
+        self.logger.info("{} is full.".format(self.name))
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -161,10 +151,8 @@ class Tank():
         :return:
         """
         self.state = self.BETWEEN
-        mqttmsg = StatusMessage(self.name, 'FILLING', None, None, None)
 
-        self.logger.warning("Tank {} is being filled".format(self.name))
-        self.mqtt.publish_message(mqttmsg)
+        self.logger.info("{} is being filled".format(self.name))
 
     def _handle_drained(self):
         """
@@ -172,10 +160,8 @@ class Tank():
         :return:
         """
         self.state = self.DRAINED
-        mqttmsg = StatusMessage(self.name, 'DRAINED', None, None, None)
 
-        self.logger.warning("Tank {} is drained".format(self.name))
-        self.mqtt.publish_message(mqttmsg)
+        self.logger.info("{} is drained".format(self.name))
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()

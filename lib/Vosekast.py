@@ -268,8 +268,6 @@ class Vosekast():
         
         self.logger.debug("All pumps switched off.")
 
-        #todo is_drained happens too soon
-        
         # stop scale
         self.logger.debug("Now stopping measurement thread.")
         self.scale.stop_measurement_thread()

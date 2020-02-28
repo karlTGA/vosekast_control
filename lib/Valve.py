@@ -43,28 +43,18 @@ class Valve():
         function to close the valve or switch
         :return:
         """
-        self.logger.debug("Closing valve {}".format(self.name))
+        self.logger.info("Closing {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.CLOSED
-
-        # publish States.CLOSED.value via mqtt
-        mqttmsg = StatusMessage(self.name, "Closing valve {}".format(self.name), None, None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
 
     def open(self):
         """
         open the valve
         :return:
         """
-        self.logger.debug("Opening valve {}".format(self.name))
+        self.logger.info("Opening {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.OPEN
-
-        # publish States.OPEN.value via mqtt
-        mqttmsg = StatusMessage(self.name, "Opening valve {}".format(self.name), None, None, None)
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
 
     @property
     def is_closed(self):
