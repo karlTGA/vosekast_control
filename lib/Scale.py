@@ -90,7 +90,6 @@ class Scale:
                 new_value = self.read_value_from_scale()
                 
                 if new_value is not None:
-                    # print("reached loop, new value not None")
                     self.add_new_value(new_value)
                     self.timestamp = datetime.now()
                     

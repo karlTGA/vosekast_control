@@ -91,23 +91,31 @@ class TestSequence():
     #todo fix drain
 
     async def write_loop(self):
+        
         try:
-            # loop
+            #null scale
+            if abs(self.scale.scale_history[0]) < 0.15:
+                scale_nulled = self.scale.scale_history[0]
+            else:
+                scale_nulled = 0
+
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 #get flow average
                 flow_average = self.scale.flow_average()
+                scale_actual = self.scale.scale_history[0] - scale_nulled
                 #write values to csv file
                 with open('sequence_values.csv', 'a', newline='') as file:
                     writer = csv.writer(file, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow([self.scale.scale_history[1], self.scale.scale_history[0], self.scale.flow_history[0], flow_average])
+                    writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
                 #todo dictionary als Datenspeicher
                 self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
 
             await asyncio.sleep(0.5)
 
-            print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+            #print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+            
             #todo sqlite
             
             #interrupt if measuring_tank full
