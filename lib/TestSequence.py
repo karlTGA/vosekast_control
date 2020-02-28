@@ -48,7 +48,7 @@ class TestSequence():
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
-                self.logger.info("Initialising connection, measurement thread. Please wait.")
+                self.logger.info("Initialising scale connection & measurement thread. Please wait.")
                 await asyncio.sleep(2)
             else:
                 self.logger.debug("Scale running, continuing.")
@@ -100,7 +100,8 @@ class TestSequence():
                 #todo dictionary als Datenspeicher
                 self.logger.debug(str(self.scale.scale_history[0]) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
-                            
+            
+            await asyncio.sleep(0.5) 
             #todo jsondumps
             
             #interrupt if measuring_tank full
@@ -120,7 +121,7 @@ class TestSequence():
 
             #change vosekast state
             try:
-                self.vosekast.state = MEASURING
+                self.vosekast.state = "MEASURING"
             except:
                 self.logger.debug("Changing Vosekast state did not work, continuing.")
             
