@@ -79,6 +79,8 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
+        print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+
         if not self.vosekast.constant_tank.is_filled:
             try:
                 #get time

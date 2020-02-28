@@ -276,6 +276,7 @@ class Vosekast():
     async def run(self):
         self.scale.open_connection()
         self.scale.start_measurement_thread()
+        self.pump_constant_tank.start()
 
         await self.mqtt_client.connect()
         self._state = self.RUNNING

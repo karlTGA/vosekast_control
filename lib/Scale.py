@@ -119,7 +119,6 @@ class Scale:
 
     def start_measurement_thread(self):
         self.run = True
-        #self.vosekast.initialise_gpio()
 
         if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
             self.logger.info("Threads alive.")
@@ -186,9 +185,7 @@ class Scale:
             line = self.scale_input_buffer[0]
             
             splitted_line = line.split()
-
-            #self.logger.debug("Measured {}".format(line))
-            
+          
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
                             
