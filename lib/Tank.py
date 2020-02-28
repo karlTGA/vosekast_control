@@ -79,34 +79,37 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        try:
-            #get time
-            time_filling_t0 = datetime.now()
-            #close valves, start pump
-            self.vosekast.prepare_measuring()
-            self.state = self.BETWEEN
-            
-            #check if constant_tank full
-            while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
+        if not self.vosekast.constant_tank.is_filled:
+            try:
+                #get time
+                time_filling_t0 = datetime.now()
+                #close valves, start pump
+                self.vosekast.prepare_measuring()
+                self.state = self.BETWEEN
+                
+                #check if constant_tank full
+                while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
 
-                time_filling_t1 = datetime.now()
-                time_filling_passed = time_filling_t1 - time_filling_t0
-                delta_time_filling = time_filling_passed.total_seconds()
+                    time_filling_t1 = datetime.now()
+                    time_filling_passed = time_filling_t1 - time_filling_t0
+                    delta_time_filling = time_filling_passed.total_seconds()
+                    
+                    #if filling takes longer than 90s
+                    if delta_time_filling >= 90:
+                        self.logger.error(
+                        "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
+                        raise TankFillingTimeout("Tank Filling Timeout.")
+                    
+                    self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
+                    await asyncio.sleep(1)
                 
-                #if filling takes longer than 90s
-                if delta_time_filling >= 90:
-                    self.logger.error(
-                    "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
-                    raise TankFillingTimeout("Tank Filling Timeout.")
-                
-                self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
-                await asyncio.sleep(1)
-            
-            return
-        except:
-            self.stop_fill
-            self.logger.info("Filling aborted.")
-            return
+                return
+            except:
+                self.stop_fill
+                self.logger.info("Filling {} aborted.".format(self.name))
+                return
+        else:
+            self.logger.info("{} already filled. Continuing.".format(self.name))
     
 
 

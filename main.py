@@ -29,7 +29,7 @@ EMULATE = os.environ.get('EMULATE', 'False')
 
 async def main():
     try:
-        GPIO.cleanup()
+        #GPIO.cleanup()
 
         # process state
         app_control = AppControl()

@@ -106,8 +106,8 @@ class TestSequence():
                 await asyncio.sleep(1)
 
             await asyncio.sleep(0.5)
-            
-            print(self.vosekast.measuring_tank.is_filled)
+
+            print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
             #todo sqlite
             
             #interrupt if measuring_tank full
