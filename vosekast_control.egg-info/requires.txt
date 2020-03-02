@@ -1,0 +1,11 @@
+gmqtt<0.7.0,>=0.6.2
+pyserial<4.0,>=3.4
+
+[:platform_machine != "armv7l"]
+rpi@ git+https://github.com/nosix/raspberry-gpio-emulator/@master
+
+[:platform_machine == "armv7l"]
+RPi.GPIO<0.8.0,>=0.7.0
+
+[:sys_platform == "linux"]
+uvloop<0.15.0,>=0.14.0

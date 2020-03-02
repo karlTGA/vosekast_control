@@ -1,0 +1,3 @@
+[console_scripts]
+dev = vosekast_control.scripts:dev
+
