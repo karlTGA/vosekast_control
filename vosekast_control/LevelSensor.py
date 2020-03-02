@@ -39,7 +39,7 @@ class LevelSensor:
             loop.create_task(callback_function(pin, alert))
 
         self._gpio_controller.add_event_callback(
-            self._pin, extra_callback_function, bouncetime=500)
+            self._pin, extra_callback_function)
 
     def clear_callbacks(self):
         """

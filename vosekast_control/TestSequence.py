@@ -59,7 +59,7 @@ class TestSequence():
             #todo if already full
             
             #await constant_tank full
-            #if self.vosekast.state == self.vosekast.INITED:
+
             await self.vosekast.constant_tank.fill()
 
             # check

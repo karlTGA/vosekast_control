@@ -165,6 +165,7 @@ class Scale:
         self.thread_readscale.join()
         self.threads.remove(self.thread_loop)
         self.threads.remove(self.thread_readscale)
+        self.logger.debug("Stopped measurement thread.")
 
     def _scale_input_buffer(self):
         if self.connection is not None and self.connection.is_open:

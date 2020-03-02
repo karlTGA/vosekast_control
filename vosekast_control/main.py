@@ -37,8 +37,6 @@ async def main(emulate=False):
         if emulate:
             sys.exit(0)
         else:
-            #cmdCommand = "shutdown -h now"
-            #subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
             os.system('sudo shutdown -h now')
     finally:
         vosekast.clean()
