@@ -62,7 +62,7 @@ class MQTTController():
 
         except ValueError:
             self.logger.debug("unexpected formatting: " +
-                  str(payload.decode("utf-8")))
+                              str(payload.decode("utf-8")))
             self.logger.debug(ValueError)
         except KeyError:
             self.logger.debug("Got message without type.")
@@ -72,7 +72,7 @@ class MQTTController():
     def on_disconnect(self, client, packet, exc=None):
         self.logger.debug('MQTT Client Disconnected')
 
-    def on_subscribe(self, client, mid, qos):
+    def on_subscribe(self, client, mid, qos, properties):
         self.logger.debug('Vosekast listening on: \"' + self.topic + "\"")
 
     def set_credentials(self, username, password):

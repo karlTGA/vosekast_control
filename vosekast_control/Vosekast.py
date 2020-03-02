@@ -15,8 +15,6 @@ from vosekast_control.MQTT import MQTTController
 import os
 
 
-
-
 # GPIO Assignment
 PIN_PUMP_CONSTANT = 17
 PIN_PUMP_MEASURING = 27
@@ -50,13 +48,13 @@ class Vosekast():
     PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
     EMPTYING = "EMPTYING"
 
-    def __init__(self, app_control, gpio_controller, debug=False, *args, **kwargs):
+    def __init__(self, app_control, gpio_controller, emulate=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.debug = debug
+        self.emulate = emulate
         self.logger = logging.getLogger(LOGGER)
         self._app_control = app_control
-        
+
         # set mqtt client, host
         self.mqtt_client = MQTTController('localhost')
         self.mqtt_client.on_command = self.handle_command
@@ -171,14 +169,15 @@ class Vosekast():
                 protect_draining=False,
             )
 
-            self.tanks = [self.stock_tank, self.constant_tank, self.measuring_tank]
+            self.tanks = [self.stock_tank,
+                          self.constant_tank, self.measuring_tank]
 
             # scale
-            self.scale = Scale(self, emulate=self.debug)
-            
+            self.scale = Scale(self, emulate=self.emulate)
+
             # testsequence
             self.testsequence = TestSequence(self)
-           
+
             # change state if ok
             self._state = self.INITED
 
@@ -209,14 +208,13 @@ class Vosekast():
         self._state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
-     
     def ready_to_measure(self):
         """
         is vosekast ready to measure
         :return: measuring ready
         """
 
-        #constant tank ready
+        # constant tank ready
         constant_tank_ready = self.constant_tank.is_filled
 
         measuring_tank_ready = (
@@ -229,10 +227,11 @@ class Vosekast():
             self.logger.info("Ready to start measuring.")
 
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
-   
+
     async def empty(self):
         self._state = self.EMPTYING
-        self.logger.warning("Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow.")
+        self.logger.warning(
+            "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow.")
         self.pump_measuring_tank.start()
         self.measuring_tank_switch.close()
         self.measuring_drain_valve.open()
@@ -247,37 +246,35 @@ class Vosekast():
         with open('sequence_values.csv', 'w', newline='') as file:
             writer = csv.writer(file, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["timestamp", "scale value", "flow", "average flow from last 5 values"])
-        
+            writer.writerow(["timestamp", "scale value", "flow",
+                             "average flow from last 5 values"])
+
     async def shutdown(self):
-        
+
         self.clean()
         self.logger.info("Shutting down.")
 
         # GPIO cleanup
         self._gpio_controller.cleanup()
-        self.logger.debug("GPIO cleanup.")  
+        self.logger.debug("GPIO cleanup.")
 
         await self.mqtt_client.disconnect()
         self.logger.debug("MQTT client disconnected.")
-        
-        self._app_control.shutdown()
-        
-    def clean(self):
-        self.measuring_tank.drain_tank()
-        self.logger.debug("Draining measuring tank.")
 
+        self._app_control.shutdown()
+
+    def clean(self):
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
 
         # set fill countdown to False
         for tank in self.tanks:
             tank.stop_fill
-        
+
         # shutdown pumps
         for pump in self.pumps:
             pump.stop()
-        
+
         self.logger.debug("All pumps switched off.")
 
         # stop scale
@@ -286,6 +283,9 @@ class Vosekast():
         self.scale.close_connection()
 
     async def run(self):
+        if self.emulate:
+            self.logger.info("Start Vosekast in Debug Mode.")
+
         self.scale.open_connection()
         self.scale.start_measurement_thread()
         self.pump_constant_tank.start()
@@ -298,7 +298,7 @@ class Vosekast():
             await asyncio.sleep(1)
 
         self.logger.debug('Vosekast stopped.')
-                
+
     # handle incoming mqtt commands
     async def handle_command(self, command):
         # valves
@@ -416,7 +416,7 @@ class Vosekast():
                 elif command['command'] == 'pause_sequence':
                     self.testsequence.pause_sequence()
                 elif command['command'] == 'continue_sequence':
-                    await self.testsequence.continue_sequence()    
+                    await self.testsequence.continue_sequence()
 
                 else:
                     self.logger.warning(

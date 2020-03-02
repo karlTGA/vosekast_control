@@ -2,43 +2,29 @@
 
 ## How to run
 
-You need Python 3.7, Pip and Pipenv (python -m pip install pipenv) on your System.
+You need Python 3.7, Pip and Poetry on your System.
 
-### Type:
-
-```
-pipenv install
-pipenv run start
-```
-
-or
+### Basic:
 
 ```
-pipenv run python main.py
+poetry install
+poetry run build
+poetry run start
 ```
 
-### Emulate:
+### Development:
 
-To run without scale connection, type:
-
-```
-EMULATE=True python main.py
-```
-
-or
+To run in delelopment mode, use following command:
 
 ```
-EMULATE=True pipenv run python main.py
+poetry run dev
 ```
 
-After starting main.py, measuring will begin.
-
-### Frontend:
-
-To start the frontend in the development mode, type the following command:
+You can start the frontend and the backend standalone:
 
 ```
-yarn start
+poetry run dev_frontend
+poetry run dev_backend
 ```
 
 ## Documentation
