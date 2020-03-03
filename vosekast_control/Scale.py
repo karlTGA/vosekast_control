@@ -3,13 +3,13 @@ from collections import deque
 from threading import Thread
 from time import sleep
 import logging
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 from random import uniform
 from itertools import islice
 from statistics import mean
-from vosekast_control.utils.Msg import StatusMessage
+from utils.Msg import StatusMessage
 
-from vosekast_control.EnumStates import States
+from EnumStates import States
 
 from collections import deque
 from datetime import datetime

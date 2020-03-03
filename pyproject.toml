@@ -12,6 +12,7 @@ gmqtt = "^0.6.2"
 uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
 "RPi.GPIO" = {version = "^0.7.0", markers = "platform_machine == 'armv7l'" }
 rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "platform_machine != 'armv7l'"}
+pendulum = "^2.0.5"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.4.4"

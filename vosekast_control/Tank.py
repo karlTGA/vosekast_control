@@ -1,7 +1,7 @@
 import logging
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 import asyncio
-from vosekast_control.utils.Msg import StatusMessage
+from utils.Msg import StatusMessage
 from datetime import datetime
 
 class TankFillingTimeout(Exception):
@@ -79,7 +79,7 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+        self.logger.info("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
 
         if not self.vosekast.constant_tank.is_filled:
             try:

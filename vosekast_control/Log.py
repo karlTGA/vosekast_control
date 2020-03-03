@@ -1,5 +1,5 @@
 import logging
-from vosekast_control.utils.Msg import LogMessage
+from utils.Msg import LogMessage
 
 LOGGER = "ROOT"
 

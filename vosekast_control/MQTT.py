@@ -1,6 +1,6 @@
 import json
 from gmqtt import Client as MQTTClient
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 import logging
 
 

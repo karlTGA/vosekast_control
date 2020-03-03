@@ -1,6 +1,6 @@
 # program runs fine when emulated, but otherwise running python3 main.py will raise:
 
-## Pi4:
+## Poetry on Balenafin:
 ```
 
 2020-02-12 09:41:15,170 - INFO - Scale - Opening connection to scale.
@@ -30,35 +30,5 @@ Traceback (most recent call last):
   File "/home/pi/.local/share/virtualenvs/vosekast_control-pmETU7-i/lib/python3.7/site-packages/gmqtt/mqtt/handler.py", line 381, in _handle_suback_packet
     self.on_subscribe(self, mid, granted_qoses, properties)
 TypeError: on_subscribe() takes 4 positional arguments but 5 were given
-
-```
-## Balenafin:
-```
-
-2020-02-12 12:47:49,485 - INFO - Scale - Opening connection to scale.
-[CONNACK] 0x1
-2020-02-12 12:47:49,501 - DEBUG - Vosekast - Vosekast started ok.
-Disconnected
-2020-02-12 12:47:49,503 - INFO - Scale - Start measuring with scale.
-True
-[EXC OCCURED] in reconnect future None
-2020-02-12 12:47:49,506 - INFO - Scale - Measured b'\xb7 kg \r\n'
-Exception in thread Thread-2:
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.7/threading.py", line 917, in _bootstrap_inner
-    self.run()
-  File "/usr/local/lib/python3.7/threading.py", line 865, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/pi/vosekast_control/lib/Scale.py", line 87, in loop
-    self.scale_history.appendleft(self.timestamp)
-AttributeError: 'Scale' object has no attribute 'timestamp'
-
-[EXC OCCURED] in reconnect future None
-Connected to host: "localhost"
-Vosekast listening on: "vosekast/commands"
-
-```
-
-```
 
 ```

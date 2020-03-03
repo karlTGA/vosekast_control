@@ -3,11 +3,11 @@ import threading
 import time
 import asyncio
 import csv
-#from vosekast_control.EnumStates import States
+#from EnumStates import States
 
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 
-from vosekast_control.utils.Msg import StatusMessage
+from utils.Msg import StatusMessage
 from datetime import datetime
 
 

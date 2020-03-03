@@ -8,6 +8,7 @@ You need Python 3.7, Pip and Poetry on your System.
 
 ```
 poetry install
+poetry shell
 poetry run build
 poetry run start
 ```
