@@ -13,6 +13,12 @@ interface StatusMessage extends Message {
   unit1: string;
 }
 
+interface LogMessage extends Message {
+  sensor_id: "Pump" | "Valve";
+  message: string;
+  level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
+}
+
 export default class MQTTConnector {
   client: mqtt.MqttClient;
 
@@ -54,6 +60,7 @@ export default class MQTTConnector {
         this.handleStatusMessage(message as StatusMessage);
         break;
       case "log":
+        this.handleLogMessage(message as LogMessage);
         break;
       case "message":
         break;
@@ -97,6 +104,27 @@ export default class MQTTConnector {
           s.scaleState.value = message.value1;
           s.scaleState.unit = message.unit1;
         });
+        break;
+      default:
+        console.log(`Receive unknown message: ${JSON.stringify(message)}`);
+    }
+  };
+
+  handleLogMessage = (message: LogMessage) => {
+    const combinedMessage = `${message.sensor_id}: ${message.message}`;
+
+    switch (message.level) {
+      case "DEBUG":
+        console.debug(combinedMessage);
+        break;
+      case "ERROR":
+        console.error(combinedMessage);
+        break;
+      case "INFO":
+        console.info(combinedMessage);
+        break;
+      case "WARNING":
+        console.warn(combinedMessage);
         break;
     }
   };
