@@ -1,6 +1,17 @@
 import mqtt from "mqtt";
-import { MQTTStore } from "../Store";
+import { MQTTStore, VosekastStore } from "../Store";
 import { message } from "antd";
+
+interface Message {
+  type: "status" | "log" | "message" | "command";
+  time: string;
+}
+
+interface StatusMessage extends Message {
+  sensor_id: "scale";
+  value1: number;
+  unit1: string;
+}
 
 export default class MQTTConnector {
   client: mqtt.MqttClient;
@@ -27,15 +38,33 @@ export default class MQTTConnector {
       s.mqttInterrupted = false;
     });
 
-    message.success("Connecto to MQTT Broker!");
+    console.log("Connect to MQTT Broker!");
+    this.client.subscribe("vosekast/#");
   };
 
-  handleMessage = (topic: string, payload: Buffer, packet: mqtt.Packet) => {
-    debugger;
+  handleMessage = (
+    topic: string,
+    payload: Buffer | string,
+    packet: mqtt.Packet
+  ) => {
+    const message: Message = JSON.parse(payload as string);
+
+    switch (message.type) {
+      case "status":
+        this.handleStatusMessage(message as StatusMessage);
+        break;
+      case "log":
+        break;
+      case "message":
+        break;
+      case "command":
+        break;
+    }
   };
 
   handleSubscription = (err: Error, granted: mqtt.ISubscriptionGrant[]) => {
-    debugger;
+    message.success("Connect to Vosekast Info Stream!");
+    console.log("Subscribed to vosekast topics.");
   };
 
   handleDissconnect = () => {
@@ -59,5 +88,16 @@ export default class MQTTConnector {
     });
 
     message.warning("MQTT Connection Lost. Try to reconnect.");
+  };
+
+  handleStatusMessage = (message: StatusMessage) => {
+    switch (message.sensor_id) {
+      case "scale":
+        VosekastStore.update(s => {
+          s.scaleState.value = message.value1;
+          s.scaleState.unit = message.unit1;
+        });
+        break;
+    }
   };
 }
