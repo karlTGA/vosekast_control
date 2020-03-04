@@ -91,7 +91,6 @@ class Scale:
                 if new_value is not None:
                     self.add_new_value(new_value)
                     self.timestamp = datetime.now()
-
                     # deque scale history
                     self.scale_history.appendleft(self.timestamp)
                     self.scale_history.appendleft(new_value)
@@ -195,9 +194,9 @@ class Scale:
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
 
-                if splitted_line[0] == b'-':
-                    self.logger.warning("Negative weight. Discarding value.")
-                    return
+                # if splitted_line[0] == b'-':
+                #     self.logger.warning("Negative weight. Discarding value.")
+                #     return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
@@ -232,27 +231,31 @@ class Scale:
 
         # calculate volume flow
         if len(self.scale_history) > 2:
+            
+            try:
+                # todo dictionary: value, timestamp
+                delta = self.scale_history[0] - self.scale_history[2]
+                delta_weight = abs(delta)
 
-            # todo dictionary: value, timestamp
-            delta = self.scale_history[0] - self.scale_history[2]
-            delta_weight = abs(delta)
+                duration = self.scale_history[1] - self.scale_history[3]
+                abs_duration = abs(duration)
+                delta_time = abs_duration.total_seconds()
 
-            duration = self.scale_history[1] - self.scale_history[3]
-            abs_duration = abs(duration)
-            delta_time = abs_duration.total_seconds()
+                weight_per_time = delta_weight / delta_time
 
-            weight_per_time = delta_weight / delta_time
+                # density of water at normal pressure:
+                # 10°C: 0.999702
+                # 15°C: 0.999103
+                # 20°C: 0.998207
 
-            # density of water at normal pressure:
-            # 10°C: 0.999702
-            # 15°C: 0.999103
-            # 20°C: 0.998207
+                # weight_per_time divided by density gives volume flow
+                volume_flow = round(weight_per_time / 0.999103, 10)
 
-            # weight_per_time divided by density gives volume flow
-            volume_flow = round(weight_per_time / 0.999103, 10)
-
-            self.flow_history.appendleft(volume_flow)
-            self.flow_history_average.appendleft(volume_flow)
+                self.flow_history.appendleft(volume_flow)
+                self.flow_history_average.appendleft(volume_flow)
+            
+            except ZeroDivisionError:
+                self.logger.warning("Division by zero.")
 
         # publish via mqtt
         # new_value = weight measured by scale

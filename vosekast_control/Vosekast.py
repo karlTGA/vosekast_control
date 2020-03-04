@@ -8,6 +8,8 @@ from TestSequence import TestSequence
 import logging
 import asyncio
 import csv
+import sqlite3
+from sqlite3 import Error
 from Log import LOGGER, add_mqtt_logger_handler
 
 from MQTT import MQTTController
@@ -242,14 +244,14 @@ class Vosekast():
 
         self.pump_measuring_tank.stop()
 
-    def create_file(self):
-        # create file, write header to csv file
-        with open('sequence_values.csv', 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=',',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["timestamp", "scale value", "flow",
-                             "average flow from last 5 values"])
-
+    # def create_file(self):
+        # # create file, write header to csv file
+        # with open('sequence_values.csv', 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter=',',
+        #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        #     writer.writerow(["timestamp", "scale value", "flow",
+        #                      "average flow from last 5 values"])
+        
     async def shutdown(self):
 
         self.clean()
@@ -289,7 +291,6 @@ class Vosekast():
 
         self.scale.open_connection()
         self.scale.start_measurement_thread()
-        self.pump_constant_tank.start()
 
         await self.mqtt_client.connect()
         self._state = self.RUNNING
