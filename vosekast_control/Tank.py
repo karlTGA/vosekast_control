@@ -42,7 +42,7 @@ class Tank():
         self.drain_valve = drain_valve
         self.source_pump = source_pump
         self.vosekast = vosekast
-        self.state = self.UNKNOWN
+        self._state = self.UNKNOWN
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
@@ -58,7 +58,7 @@ class Tank():
     def drain_tank(self):
         if self.drain_valve is not None:
             self.drain_valve.open()
-            self.state = self.IS_DRAINING
+            self._state = self.IS_DRAINING
         else:
             self.logger.warning(
                 "No valve to drain the tank {}".format(self.name))
@@ -87,7 +87,7 @@ class Tank():
                 time_filling_t0 = datetime.now()
                 #close valves, start pump
                 self.vosekast.prepare_measuring()
-                self.state = self.BETWEEN
+                self._state = self.BETWEEN
                 
                 #check if constant_tank full
                 while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
@@ -128,7 +128,7 @@ class Tank():
         internal function to register that the tank gets drained from highest position
         :return:
         """
-        self.state = self.BETWEEN
+        self._state = self.BETWEEN
 
         self.logger.info("{} is being drained.".format(self.name))
 
@@ -137,7 +137,7 @@ class Tank():
         internal function to register that the tank is filled
         :return:
         """
-        self.state = self.FILLED
+        self._state = self.FILLED
 
         self.logger.info("{} is full.".format(self.name))
 
@@ -155,7 +155,7 @@ class Tank():
         internal function to register that the tank gets filled
         :return:
         """
-        self.state = self.BETWEEN
+        self._state = self.BETWEEN
 
         self.logger.info("{} is being filled".format(self.name))
 
@@ -164,7 +164,7 @@ class Tank():
         internal function to register that the tank is drained
         :return:
         """
-        self.state = self.DRAINED
+        self._state = self.DRAINED
 
         self.logger.info("{} is drained".format(self.name))
 
@@ -173,8 +173,17 @@ class Tank():
 
     @property
     def is_filled(self):
-        return self.state == self.FILLED
+        return self._state == self.FILLED
 
     @property
     def is_drained(self):
-        return self.state == self.DRAINED    
+        return self._state == self.DRAINED
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
+        self.logger.info(f"New Tank state is: {new_state}")

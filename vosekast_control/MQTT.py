@@ -28,9 +28,21 @@ class MQTTController():
         self.client.on_disconnect = self.on_disconnect
         self.client.on_subscribe = self.on_subscribe
         self.logger = logging.getLogger(LOGGER)
+        self.tries = []
 
     async def connect(self):
-        await self.client.connect(self.host)
+        self.tries += 1
+        try:
+            await self.client.connect(self.host)
+        except ConnectionRefusedError:
+            self.connectionrefused()
+                
+    def connectionrefused(self):
+        self.logger.warning("Connection refused. Is the MQTT broker installed? Retrying.")
+        if self.tries <= 3:
+            await self.connect()
+        else:
+            self.logger.warning("Connection refused 3 times. Aborting.")
 
     async def disconnect(self):
         await self.client.disconnect()
