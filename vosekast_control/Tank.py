@@ -107,21 +107,28 @@ class Tank():
                 
                 return
             except:
-                self.stop_fill
+                self.set_fill_state(False)
                 self.logger.info("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
     
+    # @property
+    # def start_fill(self):
+    #     self.fill_state = True
 
+    # @property
+    # def stop_fill(self):
+    #     self.fill_state = False
+
+    @state.setter
+    def set_fill_state(self, new_state):
+        self.fill_state = new_state
+        #self.logger.debug(f"New Tank fill state is: {new_state}")
 
     @property
-    def start_fill(self):
-        self.fill_state = True
-
-    @property
-    def stop_fill(self):
-        self.fill_state = False
+    def get_fill_state(self):
+        return self.set_fill_state
 
     def _on_draining(self):
         """
