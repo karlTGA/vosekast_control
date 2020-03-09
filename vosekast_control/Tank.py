@@ -47,6 +47,7 @@ class Tank():
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
         self.mqtt = self.vosekast.mqtt_client
+        self._fill_state = False
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
@@ -90,7 +91,7 @@ class Tank():
                 self._state = self.BETWEEN
                 
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
+                while not self.vosekast.constant_tank.is_filled and self._fill_state == True:
 
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
@@ -107,28 +108,20 @@ class Tank():
                 
                 return
             except:
-                self.set_fill_state(False)
+                self._fill_state = False
                 self.logger.info("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
     
-    # @property
-    # def start_fill(self):
-    #     self.fill_state = True
-
-    # @property
-    # def stop_fill(self):
-    #     self.fill_state = False
-
-    @state.setter
-    def set_fill_state(self, new_state):
-        self.fill_state = new_state
-        #self.logger.debug(f"New Tank fill state is: {new_state}")
-
     @property
-    def get_fill_state(self):
-        return self.set_fill_state
+    def fill_state(self):
+        return self._fill_state
+
+    @fill_state.setter
+    def fill_state(self, new_state):
+        self._fill_state = new_state
+        #self.logger.debug(f"New Tank fill state is: {new_state}")
 
     def _on_draining(self):
         """
