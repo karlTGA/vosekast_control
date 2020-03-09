@@ -2,6 +2,7 @@ import json
 from gmqtt import Client as MQTTClient
 from Log import LOGGER
 import logging
+import asyncio
 
 
 def noop(*args, **kwargs):
@@ -57,11 +58,20 @@ class MQTTController():
 
     def publish_message(self, message_object):
         self.publish(message_object.topic, message_object.get_json())
-
-    def on_connect(self, client, flags, rc, properties):
+    
+    # RuntimeWarning: coroutine 'MQTTController.on_connect' was never awaited
+    async def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
             self.logger.debug('Connected to host: \"' + self.host + "\"")
+            await self._start_healthy_loop()
+    
+    async def _start_healthy_loop(self):
+        while self.connected:
+            self.logger.debug("MQTT connection healthy.")
+            await asyncio.sleep(10)
+        else:
+            self.logger.warning("MQTT connection error.")
 
     async def on_message(self, client, topic, payload, qos, properties):
         message = payload
