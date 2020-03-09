@@ -187,3 +187,8 @@ class Tank():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New Tank state is: {new_state}")
+
+        mqttmsg = StatusMessage(
+                    self.name, f"New Tank state is: {new_state}", None, None, None)
+        if self.mqtt.connection_test():
+                self.mqtt.publish_message(mqttmsg)

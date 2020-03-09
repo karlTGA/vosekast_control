@@ -44,6 +44,7 @@ class Scale:
         self.vosekast = vosekast
         self.state = States.NONE
         self.mqtt = self.vosekast.mqtt_client
+        self.scale_publish = False
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
@@ -175,28 +176,29 @@ class Scale:
                 # if readline reads less than 16 char reuse last value
                 if len(scale_input) == 0:
                     scale_input = self.scale_input_buffer[0]
-                    print(
+                    self.logger.warning(
                         "Cannot read from scale. Did you remember to turn on the scale?")
                     sleep(5)
+                    self.scale_publish = False
                 elif len(scale_input) != 16:
                     scale_input = self.scale_input_buffer[0]
-                    print("readline() read less than 16 char. Reusing last value.")
+                    self.logger.info("readline() read less than 16 char. Reusing last value.")
+                    self.scale_publish = False
+                else:
+                    self.scale_publish = True
 
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(0.05)
 
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
+
             line = self.scale_input_buffer[0]
 
             splitted_line = line.split()
 
             if len(splitted_line) == 3:
                 splitted_line_formatted = splitted_line[1]
-
-                # if splitted_line[0] == b'-':
-                #     self.logger.warning("Negative weight. Discarding value.")
-                #     return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
@@ -205,18 +207,19 @@ class Scale:
             elif len(splitted_line) == 2:
                 splitted_line_formatted = splitted_line[1]
 
-                if splitted_line[0] == b'-':
-                    self.logger.warning("Negative weight. Discarding value.")
-                    return
-                if splitted_line[1] == b'kg':
-                    self.logger.info("No input.")
-                    return
+                # if splitted_line[0] == b'-':
+                #     self.logger.warning("Negative weight. Discarding value.")
+                #     return
+                # if splitted_line[1] == b'kg':
+                #     self.logger.info("No weight input: " + str(splitted_line))
+                #     return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
                 new_value = float(splitted_line_str)
                 return new_value
             else:
                 self.logger.warning("Scale output too short.")
+                self.logger.debug("splitted_line: " + str(splitted_line))
 
         elif self.connection is not None:
             return 0.00
@@ -260,30 +263,34 @@ class Scale:
         # publish via mqtt
         # new_value = weight measured by scale
         # volume_flow = calculated volume flow
-        try:
-            mqttmsg = StatusMessage(
-                "scale", new_value, "Kg", volume_flow, "L/s")
-        except:
-            mqttmsg = StatusMessage("scale", new_value, "Kg", None, None)
 
-        if self.mqtt.connection_test():
-            self.mqtt.publish_message(mqttmsg)
+        if self.scale_publish != True:
+            return
+        else:
+            try:
+                mqttmsg = StatusMessage(
+                    "scale", new_value, "Kg", volume_flow, "L/s")
+            except:
+                mqttmsg = StatusMessage("scale", new_value, "Kg", None, None)
 
-        if len(self.last_values) == 10:
-            # calculate square mean error
-            diffs = 0
-            for value in list(islice(self.last_values, 0, 9)):
-                diffs += abs(value - new_value)
+            if self.mqtt.connection_test():
+                self.mqtt.publish_message(mqttmsg)
 
-            mean_diff = diffs / len(self.last_values)
+            if len(self.last_values) == 10:
+                # calculate square mean error
+                diffs = 0
+                for value in list(islice(self.last_values, 0, 9)):
+                    diffs += abs(value - new_value)
 
-            if mean_diff < 0.1:
-                self.stable = True
-                self.state = States.RUNNING
-                return
+                mean_diff = diffs / len(self.last_values)
 
-        self.stable = False
-        self.state = States.PAUSE
+                if mean_diff < 0.1:
+                    self.stable = True
+                    self.state = States.RUNNING
+                    return
+
+            self.stable = False
+            self.state = States.PAUSE
 
     def flow_average(self):
         if len(self.flow_history_average) == 5:

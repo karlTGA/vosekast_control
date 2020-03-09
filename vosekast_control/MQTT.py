@@ -35,9 +35,9 @@ class MQTTController():
         try:
             await self.client.connect(self.host)
         except ConnectionRefusedError:
-            await self.connectionrefused()
+            await self.connection_refused()
                 
-    async def connectionrefused(self):
+    async def connection_refused(self):
         self.logger.warning("Connection refused. Is the MQTT broker installed? Retrying.")
         if self.tries <= 3:
             await self.connect()
