@@ -9,12 +9,12 @@ class TankFillingTimeout(Exception):
 
 class Tank():
     # tank states
-    UNKNOWN = -1
-    DRAINED = -0.1
-    EMPTY = 0
-    FILLED = 1
-    BETWEEN = 0.5
-    STOPPED = 3
+    UNKNOWN = "UNKNOWN"
+    DRAINED = "DRAINED"
+    EMPTY = "EMPTY"
+    FILLED = "FILLED"
+    PAUSED = "PAUSED"
+    STOPPED = "STOPPED"
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
 
@@ -117,7 +117,7 @@ class Tank():
         internal function to register that the tank gets drained from highest position
         :return:
         """
-        self._state = self.BETWEEN
+        self._state = self.IS_DRAINING
 
         self.logger.info("{} is being drained.".format(self.name))
 
@@ -144,7 +144,7 @@ class Tank():
         internal function to register that the tank gets filled
         :return:
         """
-        self._state = self.BETWEEN
+        self._state = self.IS_FILLING
 
         self.logger.info("{} is being filled".format(self.name))
 

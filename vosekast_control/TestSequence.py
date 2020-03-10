@@ -83,7 +83,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             await self.stop_sequence()
-            self.vosekast.constant_tank.state = "STOPPED" 
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED 
             self.vosekast.state = "RUNNING"         
 
     #todo fix drain
@@ -190,7 +190,7 @@ class TestSequence():
 
         # set fill countdown to False
         for tank in self.vosekast.tanks:
-            tank.state = "BETWEEN"
+            tank.state = "PAUSED"
 
         self.vosekast.measuring_tank_switch.close()
         self.vosekast.state = "RUNNING"
