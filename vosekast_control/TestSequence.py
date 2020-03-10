@@ -69,10 +69,7 @@ class TestSequence():
                 self.scale.print_diagnostics()
                 return
 
-            # # create csv file
-            # self.vosekast.create_file()
-            # self.logger.info("Created csv file.")
-            
+           
             # turn on measuring pump, start measuring
             await self.start_measuring()
 

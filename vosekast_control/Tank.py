@@ -91,7 +91,7 @@ class Tank():
                 self._state = self.BETWEEN
                 
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self._fill_state == True:
+                while not self.vosekast.constant_tank.is_filled and self._fill_state:
 
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0

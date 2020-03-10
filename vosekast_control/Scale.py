@@ -204,11 +204,11 @@ class Scale:
 
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")
-                    print(splitted_line)
+                    self.logger.debug("Input: " + str(splitted_line))
                     return
                 if splitted_line[1] == b'kg':
-                    self.logger.info("No input.")
-                    print(splitted_line)
+                    self.logger.info("Invalid input.")
+                    self.logger.debug("Input: " + str(splitted_line))
                     return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
