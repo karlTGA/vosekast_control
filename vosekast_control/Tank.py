@@ -15,7 +15,6 @@ class Tank():
     FILLED = 1
     BETWEEN = 0.5
     STOPPED = 3
-
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
 
@@ -47,7 +46,6 @@ class Tank():
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
         self.mqtt = self.vosekast.mqtt_client
-        self._fill_state = False
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
@@ -88,10 +86,10 @@ class Tank():
                 time_filling_t0 = datetime.now()
                 #close valves, start pump
                 self.vosekast.prepare_measuring()
-                self._state = self.BETWEEN
+                self._state = self.IS_FILLING
                 
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self._fill_state:
+                while not self.vosekast.constant_tank.is_filled and self._state == self.IS_FILLING:
 
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
@@ -108,21 +106,12 @@ class Tank():
                 
                 return
             except:
-                self._fill_state = False
+                self._state = self.STOPPED
                 self.logger.info("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
     
-    @property
-    def fill_state(self):
-        return self._fill_state
-
-    @fill_state.setter
-    def fill_state(self, new_state):
-        self._fill_state = new_state
-        #self.logger.debug(f"New Tank fill state is: {new_state}")
-
     def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position

@@ -272,7 +272,7 @@ class Vosekast():
 
         # set fill countdown to False
         for tank in self.tanks:
-            tank.fill_state = False
+            tank.state = "STOPPED"
 
         # shutdown pumps
         for pump in self.pumps:

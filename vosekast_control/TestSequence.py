@@ -55,7 +55,7 @@ class TestSequence():
                 self.logger.debug("Scale running, continuing.")
 
             # set fill to True
-            self.vosekast.constant_tank.fill_state = True
+            self.vosekast.constant_tank.state = "IS_FILLING"
 
             #todo if already full
             
@@ -83,7 +83,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             await self.stop_sequence()
-            self.vosekast.constant_tank.fill_state = False 
+            self.vosekast.constant_tank.state = "STOPPED" 
             self.vosekast.state = "RUNNING"         
 
     #todo fix drain
@@ -190,7 +190,7 @@ class TestSequence():
 
         # set fill countdown to False
         for tank in self.vosekast.tanks:
-            tank.fill_state = False
+            tank.state = "BETWEEN"
 
         self.vosekast.measuring_tank_switch.close()
         self.vosekast.state = "RUNNING"
@@ -201,7 +201,7 @@ class TestSequence():
 
         # set fill countdown to True
         for tank in self.vosekast.tanks:
-            tank.fill_state = True
+            tank.state = "IS_FILLING"
 
         self.vosekast.measuring_tank_switch.open()
         self.vosekast.state = "MEASURING"
