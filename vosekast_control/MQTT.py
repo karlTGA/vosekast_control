@@ -1,6 +1,7 @@
 import json
 from gmqtt import Client as MQTTClient
 from Log import LOGGER
+from utils.Msg import StatusMessage
 import logging
 import asyncio
 
@@ -37,9 +38,10 @@ class MQTTController():
             await self.client.connect(self.host)
         except ConnectionRefusedError:
             await self.connectionrefused()
-                
+
     async def connectionrefused(self):
-        self.logger.warning("Connection refused. Is the MQTT broker installed? Retrying.")
+        self.logger.warning(
+            "Connection refused. Is the MQTT broker installed? Retrying.")
         if self.tries <= 3:
             await self.connect()
         else:
@@ -58,20 +60,25 @@ class MQTTController():
 
     def publish_message(self, message_object):
         self.publish(message_object.topic, message_object.get_json())
-    
+
     # RuntimeWarning: coroutine 'MQTTController.on_connect' was never awaited
-    async def on_connect(self, client, flags, rc, properties):
+    def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
             self.logger.debug('Connected to host: \"' + self.host + "\"")
-            await self._start_healthy_loop()
-    
+            asyncio.create_task(self._start_healthy_loop())
+
     async def _start_healthy_loop(self):
+        runs = 0
+
         while self.connected:
-            self.logger.debug("MQTT connection healthy.")
-            await asyncio.sleep(10)
-        else:
-            self.logger.warning("MQTT connection error.")
+            if runs == 10:
+                msg = StatusMessage('system', 'OK', None, None, None)
+                self.publish_message(msg)
+                runs = 0
+
+            runs += 1
+            await asyncio.sleep(1)
 
     async def on_message(self, client, topic, payload, qos, properties):
         message = payload
