@@ -55,7 +55,7 @@ class TestSequence():
                 self.logger.debug("Scale running, continuing.")
 
             # set fill to True
-            self.vosekast.constant_tank.state = "IS_FILLING"
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
             #todo if already full
             
