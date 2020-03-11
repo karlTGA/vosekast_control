@@ -55,7 +55,7 @@ class TestSequence():
                 self.logger.debug("Scale running, continuing.")
 
             # set fill to True
-            self.vosekast.constant_tank.start_fill
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
             #todo if already full
             
@@ -69,10 +69,7 @@ class TestSequence():
                 self.scale.print_diagnostics()
                 return
 
-            # # create csv file
-            # self.vosekast.create_file()
-            # self.logger.info("Created csv file.")
-            
+           
             # turn on measuring pump, start measuring
             await self.start_measuring()
 
@@ -86,7 +83,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             await self.stop_sequence()
-            self.vosekast.constant_tank.stop_fill   
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED 
             self.vosekast.state = "RUNNING"         
 
     #todo fix drain
@@ -180,6 +177,7 @@ class TestSequence():
 
     async def stop_sequence(self):
         self.state = self.STOPPED
+        self.vosekast.measuring_tank_switch.close()
         self.logger.debug('Stopped test sequence')
         self.vosekast.state = "RUNNING"
 
@@ -192,7 +190,7 @@ class TestSequence():
 
         # set fill countdown to False
         for tank in self.vosekast.tanks:
-            tank.stop_fill
+            tank.state = "PAUSED"
 
         self.vosekast.measuring_tank_switch.close()
         self.vosekast.state = "RUNNING"
@@ -203,7 +201,7 @@ class TestSequence():
 
         # set fill countdown to True
         for tank in self.vosekast.tanks:
-            tank.start_fill
+            tank.state = "IS_FILLING"
 
         self.vosekast.measuring_tank_switch.open()
         self.vosekast.state = "MEASURING"

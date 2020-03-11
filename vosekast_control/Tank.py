@@ -9,13 +9,12 @@ class TankFillingTimeout(Exception):
 
 class Tank():
     # tank states
-    UNKNOWN = -1
-    DRAINED = -0.1
-    EMPTY = 0
-    FILLED = 1
-    BETWEEN = 0.5
-    STOPPED = 3
-
+    UNKNOWN = "UNKNOWN"
+    DRAINED = "DRAINED"
+    EMPTY = "EMPTY"
+    FILLED = "FILLED"
+    PAUSED = "PAUSED"
+    STOPPED = "STOPPED"
     IS_DRAINING = "IS_DRAINING"
     IS_FILLING = "IS_FILLED"
 
@@ -87,10 +86,10 @@ class Tank():
                 time_filling_t0 = datetime.now()
                 #close valves, start pump
                 self.vosekast.prepare_measuring()
-                self._state = self.BETWEEN
+                self._state = self.IS_FILLING
                 
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
+                while not self.vosekast.constant_tank.is_filled and self._state == self.IS_FILLING:
 
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
@@ -107,28 +106,18 @@ class Tank():
                 
                 return
             except:
-                self.stop_fill
+                self._state = self.STOPPED
                 self.logger.info("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
     
-
-
-    @property
-    def start_fill(self):
-        self.fill_state = True
-
-    @property
-    def stop_fill(self):
-        self.fill_state = False
-
     def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position
         :return:
         """
-        self._state = self.BETWEEN
+        self._state = self.IS_DRAINING
 
         self.logger.info("{} is being drained.".format(self.name))
 
@@ -155,7 +144,7 @@ class Tank():
         internal function to register that the tank gets filled
         :return:
         """
-        self._state = self.BETWEEN
+        self._state = self.IS_FILLING
 
         self.logger.info("{} is being filled".format(self.name))
 

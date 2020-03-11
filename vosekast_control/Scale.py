@@ -132,29 +132,26 @@ class Scale:
 
     # diagnostics
     def print_diagnostics(self):
-        self.logger.debug("Printing diagnostics:")
-        self.logger.debug("self.threads: " + str(self.threads))
-        self.logger.debug("self.connection.is_open: " +
+        self.logger.info("Printing diagnostics:")
+        self.logger.info("self.threads: " + str(self.threads))
+        self.logger.info("self.connection.is_open: " +
                           str(self.connection.is_open))
-        self.logger.debug("Thread loop alive: " +
+        self.logger.info("Thread loop alive: " +
                           str(self.thread_loop.is_alive()))
-        self.logger.debug("Thread readscale alive: " +
+        self.logger.info("Thread readscale alive: " +
                           str(self.thread_readscale.is_alive()))
-        self.logger.debug("self.run = " + str(self.run))
-        self.logger.debug("constant_tank_ready: " +
+        self.logger.info("self.run = " + str(self.run))
+        self.logger.info("constant_tank_ready: " +
                           str(self.vosekast.constant_tank.is_filled))
-        self.logger.debug("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
+        self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
                                                          and not self.vosekast.measuring_tank.is_filled))
-        self.logger.debug("constant_pump_running: " +
+        self.logger.info("constant_pump_running: " +
                           str(self.vosekast.pump_constant_tank.is_running))
         self.logger.info("measuring_drain_valve.is_closed: " +
                          str(self.vosekast.measuring_drain_valve.is_closed))
         self.logger.info("measuring_tank.is_filled: " +
                          str(self.vosekast.measuring_tank.is_filled))
-        #self.logger.debug("deques: (self.scale_history, self.flow_history, self.scale_input_buffer)")
-        # self.logger.debug(self.scale_history)
-        # self.logger.debug(self.flow_history)
-        # self.logger.debug(self.scale_input_buffer)
+
 
     def stop_measurement_thread(self):
         self.run = False
@@ -207,9 +204,11 @@ class Scale:
 
                 if splitted_line[0] == b'-':
                     self.logger.warning("Negative weight. Discarding value.")
+                    self.logger.debug("Input: " + str(splitted_line))
                     return
                 if splitted_line[1] == b'kg':
-                    self.logger.info("No input.")
+                    self.logger.info("Invalid input.")
+                    self.logger.debug("Input: " + str(splitted_line))
                     return
 
                 splitted_line_str = splitted_line_formatted.decode("utf-8")
