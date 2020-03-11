@@ -42,7 +42,7 @@ class MQTTController():
                 
     async def connection_refused(self):
         self.logger.warning(
-          "Connection refused. Is the MQTT broker installed? Retrying.")
+          "Connection refused. Is the MQTT broker accessible? Retrying.")
 
         if self.tries <= 3:
             await self.connect()
@@ -62,8 +62,7 @@ class MQTTController():
             # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def publish_message(self, message_object):
-        if self.connection_test():
-            self.publish(message_object.topic, message_object.get_json())
+        self.publish(message_object.topic, message_object.get_json())
 
     # RuntimeWarning: coroutine 'MQTTController.on_connect' was never awaited
     def on_connect(self, client, flags, rc, properties):

@@ -9,13 +9,16 @@ from itertools import islice
 from statistics import mean
 from utils.Msg import StatusMessage
 
-from EnumStates import States
-
 from collections import deque
 from datetime import datetime
 
 
 class Scale:
+    # Scale states
+    UNKNOWN = -1
+    RUNNING = 0
+    PAUSED = 0.5
+    STOPPED = 3
 
     def __init__(
         self,
@@ -42,7 +45,7 @@ class Scale:
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
-        self.state = States.NONE
+        self.state = self.UNKNOWN
         self.mqtt = self.vosekast.mqtt_client
         self.scale_publish = False
         self.threads = []
@@ -285,11 +288,11 @@ class Scale:
 
                 if mean_diff < 0.1:
                     self.stable = True
-                    self.state = States.RUNNING
+                    self.state = self.RUNNING
                     return
 
             self.stable = False
-            self.state = States.PAUSE
+            self.state = self.PAUSED
 
     def flow_average(self):
         if len(self.flow_history_average) == 5:
