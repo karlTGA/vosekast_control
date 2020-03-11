@@ -15,10 +15,10 @@ from datetime import datetime
 
 class Scale:
     # Scale states
-    UNKNOWN = -1
-    RUNNING = 0
-    PAUSED = 0.5
-    STOPPED = 3
+    UNKNOWN = "UNKNOWN"
+    RUNNING = "RUNNING"
+    PAUSED = "PAUSED"
+    STOPPED = "STOPPED"
 
     def __init__(
         self,
