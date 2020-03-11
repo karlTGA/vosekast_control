@@ -264,7 +264,7 @@ class Scale:
         # new_value = weight measured by scale
         # volume_flow = calculated volume flow
 
-        if self.scale_publish != True:
+        if not self.scale_publish:
             return
         else:
             try:
@@ -273,8 +273,7 @@ class Scale:
             except:
                 mqttmsg = StatusMessage("scale", new_value, "Kg", None, None)
 
-            if self.mqtt.connection_test():
-                self.mqtt.publish_message(mqttmsg)
+            self.mqtt.publish_message(mqttmsg)
 
             if len(self.last_values) == 10:
                 # calculate square mean error

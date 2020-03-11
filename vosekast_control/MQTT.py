@@ -52,11 +52,13 @@ class MQTTController():
         return self.client.is_connected
 
     def publish(self, topic, message):
-        self.client.publish(topic, message, qos=0)
-        # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
+        if self.connection_test():
+            self.client.publish(topic, message, qos=0)
+            # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def publish_message(self, message_object):
-        self.publish(message_object.topic, message_object.get_json())
+        if self.connection_test():
+            self.publish(message_object.topic, message_object.get_json())
 
     def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
