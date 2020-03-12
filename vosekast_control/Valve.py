@@ -42,13 +42,17 @@ class Valve():
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
+    #todo bounce 
     def close(self):
         """
         function to close the valve or switch
         :return:
         """
         self.logger.info("Closing {}".format(self.name))
+        
+        #todo this triggers bounce
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
+        
         self.state = self.CLOSED
 
         mqttmsg = StatusMessage(
@@ -61,7 +65,10 @@ class Valve():
         :return:
         """
         self.logger.info("Opening {}".format(self.name))
+        
+        #todo this triggers bounce
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
+        
         self.state = self.OPEN
 
         mqttmsg = StatusMessage(

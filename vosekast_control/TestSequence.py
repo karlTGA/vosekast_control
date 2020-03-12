@@ -190,19 +190,18 @@ class TestSequence():
         self.state = self.PAUSED
 
         # set fill countdown to False
-        for tank in self.vosekast.tanks:
-            tank.state = "PAUSED"
+        self.vosekast.constant_tank.state = self.vosekast.constant_tank.PAUSED
 
         self.vosekast.measuring_tank_switch.close()
         self.vosekast.state = "RUNNING"
         self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
+        #todo only continue if sequence has been started before
         self.state = self.MEASURING
 
         # set fill countdown to True
-        for tank in self.vosekast.tanks:
-            tank.state = "IS_FILLING"
+        self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
         self.vosekast.measuring_tank_switch.open()
         self.vosekast.state = "MEASURING"
