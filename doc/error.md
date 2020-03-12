@@ -1,34 +1,46 @@
-# program runs fine when emulated, but otherwise running python3 main.py will raise:
+# current error messages, needs work:
 
-## Poetry on Balenafin:
+## Bounce:
+```
+2020-03-12 09:52:45,555 - INFO - TestSequence - Initialising sequence.
+2020-03-12 09:52:45,556 - DEBUG - Vosekast - New Vosekast state is: PREPARING MEASUREMENT
+2020-03-12 09:52:45,557 - DEBUG - Scale - Waiting for thread_loop.
+2020-03-12 09:52:45,558 - DEBUG - TestSequence - Scale running, continuing.
+2020-03-12 09:52:45,558 - INFO - Tank - Measuring Tank state: UNKNOWN
+2020-03-12 09:52:45,560 - INFO - Tank - Constant Tank state: UNKNOWN
+2020-03-12 09:52:45,561 - INFO - Valve - Closing Measuring Drain Valve
+2020-03-12 09:52:45,563 - DEBUG - Tank - No drain valve on the Constant Tank
+2020-03-12 09:52:45,563 - INFO - Pump - Starting Pump Constant Tank
+2020-03-12 09:52:45,565 - INFO - Pump - Stopping Pump Measuring Tank
+2020-03-12 09:52:45,566 - DEBUG - Tank - 0.005224s < time allotted (90s)
+
+# system seems to trigger alerts, why?
+
+2020-03-12 09:52:46,022 - INFO - Tank - Measuring Tank is being filled.
+2020-03-12 09:52:46,024 - INFO - Tank - Measuring Tank is being drained.
+2020-03-12 09:52:46,025 - INFO - Tank - Constant Tank is being drained.
+2020-03-12 09:52:46,027 - INFO - Tank - Constant Tank is drained.
+
+# alerts have triggered callback function, which change Tank states
+
+2020-03-12 09:52:46,568 - INFO - Tank - Measuring Tank state: IS_DRAINING
+2020-03-12 09:52:46,570 - INFO - Tank - Constant Tank state: DRAINED
+
+# fill function detects Tank state change and aborts
+
+2020-03-12 09:52:46,571 - DEBUG - TestSequence - Vosekast not ready to measure.
 ```
 
-2020-02-12 09:41:15,170 - INFO - Scale - Opening connection to scale.
-[CONNACK] 0x1
-2020-02-12 09:41:15,186 - DEBUG - Vosekast - Vosekast started ok.
-2020-02-12 09:41:15,188 - INFO - Scale - Start measuring with scale.
-TrueDisconnected
+## MQTT:
 
-2020-02-12 09:41:16,192 - INFO - Scale - Measured b''
-Exception in thread Thread-2:
-Traceback (most recent call last):
-  File "/usr/lib/python3.7/threading.py", line 917, in _bootstrap_inner
-    self.run()
-  File "/usr/lib/python3.7/threading.py", line 865, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/pi/vosekast_control/lib/Scale.py", line 87, in loop
-    self.scale_history.appendleft(self.timestamp)
-AttributeError: 'Scale' object has no attribute 'timestamp'
-
-Connected to host: "localhost"
+```
 [ERROR HANDLE PKG]
 Traceback (most recent call last):
   File "/home/pi/.local/share/virtualenvs/vosekast_control-pmETU7-i/lib/python3.7/site-packages/gmqtt/mqtt/handler.py", line 357, in __call__
     result = self._handle_packet(cmd, packet)
   File "/home/pi/.local/share/virtualenvs/vosekast_control-pmETU7-i/lib/python3.7/site-packages/gmqtt/mqtt/handler.py", line 210, in _handle_packet
     handler(cmd, packet)
-  File "/home/pi/.local/share/virtualenvs/vosekast_control-pmETU7-i/lib/python3.7/site-packages/gmqtt/mqtt/handler.py", line 381, in _handle_suback_packet
-    self.on_subscribe(self, mid, granted_qoses, properties)
-TypeError: on_subscribe() takes 4 positional arguments but 5 were given
-
+  File "/home/pi/.local/share/virtualenvs/vosekast_control-pmETU7-i/lib/python3.7/site-packages/gmqtt/mqtt/handler.py", line 370, in _handle_suback_packet
+    self.on_subscribe(self, mid, granted_qos)
+TypeError: on_subscribe() missing 1 required positional argument: 'properties'
 ```
