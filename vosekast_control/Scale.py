@@ -207,7 +207,6 @@ class Scale:
             elif len(splitted_line) == 2:
                 splitted_line_formatted = splitted_line[1]
 
-
                 #if splitted_line[0] == b'-':
                 #    self.logger.warning("Negative weight. Discarding value.")
                 #    self.logger.debug("Input: " + str(splitted_line))

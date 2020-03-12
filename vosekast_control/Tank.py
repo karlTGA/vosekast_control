@@ -16,7 +16,7 @@ class Tank():
     PAUSED = "PAUSED"
     STOPPED = "STOPPED"
     IS_DRAINING = "IS_DRAINING"
-    IS_FILLING = "IS_FILLED"
+    IS_FILLING = "IS_FILLING"
 
     def __init__(
         self,
@@ -48,6 +48,7 @@ class Tank():
         self.mqtt = self.vosekast.mqtt_client
 
         # register callback for overfill if necessary
+        #todo 
         if overflow_sensor is not None:
             self.overflow_sensor.add_callback(self._up_state_changed)
 
@@ -78,9 +79,10 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        self.logger.info("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+        self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
+        self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
 
-        if not self.vosekast.constant_tank.is_filled:
+        if not self._state == self.FILLED:
             try:
                 #get time
                 time_filling_t0 = datetime.now()
@@ -88,9 +90,9 @@ class Tank():
                 self.vosekast.prepare_measuring()
                 self._state = self.IS_FILLING
                 
+                
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self._state == self.IS_FILLING:
-
+                while not self._state == self.FILLED and self._state == self.IS_FILLING:
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
                     delta_time_filling = time_filling_passed.total_seconds()
@@ -103,11 +105,13 @@ class Tank():
                     
                     self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
                     await asyncio.sleep(1)
-                
+                    
+                self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
+                self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
                 return
             except:
                 self._state = self.STOPPED
-                self.logger.info("Filling {} aborted.".format(self.name))
+                self.logger.warning("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
@@ -154,7 +158,7 @@ class Tank():
         """
         self._state = self.IS_FILLING
 
-        self.logger.info("{} is being filled".format(self.name))
+        self.logger.info("{} is being filled.".format(self.name))
 
         mqttmsg = StatusMessage(
                     self.name, "{} is being filled".format(self.name), None, None, None)
@@ -167,7 +171,7 @@ class Tank():
         """
         self._state = self.DRAINED
 
-        self.logger.info("{} is drained".format(self.name))
+        self.logger.info("{} is drained.".format(self.name))
 
         mqttmsg = StatusMessage(
                     self.name, "{} is drained".format(self.name), None, None, None)
