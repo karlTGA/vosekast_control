@@ -124,6 +124,10 @@ class Tank():
         self._state = self.IS_DRAINING
 
         self.logger.info("{} is being drained.".format(self.name))
+        
+        mqttmsg = StatusMessage(
+                    self.name, "{} is being drained.".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     def _on_full(self):
         """
@@ -133,6 +137,10 @@ class Tank():
         self._state = self.FILLED
 
         self.logger.info("{} is full.".format(self.name))
+
+        mqttmsg = StatusMessage(
+                    self.name, "{} is full.".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -152,6 +160,10 @@ class Tank():
 
         self.logger.info("{} is being filled.".format(self.name))
 
+        mqttmsg = StatusMessage(
+                    self.name, "{} is being filled".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
+
     def _handle_drained(self):
         """
         internal function to register that the tank is drained
@@ -160,6 +172,10 @@ class Tank():
         self._state = self.DRAINED
 
         self.logger.info("{} is drained.".format(self.name))
+
+        mqttmsg = StatusMessage(
+                    self.name, "{} is drained".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()
@@ -180,3 +196,5 @@ class Tank():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New Tank state is: {new_state}")
+
+        #todo restructure statusmessages

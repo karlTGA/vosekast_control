@@ -37,11 +37,13 @@ class MQTTController():
         try:
             await self.client.connect(self.host)
         except ConnectionRefusedError:
-            await self.connectionrefused()
 
-    async def connectionrefused(self):
+            await self.connection_refused()
+                
+    async def connection_refused(self):
         self.logger.warning(
-            "Connection refused. Is the MQTT broker installed? Retrying.")
+          "Connection refused. Is the MQTT broker accessible? Retrying.")
+
         if self.tries <= 3:
             await self.connect()
         else:
@@ -55,8 +57,9 @@ class MQTTController():
         return self.client.is_connected
 
     def publish(self, topic, message):
-        self.client.publish(topic, message, qos=0)
-        # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
+        if self.connection_test():
+            self.client.publish(topic, message, qos=0)
+            # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def publish_message(self, message_object):
         self.publish(message_object.topic, message_object.get_json())
