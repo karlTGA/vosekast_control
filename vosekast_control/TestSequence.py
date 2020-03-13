@@ -3,11 +3,12 @@ import threading
 import time
 import asyncio
 import csv
-#from vosekast_control.EnumStates import States
 
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 
-from vosekast_control.utils.Msg import StatusMessage
+import sqlite3
+from sqlite3 import Error
+from utils.Msg import StatusMessage
 from datetime import datetime
 
 
@@ -54,12 +55,13 @@ class TestSequence():
                 self.logger.debug("Scale running, continuing.")
 
             # set fill to True
-            self.vosekast.constant_tank.start_fill
+            if not self.vosekast.constant_tank.FILLED:
+                self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
             #todo if already full
             
             #await constant_tank full
-            #if self.vosekast.state == self.vosekast.INITED:
+
             await self.vosekast.constant_tank.fill()
 
             # check
@@ -68,10 +70,7 @@ class TestSequence():
                 self.scale.print_diagnostics()
                 return
 
-            # create csv file
-            self.vosekast.create_file()
-            self.logger.info("Created csv file.")
-            
+           
             # turn on measuring pump, start measuring
             await self.start_measuring()
 
@@ -85,7 +84,7 @@ class TestSequence():
             self.logger.error("Error, aborting test sequence.")
             
             await self.stop_sequence()
-            self.vosekast.constant_tank.stop_fill   
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED 
             self.vosekast.state = "RUNNING"         
 
     #todo fix drain
@@ -103,15 +102,48 @@ class TestSequence():
                 #get flow average
                 flow_average = self.scale.flow_average()
                 scale_actual = round(self.scale.scale_history[0] - scale_nulled, 5)
-                #write values to csv file
-                with open('sequence_values.csv', 'a', newline='') as file:
-                    writer = csv.writer(file, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
-                #todo dictionary als Datenspeicher
+                
+                # #write values to csv file
+                # with open('sequence_values.csv', 'a', newline='') as file:
+                #     writer = csv.writer(file, delimiter=',',
+                #                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                #     writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
+                
+                #db
+                dbconnect = sqlite3.connect('sequence_values.db')
+                c = dbconnect.cursor()
+                c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
+                    description text,
+                    timestamp real,
+                    scale_value real,
+                    flow_current real,
+                    flow_average_of_5 real
+                    )""")
+
+                dbconnect.commit()
+                                
+                try: 
+                    c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
+                        'description': "description", 
+                        'timestamp': self.scale.scale_history[1], 
+                        'scale_value': scale_actual,
+                        'flow_current': self.scale.flow_history[0],
+                        'flow_average': flow_average
+                        })     
+
+                    dbconnect.commit()
+
+                except Error as e:
+                    self.logger.warning(e)
+
+                except:
+                    self.logger.warning("Error writing to db.")
+                    dbconnect.close() 
+
                 self.logger.debug(str(scale_actual) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
                 await asyncio.sleep(1)
 
+            dbconnect.close() 
             
             #todo sqlite
             
@@ -123,6 +155,7 @@ class TestSequence():
         
         except:
             self.logger.warning("Write loop killed, stopping sequence.")
+            dbconnect.close() 
             await self.stop_sequence()
     
     async def start_measuring(self):
@@ -145,6 +178,7 @@ class TestSequence():
 
     async def stop_sequence(self):
         self.state = self.STOPPED
+        self.vosekast.measuring_tank_switch.close()
         self.logger.debug('Stopped test sequence')
         self.vosekast.state = "RUNNING"
 
@@ -156,19 +190,18 @@ class TestSequence():
         self.state = self.PAUSED
 
         # set fill countdown to False
-        for tank in self.vosekast.tanks:
-            tank.stop_fill
+        self.vosekast.constant_tank.state = self.vosekast.constant_tank.PAUSED
 
         self.vosekast.measuring_tank_switch.close()
         self.vosekast.state = "RUNNING"
         self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
+        #todo only continue if sequence has been started before
         self.state = self.MEASURING
 
         # set fill countdown to True
-        for tank in self.vosekast.tanks:
-            tank.start_fill
+        self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
         self.vosekast.measuring_tank_switch.open()
         self.vosekast.state = "MEASURING"

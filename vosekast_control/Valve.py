@@ -1,7 +1,6 @@
 import logging
-from vosekast_control.Log import LOGGER
-from vosekast_control.EnumStates import States
-from vosekast_control.utils.Msg import StatusMessage
+from Log import LOGGER
+from utils.Msg import StatusMessage
 
 
 class Valve():
@@ -13,6 +12,11 @@ class Valve():
     TWO_WAY = "TWO_WAY"
     THREE_WAY = "THREE_WAY"
     SWITCH = "SWITCH"
+
+    # valve states
+    UNKNOWN = "UNKNOWN"
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
 
     def __init__(
         self,
@@ -32,20 +36,28 @@ class Valve():
         self.regulation = regulation
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
-        self.state = None
+        self.state = self.UNKNOWN
         self.mqtt = self.vosekast.mqtt_client
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
+    #todo bounce 
     def close(self):
         """
         function to close the valve or switch
         :return:
         """
         self.logger.info("Closing {}".format(self.name))
+        
+        #todo this triggers bounce
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
-        self.state = States.CLOSED
+        
+        self.state = self.CLOSED
+
+        mqttmsg = StatusMessage(
+                    self.name, "Closing {}".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     def open(self):
         """
@@ -53,14 +65,21 @@ class Valve():
         :return:
         """
         self.logger.info("Opening {}".format(self.name))
+        
+        #todo this triggers bounce
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
-        self.state = States.OPEN
+        
+        self.state = self.OPEN
+
+        mqttmsg = StatusMessage(
+                    self.name, "Opening {}".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     @property
     def is_closed(self):
-        return self.state == States.CLOSED
+        return self.state == self.CLOSED
 
     @property
     def is_open(self):
-        return self.state == States.OPEN   
+        return self.state == self.OPEN   
 

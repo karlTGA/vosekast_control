@@ -1,7 +1,9 @@
 import json
 from gmqtt import Client as MQTTClient
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
+from utils.Msg import StatusMessage
 import logging
+import asyncio
 
 
 def noop(*args, **kwargs):
@@ -28,9 +30,24 @@ class MQTTController():
         self.client.on_disconnect = self.on_disconnect
         self.client.on_subscribe = self.on_subscribe
         self.logger = logging.getLogger(LOGGER)
+        self.tries = 0
 
     async def connect(self):
-        await self.client.connect(self.host)
+        self.tries += 1
+        try:
+            await self.client.connect(self.host)
+        except ConnectionRefusedError:
+
+            await self.connection_refused()
+                
+    async def connection_refused(self):
+        self.logger.warning(
+          "Connection refused. Is the MQTT broker accessible? Retrying.")
+
+        if self.tries <= 3:
+            await self.connect()
+        else:
+            self.logger.warning("Connection refused 3 times. Aborting.")
 
     async def disconnect(self):
         await self.client.disconnect()
@@ -40,16 +57,31 @@ class MQTTController():
         return self.client.is_connected
 
     def publish(self, topic, message):
-        self.client.publish(topic, message, qos=0)
-        # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
+        if self.connection_test():
+            self.client.publish(topic, message, qos=0)
+            # print("Published: \"" + message + "\" to topic: \"" + topic + "\"")
 
     def publish_message(self, message_object):
         self.publish(message_object.topic, message_object.get_json())
 
+    # RuntimeWarning: coroutine 'MQTTController.on_connect' was never awaited
     def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
             self.logger.debug('Connected to host: \"' + self.host + "\"")
+            asyncio.create_task(self._start_healthy_loop())
+
+    async def _start_healthy_loop(self):
+        runs = 0
+
+        while self.connected:
+            if runs == 10:
+                msg = StatusMessage('mqtt connection healthy', None, None, None, None)
+                self.publish_message(msg)
+                runs = 0
+
+            runs += 1
+            await asyncio.sleep(1)
 
     async def on_message(self, client, topic, payload, qos, properties):
         message = payload

@@ -1,7 +1,7 @@
 import logging
-from vosekast_control.Log import LOGGER
-from vosekast_control.EnumStates import States
-from vosekast_control.utils.Msg import StatusMessage
+from Log import LOGGER
+from EnumStates import States
+from utils.Msg import StatusMessage
 
 
 class Pump():
@@ -29,6 +29,11 @@ class Pump():
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
         self.state = States.STOPPED
 
+        mqttmsg = StatusMessage(
+                    self.name, "Stopping {}".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
+
+
     def start(self):
         """
         start the pump
@@ -37,6 +42,10 @@ class Pump():
         self.logger.info("Starting {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
         self.state = States.RUNNING
+
+        mqttmsg = StatusMessage(
+                    self.name, "Starting {}".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     def toggle(self):
         """

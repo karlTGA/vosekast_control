@@ -7,11 +7,11 @@ import subprocess
 import os
 import traceback
 
-from vosekast_control.Log import setup_custom_logger
-from vosekast_control.AppControl import AppControl
+from Log import setup_custom_logger
+from AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 import RPi.GPIO as GPIO
-from vosekast_control.Vosekast import Vosekast
+from Vosekast import Vosekast
 
 # add mqtt resources
 import asyncio
@@ -24,7 +24,7 @@ logger = setup_custom_logger()
 
 async def main(emulate=False):
     try:
-        GPIO.cleanup()
+        #GPIO.cleanup()
 
         # process state
         app_control = AppControl()
@@ -37,8 +37,6 @@ async def main(emulate=False):
         if emulate:
             sys.exit(0)
         else:
-            #cmdCommand = "shutdown -h now"
-            #subprocess.Popen(cmdCommand.split(), stdout=subprocess.PIPE)
             os.system('sudo shutdown -h now')
     finally:
         vosekast.clean()

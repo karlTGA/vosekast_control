@@ -1,7 +1,7 @@
 import logging
-from vosekast_control.Log import LOGGER
+from Log import LOGGER
 import asyncio
-from vosekast_control.utils.Msg import StatusMessage
+from utils.Msg import StatusMessage
 from datetime import datetime
 
 class TankFillingTimeout(Exception):
@@ -9,15 +9,14 @@ class TankFillingTimeout(Exception):
 
 class Tank():
     # tank states
-    UNKNOWN = -1
-    DRAINED = -0.1
-    EMPTY = 0
-    FILLED = 1
-    BETWEEN = 0.5
-    STOPPED = 3
-
+    UNKNOWN = "UNKNOWN"
+    DRAINED = "DRAINED"
+    EMPTY = "EMPTY"
+    FILLED = "FILLED"
+    PAUSED = "PAUSED"
+    STOPPED = "STOPPED"
     IS_DRAINING = "IS_DRAINING"
-    IS_FILLING = "IS_FILLED"
+    IS_FILLING = "IS_FILLING"
 
     def __init__(
         self,
@@ -42,13 +41,14 @@ class Tank():
         self.drain_valve = drain_valve
         self.source_pump = source_pump
         self.vosekast = vosekast
-        self.state = self.UNKNOWN
+        self._state = self.UNKNOWN
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
         self.mqtt = self.vosekast.mqtt_client
 
         # register callback for overfill if necessary
+        #todo 
         if overflow_sensor is not None:
             self.overflow_sensor.add_callback(self._up_state_changed)
 
@@ -58,7 +58,7 @@ class Tank():
     def drain_tank(self):
         if self.drain_valve is not None:
             self.drain_valve.open()
-            self.state = self.IS_DRAINING
+            self._state = self.IS_DRAINING
         else:
             self.logger.warning(
                 "No valve to drain the tank {}".format(self.name))
@@ -79,19 +79,20 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        print("Measuring Tank filled: " + str(self.vosekast.measuring_tank.is_filled))
+        self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
+        self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
 
-        if not self.vosekast.constant_tank.is_filled:
+        if not self._state == self.FILLED:
             try:
                 #get time
                 time_filling_t0 = datetime.now()
                 #close valves, start pump
                 self.vosekast.prepare_measuring()
-                self.state = self.BETWEEN
+                self._state = self.IS_FILLING
+                
                 
                 #check if constant_tank full
-                while not self.vosekast.constant_tank.is_filled and self.fill_state == True:
-
+                while not self._state == self.FILLED and self._state == self.IS_FILLING:
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
                     delta_time_filling = time_filling_passed.total_seconds()
@@ -104,42 +105,42 @@ class Tank():
                     
                     self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
                     await asyncio.sleep(1)
-                
+                    
+                self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
+                self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
                 return
             except:
-                self.stop_fill
-                self.logger.info("Filling {} aborted.".format(self.name))
+                self._state = self.STOPPED
+                self.logger.warning("Filling {} aborted.".format(self.name))
                 return
         else:
             self.logger.info("{} already filled. Continuing.".format(self.name))
     
-
-
-    @property
-    def start_fill(self):
-        self.fill_state = True
-
-    @property
-    def stop_fill(self):
-        self.fill_state = False
-
     def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position
         :return:
         """
-        self.state = self.BETWEEN
+        self._state = self.IS_DRAINING
 
         self.logger.info("{} is being drained.".format(self.name))
+        
+        mqttmsg = StatusMessage(
+                    self.name, "{} is being drained.".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     def _on_full(self):
         """
         internal function to register that the tank is filled
         :return:
         """
-        self.state = self.FILLED
+        self._state = self.FILLED
 
         self.logger.info("{} is full.".format(self.name))
+
+        mqttmsg = StatusMessage(
+                    self.name, "{} is full.".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -155,26 +156,45 @@ class Tank():
         internal function to register that the tank gets filled
         :return:
         """
-        self.state = self.BETWEEN
+        self._state = self.IS_FILLING
 
-        self.logger.info("{} is being filled".format(self.name))
+        self.logger.info("{} is being filled.".format(self.name))
+
+        mqttmsg = StatusMessage(
+                    self.name, "{} is being filled".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
     def _handle_drained(self):
         """
         internal function to register that the tank is drained
         :return:
         """
-        self.state = self.DRAINED
+        self._state = self.DRAINED
 
-        self.logger.info("{} is drained".format(self.name))
+        self.logger.info("{} is drained.".format(self.name))
+
+        mqttmsg = StatusMessage(
+                    self.name, "{} is drained".format(self.name), None, None, None)
+        self.mqtt.publish_message(mqttmsg)
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()
 
     @property
     def is_filled(self):
-        return self.state == self.FILLED
+        return self._state == self.FILLED
 
     @property
     def is_drained(self):
-        return self.state == self.DRAINED    
+        return self._state == self.DRAINED
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
+        self.logger.info(f"New Tank state is: {new_state}")
+
+        #todo restructure statusmessages

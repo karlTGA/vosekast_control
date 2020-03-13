@@ -20,7 +20,7 @@ class LevelSensor:
         self._gpio_controller.add_event_detect(
             self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
-
+    #todo fix bounce
     def add_callback(self, callback_function):
         """
         add callback function that fires every time the sensor is triggered
@@ -39,7 +39,7 @@ class LevelSensor:
             loop.create_task(callback_function(pin, alert))
 
         self._gpio_controller.add_event_callback(
-            self._pin, extra_callback_function, bouncetime=500)
+            self._pin, extra_callback_function)
 
     def clear_callbacks(self):
         """

@@ -4,6 +4,7 @@
 *.iml
 *.pyc
 *.csv
+*.db
 out
 gen
 __pycache__

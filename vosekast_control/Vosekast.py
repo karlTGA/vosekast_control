@@ -1,16 +1,18 @@
-from vosekast_control.Pump import Pump
-from vosekast_control.Tank import Tank
-from vosekast_control.LevelSensor import LevelSensor
-from vosekast_control.Valve import Valve
-from vosekast_control.Scale import Scale
-from vosekast_control.TestSequence import TestSequence
+from Pump import Pump
+from Tank import Tank
+from LevelSensor import LevelSensor
+from Valve import Valve
+from Scale import Scale
+from TestSequence import TestSequence
 
 import logging
 import asyncio
 import csv
-from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
+import sqlite3
+from sqlite3 import Error
+from Log import LOGGER, add_mqtt_logger_handler
 
-from vosekast_control.MQTT import MQTTController
+from MQTT import MQTTController
 
 import os
 
@@ -233,6 +235,7 @@ class Vosekast():
         self.logger.warning(
             "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow.")
         self.pump_measuring_tank.start()
+        self.pump_constant_tank.stop()
         self.measuring_tank_switch.close()
         self.measuring_drain_valve.open()
 
@@ -241,14 +244,14 @@ class Vosekast():
 
         self.pump_measuring_tank.stop()
 
-    def create_file(self):
-        # create file, write header to csv file
-        with open('sequence_values.csv', 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=',',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["timestamp", "scale value", "flow",
-                             "average flow from last 5 values"])
-
+    # def create_file(self):
+        # # create file, write header to csv file
+        # with open('sequence_values.csv', 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter=',',
+        #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        #     writer.writerow(["timestamp", "scale value", "flow",
+        #                      "average flow from last 5 values"])
+        
     async def shutdown(self):
 
         self.clean()
@@ -269,7 +272,7 @@ class Vosekast():
 
         # set fill countdown to False
         for tank in self.tanks:
-            tank.stop_fill
+            tank.state = "STOPPED"
 
         # shutdown pumps
         for pump in self.pumps:
@@ -288,7 +291,6 @@ class Vosekast():
 
         self.scale.open_connection()
         self.scale.start_measurement_thread()
-        self.pump_constant_tank.start()
 
         await self.mqtt_client.connect()
         self._state = self.RUNNING
@@ -378,8 +380,6 @@ class Vosekast():
                     self.scale.start_measurement_thread()
                 elif command['command'] == 'stop_measurement_thread':
                     self.scale.stop_measurement_thread()
-                elif command['command'] == 'get_stable_value':
-                    self.scale.get_stable_value()
                 elif command['command'] == 'print_diagnostics':
                     self.scale.print_diagnostics()
                 elif command['command'] == 'read_value_from_scale':
@@ -411,7 +411,7 @@ class Vosekast():
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
                     await self.testsequence.stop_sequence()
-                elif command['command'] == 'empty':
+                elif command['command'] == 'empty_tanks':
                     await self.empty()
                 elif command['command'] == 'pause_sequence':
                     self.testsequence.pause_sequence()
