@@ -10,7 +10,6 @@ import traceback
 from Log import setup_custom_logger
 from AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
-import RPi.GPIO as GPIO
 from Vosekast import Vosekast
 
 # add mqtt resources
@@ -23,8 +22,11 @@ logger = setup_custom_logger()
 
 
 async def main(emulate=False):
+    # import the rpi module at event start to prevent the early opening of the emulator gui
+    import RPi.GPIO as GPIO
+
     try:
-        #GPIO.cleanup()
+        # GPIO.cleanup()
 
         # process state
         app_control = AppControl()
