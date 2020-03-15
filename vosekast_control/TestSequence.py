@@ -4,11 +4,11 @@ import time
 import asyncio
 import csv
 
-from Log import LOGGER
+from vosekast_control.Log import LOGGER
 
 import sqlite3
 from sqlite3 import Error
-from utils.Msg import StatusMessage
+from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 

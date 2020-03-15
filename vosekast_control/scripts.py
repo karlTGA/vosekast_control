@@ -1,6 +1,6 @@
 import subprocess
 import asyncio
-from main import main
+from vosekast_control.main import main
 import os
 
 
