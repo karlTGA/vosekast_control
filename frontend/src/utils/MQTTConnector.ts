@@ -32,7 +32,6 @@ export default class MQTTConnector {
 
     this.client.on("connect", this.handleConnect);
     this.client.on("message", this.handleMessage);
-    this.client.on("subscribe", this.handleSubscription);
     this.client.on("close", this.handleDissconnect);
     this.client.on("error", this.handleError);
     this.client.on("offline", this.handleOffline);
@@ -45,7 +44,7 @@ export default class MQTTConnector {
       s.mqttInterrupted = false;
     });
 
-    this.client.subscribe("vosekast/#");
+    this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
   };
 
   handleMessage = (
@@ -70,8 +69,10 @@ export default class MQTTConnector {
   };
 
   handleSubscription = (err: Error, granted: mqtt.ISubscriptionGrant[]) => {
-    message.success("Connect to Vosekast Info Stream!");
-    console.log("Subscribed to vosekast topics.");
+    if (err == null) {
+      message.success("Connect to Vosekast Info Stream!");
+      console.log("Subscribed to vosekast topics.");
+    }
   };
 
   handleDissconnect = () => {
