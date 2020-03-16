@@ -1,7 +1,7 @@
 import logging
-from Log import LOGGER
+from vosekast_control.Log import LOGGER
 import asyncio
-from utils.Msg import StatusMessage
+from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 class TankFillingTimeout(Exception):

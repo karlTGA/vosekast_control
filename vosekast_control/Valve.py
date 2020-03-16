@@ -1,6 +1,6 @@
 import logging
-from Log import LOGGER
-from utils.Msg import StatusMessage
+from vosekast_control.Log import LOGGER
+from vosekast_control.utils.Msg import StatusMessage
 
 
 class Valve():
