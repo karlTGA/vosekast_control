@@ -40,14 +40,14 @@ class Scale:
         self.thread_loop = Thread()
         self.thread_readscale = Thread()
         self.emulate = emulate
-        self.run = False
+        self.is_running = False
         self.timestamp = datetime.now()
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
         self.state = self.UNKNOWN
         self.mqtt = self.vosekast.mqtt_client
-        self.scale_publish = False
+        self.scale_publish = True
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
@@ -79,11 +79,11 @@ class Scale:
         self.logger.debug("Start measuring loop.")
 
         # check if already running
-        if self.is_running != True:
+        if not self.is_running:
             self.open_connection()
             self.start_measurement_thread()
 
-        while self.run:
+        while self.is_running:
 
             if self.emulate:
                 new_value = 10.0 + uniform(0.0, 0.2)
@@ -105,22 +105,8 @@ class Scale:
 
         self.logger.info("Stopped measuring with scale.")
 
-    @property
-    def is_running(self):
-        if self.run == True and self.thread_loop.is_alive == True:
-            self.logger.debug("Scale ready.")
-            return True
-        elif self.run == True:
-            self.logger.debug("Waiting for thread_loop.")
-            return True
-        elif self.run != True:
-            self.logger.warning("self.run != True")
-        else:
-            self.logger.warning("Scale not ready. Printing diagnostics.")
-            self.print_diagnostics()
-
     def start_measurement_thread(self):
-        self.run = True
+        self.is_running = True
 
         if self.thread_loop.is_alive() and self.thread_readscale.is_alive():
             self.logger.info("Threads alive.")
@@ -139,26 +125,25 @@ class Scale:
         self.logger.info("Printing diagnostics:")
         self.logger.info("self.threads: " + str(self.threads))
         self.logger.info("self.connection.is_open: " +
-                          str(self.connection.is_open))
+                         str(self.connection.is_open))
         self.logger.info("Thread loop alive: " +
-                          str(self.thread_loop.is_alive()))
+                         str(self.thread_loop.is_alive()))
         self.logger.info("Thread readscale alive: " +
-                          str(self.thread_readscale.is_alive()))
-        self.logger.info("self.run = " + str(self.run))
+                         str(self.thread_readscale.is_alive()))
+        self.logger.info("self.is_running = " + str(self.is_running))
         self.logger.info("constant_tank_ready: " +
-                          str(self.vosekast.constant_tank.is_filled))
+                         str(self.vosekast.constant_tank.is_filled))
         self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
-                                                         and not self.vosekast.measuring_tank.is_filled))
+                                                        and not self.vosekast.measuring_tank.is_filled))
         self.logger.info("constant_pump_running: " +
-                          str(self.vosekast.pump_constant_tank.is_running))
+                         str(self.vosekast.pump_constant_tank.is_running))
         self.logger.info("measuring_drain_valve.is_closed: " +
                          str(self.vosekast.measuring_drain_valve.is_closed))
         self.logger.info("measuring_tank.is_filled: " +
                          str(self.vosekast.measuring_tank.is_filled))
 
-
     def stop_measurement_thread(self):
-        self.run = False
+        self.is_running = False
 
         # terminate threads
         self.thread_loop.join()
@@ -170,7 +155,7 @@ class Scale:
     def _scale_input_buffer(self):
         if self.connection is not None and self.connection.is_open:
             self.scale_input_buffer.appendleft(b'+ 0.000 kg')
-            while self.run:
+            while self.is_running:
                 scale_input = self.connection.readline()
 
                 # if readline reads less than 16 char reuse last value
@@ -182,7 +167,8 @@ class Scale:
                     self.scale_publish = False
                 elif len(scale_input) != 16:
                     scale_input = self.scale_input_buffer[0]
-                    self.logger.info("readline() read less than 16 char. Reusing last value.")
+                    self.logger.info(
+                        "readline() read less than 16 char. Reusing last value.")
                     self.scale_publish = False
                 else:
                     self.scale_publish = True
@@ -207,11 +193,11 @@ class Scale:
             elif len(splitted_line) == 2:
                 splitted_line_formatted = splitted_line[1]
 
-                #if splitted_line[0] == b'-':
+                # if splitted_line[0] == b'-':
                 #    self.logger.warning("Negative weight. Discarding value.")
                 #    self.logger.debug("Input: " + str(splitted_line))
                 #    return
-                #if splitted_line[1] == b'kg':
+                # if splitted_line[1] == b'kg':
                 #    self.logger.info("Invalid input.")
                 #    self.logger.debug("Input: " + str(splitted_line))
                 #    return
@@ -236,7 +222,7 @@ class Scale:
 
         # calculate volume flow
         if len(self.scale_history) > 2:
-            
+
             try:
                 # todo dictionary: value, timestamp
                 delta = self.scale_history[0] - self.scale_history[2]
@@ -258,7 +244,7 @@ class Scale:
 
                 self.flow_history.appendleft(volume_flow)
                 self.flow_history_average.appendleft(volume_flow)
-            
+
             except ZeroDivisionError:
                 self.logger.warning("Division by zero.")
 

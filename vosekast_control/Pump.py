@@ -30,9 +30,8 @@ class Pump():
         self.state = States.STOPPED
 
         mqttmsg = StatusMessage(
-                    self.name, "Stopping {}".format(self.name), None, None, None)
+            self.name, "STOPPED", None, None, None)
         self.mqtt.publish_message(mqttmsg)
-
 
     def start(self):
         """
@@ -44,7 +43,7 @@ class Pump():
         self.state = States.RUNNING
 
         mqttmsg = StatusMessage(
-                    self.name, "Starting {}".format(self.name), None, None, None)
+            self.name, "STARTED", None, None, None)
         self.mqtt.publish_message(mqttmsg)
 
     def toggle(self):

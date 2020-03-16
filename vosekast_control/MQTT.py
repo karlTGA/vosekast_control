@@ -39,10 +39,10 @@ class MQTTController():
         except ConnectionRefusedError:
 
             await self.connection_refused()
-                
+
     async def connection_refused(self):
         self.logger.warning(
-          "Connection refused. Is the MQTT broker accessible? Retrying.")
+            "Connection refused. Is the MQTT broker accessible? Retrying.")
 
         if self.tries <= 3:
             await self.connect()
@@ -76,7 +76,7 @@ class MQTTController():
 
         while self.connected:
             if runs == 10:
-                msg = StatusMessage('mqtt connection healthy', None, None, None, None)
+                msg = StatusMessage('system', 'OK', None, None, None)
                 self.publish_message(msg)
                 runs = 0
 
