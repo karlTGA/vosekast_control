@@ -1,6 +1,7 @@
 import mqtt from "mqtt";
 import { MQTTStore, VosekastStore } from "../Store";
 import { message } from "antd";
+import moment from "moment";
 
 interface Message {
   type: "status" | "log" | "message" | "command";
@@ -8,8 +9,8 @@ interface Message {
 }
 
 interface StatusMessage extends Message {
-  sensor_id: "scale";
-  value1: number;
+  sensor_id: "scale" | "system";
+  value1: number | string;
   unit1: string;
 }
 
@@ -44,7 +45,6 @@ export default class MQTTConnector {
       s.mqttInterrupted = false;
     });
 
-    console.log("Connect to MQTT Broker!");
     this.client.subscribe("vosekast/#");
   };
 
@@ -101,9 +101,17 @@ export default class MQTTConnector {
     switch (message.sensor_id) {
       case "scale":
         VosekastStore.update(s => {
-          s.scaleState.value = message.value1;
+          s.scaleState.value = message.value1 as number;
           s.scaleState.unit = message.unit1;
         });
+        break;
+      case "system":
+        if (message.value1 === "OK") {
+          VosekastStore.update(s => {
+            s.isHealthy = (message.value1 as string) === "OK";
+            s.lastHealthUpdate = moment();
+          });
+        }
         break;
       default:
         console.log(`Receive unknown message: ${JSON.stringify(message)}`);

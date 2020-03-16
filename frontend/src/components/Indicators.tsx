@@ -5,10 +5,9 @@ import {
   CheckCircleTwoTone,
   ExclamationCircleTwoTone
 } from "@ant-design/icons";
-import { MQTTStore } from "../Store";
+import { MQTTStore, VosekastStore } from "../Store";
 
-export function OnlineIndicator() {
-  const isConnected = useStoreState(MQTTStore, s => s.isConnected);
+export function OnlineIndicator({ isConnected }: { isConnected: boolean }) {
   return (
     <>
       {isConnected ? (
@@ -22,6 +21,16 @@ export function OnlineIndicator() {
       )}
     </>
   );
+}
+
+export function MQTTOnlineIndicator() {
+  const isConnected = useStoreState(MQTTStore, s => s.isConnected);
+  return OnlineIndicator({ isConnected });
+}
+
+export function VosekastOnlineIndicator() {
+  const isConnected = useStoreState(VosekastStore, s => s.isHealthy);
+  return OnlineIndicator({ isConnected });
 }
 
 export function ErrorIndicator() {

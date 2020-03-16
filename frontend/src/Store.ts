@@ -1,4 +1,5 @@
 import { Store } from "pullstate";
+import moment from "moment";
 
 export interface PumpState {
   output: number;
@@ -25,6 +26,8 @@ export interface MQTTState {
 }
 
 export interface VosekastState {
+  isHealthy: boolean;
+  lastHealthUpdate?: moment.Moment;
   isRunning: boolean;
   isMeasuring: boolean;
   pumpStates: Map<string, PumpState>;
@@ -42,6 +45,7 @@ export const MQTTStore = new Store<MQTTState>({
 export const VosekastStore = new Store<VosekastState>({
   isRunning: false,
   isMeasuring: false,
+  isHealthy: false,
   pumpStates: new Map(),
   valveStates: new Map(),
   tankStates: new Map(),
@@ -50,3 +54,41 @@ export const VosekastStore = new Store<VosekastState>({
     unit: ""
   }
 });
+
+// reaction that set health state of vosekast negativ if no health message was reported for a long time
+VosekastStore.createReaction(
+  s => s.lastHealthUpdate,
+  healthUpdatedAt => {
+    setTimeout(() => {
+      VosekastStore.update(s => {
+        if (s.lastHealthUpdate === healthUpdatedAt) {
+          s.isHealthy = false;
+        }
+      });
+    }, 20000);
+  }
+);
+
+VosekastStore.createReaction(
+  s => s.isHealthy,
+  (isHealthy, draft, original, lastIsHealthy) => {
+    if (isHealthy !== lastIsHealthy) {
+      console.log(
+        isHealthy ? "Connected to Vosekast" : "Disconnected from Vosekast"
+      );
+    }
+  }
+);
+
+MQTTStore.createReaction(
+  s => s.isConnected,
+  (isConnected, draft, original, lastIsConnected) => {
+    if (isConnected !== lastIsConnected) {
+      console.log(
+        isConnected
+          ? "Connected to MQTT Broker"
+          : "Disconnected from MQTT Broker"
+      );
+    }
+  }
+);
