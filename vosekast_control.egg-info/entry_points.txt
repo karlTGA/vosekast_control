@@ -1,5 +1,0 @@
-[console_scripts]
-dev = vosekast_control.scripts:dev
-dev_backend = vosekast_control.scripts:dev_backend
-dev_frontend = vosekast_control.scripts:dev_frontend
-

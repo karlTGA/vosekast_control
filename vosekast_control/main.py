@@ -7,16 +7,14 @@ import subprocess
 import os
 import traceback
 
-from Log import setup_custom_logger
-from AppControl import AppControl
+from vosekast_control.Log import setup_custom_logger
+from vosekast_control.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 import RPi.GPIO as GPIO
-from Vosekast import Vosekast
+from vosekast_control.Vosekast import Vosekast
 
 # add mqtt resources
 import asyncio
-import uvloop
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # add logger
 logger = setup_custom_logger()
