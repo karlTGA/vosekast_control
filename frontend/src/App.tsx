@@ -6,6 +6,7 @@ import {
   ErrorIndicator
 } from "./components/Indicators";
 import { ScaleTag } from "./components/Scale";
+import { PumpTag } from "./components/Pump";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <VosekastOnlineIndicator />
       <ErrorIndicator />
       <ScaleTag />
+      <PumpTag pumpId="pump_measuring_tank" />
     </div>
   );
 }

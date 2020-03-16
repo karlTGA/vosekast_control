@@ -1,21 +1,23 @@
 import logging
 from vosekast_control.Log import LOGGER
-from vosekast_control.EnumStates import States
 from vosekast_control.utils.Msg import StatusMessage
 
 
 class Pump():
+    RUNNING = "RUNNING"
+    STOPPED = "STOPPED"
+    UNKNOWN = "UNKNOWN"
 
     def __init__(self, vosekast, name, control_pin, gpio_controller):
         super().__init__()
 
         self.vosekast = vosekast
+        self.mqtt = self.vosekast.mqtt_client
         self.name = name
         self._pin = control_pin
         self._gpio_controller = gpio_controller
         self.logger = logging.getLogger(LOGGER)
-        self.state = States.NONE
-        self.mqtt = self.vosekast.mqtt_client
+        self._state = self.UNKNOWN
 
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
@@ -27,11 +29,7 @@ class Pump():
         """
         self.logger.info("Stopping {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
-        self.state = States.STOPPED
-
-        mqttmsg = StatusMessage(
-            self.name, "STOPPED", None, None, None)
-        self.mqtt.publish_message(mqttmsg)
+        self.state = self.STOPPED
 
     def start(self):
         """
@@ -40,11 +38,7 @@ class Pump():
         """
         self.logger.info("Starting {}".format(self.name))
         self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
-        self.state = States.RUNNING
-
-        mqttmsg = StatusMessage(
-            self.name, "STARTED", None, None, None)
-        self.mqtt.publish_message(mqttmsg)
+        self.state = self.RUNNING
 
     def toggle(self):
         """
@@ -62,3 +56,13 @@ class Pump():
     @property
     def is_running(self):
         return self.state == States.RUNNING
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
+        self.logger.info(f"New state of pump {self.name} is: {new_state}")
+        self.mqtt.publish_message(StatusMessage('pump', self.name, new_state))

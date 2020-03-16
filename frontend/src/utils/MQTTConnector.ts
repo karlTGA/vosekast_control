@@ -9,9 +9,9 @@ interface Message {
 }
 
 interface StatusMessage extends Message {
-  sensor_id: "scale" | "system";
-  value1: number | string;
-  unit1: string;
+  device_type: "scale" | "system" | "pump" | "valve";
+  device_id: string;
+  new_state: string;
 }
 
 interface LogMessage extends Message {
@@ -99,20 +99,24 @@ export default class MQTTConnector {
   };
 
   handleStatusMessage = (message: StatusMessage) => {
-    switch (message.sensor_id) {
+    switch (message.device_type) {
       case "scale":
         VosekastStore.update(s => {
-          s.scaleState.value = message.value1 as number;
-          s.scaleState.unit = message.unit1;
+          s.scaleState.value = message.new_state;
         });
         break;
       case "system":
-        if (message.value1 === "OK") {
+        if (message.device_id === "health" && message.new_state === "OK") {
           VosekastStore.update(s => {
-            s.isHealthy = (message.value1 as string) === "OK";
+            s.isHealthy = message.new_state === "OK";
             s.lastHealthUpdate = moment();
           });
         }
+        break;
+      case "pump":
+        VosekastStore.update(s => {
+          s.pumpStates.set(message.device_id, message.new_state);
+        });
         break;
       default:
         console.log(`Receive unknown message: ${JSON.stringify(message)}`);

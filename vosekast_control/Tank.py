@@ -4,8 +4,10 @@ import asyncio
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
+
 class TankFillingTimeout(Exception):
     pass
+
 
 class Tank():
     # tank states
@@ -41,14 +43,14 @@ class Tank():
         self.drain_valve = drain_valve
         self.source_pump = source_pump
         self.vosekast = vosekast
+        self.mqtt = self.vosekast.mqtt_client
         self._state = self.UNKNOWN
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
-        self.mqtt = self.vosekast.mqtt_client
 
         # register callback for overfill if necessary
-        #todo 
+        # todo
         if overflow_sensor is not None:
             self.overflow_sensor.add_callback(self._up_state_changed)
 
@@ -79,43 +81,48 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
-        self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
+        self.logger.info("Measuring Tank state: " +
+                         str(self.vosekast.measuring_tank.state))
+        self.logger.info("Constant Tank state: " +
+                         str(self.vosekast.constant_tank.state))
 
         if not self._state == self.FILLED:
             try:
-                #get time
+                # get time
                 time_filling_t0 = datetime.now()
-                #close valves, start pump
+                # close valves, start pump
                 self.vosekast.prepare_measuring()
                 self._state = self.IS_FILLING
-                
-                
-                #check if constant_tank full
+
+                # check if constant_tank full
                 while not self._state == self.FILLED and self._state == self.IS_FILLING:
                     time_filling_t1 = datetime.now()
                     time_filling_passed = time_filling_t1 - time_filling_t0
                     delta_time_filling = time_filling_passed.total_seconds()
-                    
-                    #if filling takes longer than 90s
+
+                    # if filling takes longer than 90s
                     if delta_time_filling >= 90:
                         self.logger.error(
-                        "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
+                            "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                         raise TankFillingTimeout("Tank Filling Timeout.")
-                    
-                    self.logger.debug(str(delta_time_filling) + 's < time allotted (90s)')
+
+                    self.logger.debug(
+                        str(delta_time_filling) + 's < time allotted (90s)')
                     await asyncio.sleep(1)
-                    
-                self.logger.info("Measuring Tank state: " + str(self.vosekast.measuring_tank.state))
-                self.logger.info("Constant Tank state: " + str(self.vosekast.constant_tank.state))
+
+                self.logger.info("Measuring Tank state: " +
+                                 str(self.vosekast.measuring_tank.state))
+                self.logger.info("Constant Tank state: " +
+                                 str(self.vosekast.constant_tank.state))
                 return
             except:
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
                 return
         else:
-            self.logger.info("{} already filled. Continuing.".format(self.name))
-    
+            self.logger.info(
+                "{} already filled. Continuing.".format(self.name))
+
     def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position
@@ -123,24 +130,12 @@ class Tank():
         """
         self._state = self.IS_DRAINING
 
-        self.logger.info("{} is being drained.".format(self.name))
-        
-        mqttmsg = StatusMessage(
-                    self.name, "{} is being drained.".format(self.name), None, None, None)
-        self.mqtt.publish_message(mqttmsg)
-
     def _on_full(self):
         """
         internal function to register that the tank is filled
         :return:
         """
         self._state = self.FILLED
-
-        self.logger.info("{} is full.".format(self.name))
-
-        mqttmsg = StatusMessage(
-                    self.name, "{} is full.".format(self.name), None, None, None)
-        self.mqtt.publish_message(mqttmsg)
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -158,24 +153,12 @@ class Tank():
         """
         self._state = self.IS_FILLING
 
-        self.logger.info("{} is being filled.".format(self.name))
-
-        mqttmsg = StatusMessage(
-                    self.name, "{} is being filled".format(self.name), None, None, None)
-        self.mqtt.publish_message(mqttmsg)
-
     def _handle_drained(self):
         """
         internal function to register that the tank is drained
         :return:
         """
         self._state = self.DRAINED
-
-        self.logger.info("{} is drained.".format(self.name))
-
-        mqttmsg = StatusMessage(
-                    self.name, "{} is drained".format(self.name), None, None, None)
-        self.mqtt.publish_message(mqttmsg)
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()
@@ -196,5 +179,4 @@ class Tank():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New Tank state is: {new_state}")
-
-        #todo restructure statusmessages
+        self.mqtt.publish_message(StatusMessage('tank', self.name, new_state))

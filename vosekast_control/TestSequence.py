@@ -8,7 +8,6 @@ from vosekast_control.Log import LOGGER
 
 import sqlite3
 from sqlite3 import Error
-from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 
@@ -49,7 +48,8 @@ class TestSequence():
             if self.scale.is_running != True:
                 self.scale.open_connection()
                 self.scale.start_measurement_thread()
-                self.logger.info("Initialising scale connection & measurement thread. Please wait.")
+                self.logger.info(
+                    "Initialising scale connection & measurement thread. Please wait.")
                 await asyncio.sleep(2)
             else:
                 self.logger.debug("Scale running, continuing.")
@@ -58,9 +58,9 @@ class TestSequence():
             if not self.vosekast.constant_tank.FILLED:
                 self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
 
-            #todo if already full
-            
-            #await constant_tank full
+            # todo if already full
+
+            # await constant_tank full
 
             await self.vosekast.constant_tank.fill()
 
@@ -70,46 +70,46 @@ class TestSequence():
                 self.scale.print_diagnostics()
                 return
 
-           
             # turn on measuring pump, start measuring
             await self.start_measuring()
 
             self.vosekast.state = "MEASURING"
 
-            #write to file
+            # write to file
             await self.write_loop()
-        
-        #TankFillingTimeout
+
+        # TankFillingTimeout
         except:
             self.logger.error("Error, aborting test sequence.")
-            
-            await self.stop_sequence()
-            self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED 
-            self.vosekast.state = "RUNNING"         
 
-    #todo fix drain
+            await self.stop_sequence()
+            self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED
+            self.vosekast.state = "RUNNING"
+
+    # todo fix drain
 
     async def write_loop(self):
-        
+
         try:
-            #null scale
+            # null scale
             if abs(self.scale.scale_history[0]) < 0.15:
                 scale_nulled = self.scale.scale_history[0]
             else:
                 scale_nulled = 0
 
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
-                #get flow average
+                # get flow average
                 flow_average = self.scale.flow_average()
-                scale_actual = round(self.scale.scale_history[0] - scale_nulled, 5)
-                
+                scale_actual = round(
+                    self.scale.scale_history[0] - scale_nulled, 5)
+
                 # #write values to csv file
                 # with open('sequence_values.csv', 'a', newline='') as file:
                 #     writer = csv.writer(file, delimiter=',',
                 #                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 #     writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
-                
-                #db
+
+                # db
                 dbconnect = sqlite3.connect('sequence_values.db')
                 c = dbconnect.cursor()
                 c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
@@ -121,15 +121,15 @@ class TestSequence():
                     )""")
 
                 dbconnect.commit()
-                                
-                try: 
+
+                try:
                     c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
-                        'description': "description", 
-                        'timestamp': self.scale.scale_history[1], 
+                        'description': "description",
+                        'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
                         'flow_average': flow_average
-                        })     
+                    })
 
                     dbconnect.commit()
 
@@ -138,26 +138,28 @@ class TestSequence():
 
                 except:
                     self.logger.warning("Error writing to db.")
-                    dbconnect.close() 
+                    dbconnect.close()
 
-                self.logger.debug(str(scale_actual) +" kg, flow rate (average) "+ str(flow_average)+ " L/s")
+                self.logger.debug(
+                    str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
                 await asyncio.sleep(1)
 
-            dbconnect.close() 
-            
-            #todo sqlite
-            
-            #interrupt if measuring_tank full
+            dbconnect.close()
+
+            # todo sqlite
+
+            # interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.vosekast.measuring_tank_switch.close()
                 self.vosekast.measuring_tank.drain_tank()
-                self.logger.debug("Draining measuring tank, opening Measuring Tank bypass.")
-        
+                self.logger.debug(
+                    "Draining measuring tank, opening Measuring Tank bypass.")
+
         except:
             self.logger.warning("Write loop killed, stopping sequence.")
-            dbconnect.close() 
+            dbconnect.close()
             await self.stop_sequence()
-    
+
     async def start_measuring(self):
         try:
             self.vosekast.measuring_tank.prepare_to_fill()
@@ -167,10 +169,9 @@ class TestSequence():
 
             await asyncio.sleep(5)
 
-                                 
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
-            
+
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
@@ -183,9 +184,9 @@ class TestSequence():
         self.vosekast.state = "RUNNING"
 
         # todo kill start_measurement
-        
+
         self.vosekast.clean()
-        
+
     def pause_sequence(self):
         self.state = self.PAUSED
 
@@ -197,7 +198,7 @@ class TestSequence():
         self.logger.info("Paused. Measuring Tank bypass open.")
 
     async def continue_sequence(self):
-        #todo only continue if sequence has been started before
+        # todo only continue if sequence has been started before
         self.state = self.MEASURING
 
         # set fill countdown to True

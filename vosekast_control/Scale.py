@@ -22,6 +22,7 @@ class Scale:
 
     def __init__(
         self,
+        name,
         vosekast,
         port="/dev/serial0",
         baudrate=9600,
@@ -31,6 +32,7 @@ class Scale:
     ):
         super().__init__()
 
+        self.name = name
         self.port = port
         self.baudrate = baudrate
         self.bytesize = bytesize
@@ -255,13 +257,11 @@ class Scale:
         if not self.scale_publish:
             return
         else:
-            try:
-                mqttmsg = StatusMessage(
-                    "scale", new_value, "Kg", volume_flow, "L/s")
-            except:
-                mqttmsg = StatusMessage("scale", new_value, "Kg", None, None)
-
-            self.mqtt.publish_message(mqttmsg)
+            self.mqtt.publish_message(StatusMessage(
+                "scale", self.name, f"{new_value} Kg"))
+            # if volume_flow is not None:
+            #     self.mqtt.publish_message(StatusMessage(
+            #         "scale", self.name, f"{volume_flow} L/s"))
 
             if len(self.last_values) == 10:
                 # calculate square mean error

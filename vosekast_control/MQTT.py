@@ -76,7 +76,7 @@ class MQTTController():
 
         while self.connected:
             if runs == 10:
-                msg = StatusMessage('system', 'OK', None, None, None)
+                msg = StatusMessage('system', 'health', 'OK')
                 self.publish_message(msg)
                 runs = 0
 

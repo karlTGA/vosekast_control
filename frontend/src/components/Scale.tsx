@@ -7,9 +7,5 @@ export function ScaleTag() {
   const scaleState = useStoreState(VosekastStore, s => s.scaleState);
   if (scaleState == null) return <></>;
 
-  return (
-    <Tag>
-      Scale: {scaleState.value} {scaleState.unit}
-    </Tag>
-  );
+  return <Tag>Scale: {scaleState.value}</Tag>;
 }

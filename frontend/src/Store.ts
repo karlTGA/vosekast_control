@@ -15,8 +15,7 @@ export interface TankState {
 }
 
 export interface ScaleState {
-  value: number;
-  unit: string;
+  value: string;
 }
 
 export interface MQTTState {
@@ -30,9 +29,9 @@ export interface VosekastState {
   lastHealthUpdate?: moment.Moment;
   isRunning: boolean;
   isMeasuring: boolean;
-  pumpStates: Map<string, PumpState>;
-  valveStates: Map<string, ValveState>;
-  tankStates: Map<string, TankState>;
+  pumpStates: Map<string, string>;
+  valveStates: Map<string, string>;
+  tankStates: Map<string, string>;
   scaleState: ScaleState;
 }
 
@@ -50,8 +49,7 @@ export const VosekastStore = new Store<VosekastState>({
   valveStates: new Map(),
   tankStates: new Map(),
   scaleState: {
-    value: -1,
-    unit: ""
+    value: ""
   }
 });
 

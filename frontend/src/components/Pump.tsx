@@ -8,7 +8,7 @@ export function PumpTag({ pumpId }: { pumpId: string }) {
 
   return (
     <Tag>
-      Pump {pumpId}: {pumpState != null ? pumpState.output : "Unknown"}
+      Pump {pumpId}: {pumpState != null ? pumpState : "Unknown"}
     </Tag>
   );
 }

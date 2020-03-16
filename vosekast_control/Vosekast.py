@@ -70,7 +70,7 @@ class Vosekast():
             # valves
             self.measuring_drain_valve = Valve(
                 self,
-                "Measuring Drain Valve",
+                "measuring_drain_valve",
                 PIN_VALVE_MEASURING_DRAIN,
                 Valve.TWO_WAY,
                 Valve.BINARY,
@@ -78,7 +78,7 @@ class Vosekast():
             )
             self.measuring_tank_switch = Valve(
                 self,
-                "Measuring Tank Switch",
+                "measuring_tank_switch",
                 PIN_VALVE_MEASURING_SWITCH,
                 Valve.SWITCH,
                 Valve.BINARY,
@@ -123,13 +123,13 @@ class Vosekast():
             # pumps
             self.pump_constant_tank = Pump(
                 self,
-                "Pump Constant Tank",
+                "pump_constant_tank",
                 PIN_PUMP_CONSTANT,
                 self._gpio_controller,
             )
             self.pump_measuring_tank = Pump(
                 self,
-                "Pump Measuring Tank",
+                "pump_measuring_tank",
                 PIN_PUMP_MEASURING,
                 self._gpio_controller,
             )
@@ -137,7 +137,7 @@ class Vosekast():
 
             # tanks
             self.stock_tank = Tank(
-                "Stock Tank",
+                "stock_tank",
                 200,
                 None,
                 None,
@@ -148,7 +148,7 @@ class Vosekast():
             )
 
             self.constant_tank = Tank(
-                "Constant Tank",
+                "constant_tank",
                 100,
                 None,
                 self.level_constant_low,
@@ -160,7 +160,7 @@ class Vosekast():
             )
 
             self.measuring_tank = Tank(
-                "Measuring Tank",
+                "measuring_tank",
                 100,
                 None,
                 self.level_measuring_low,
@@ -175,7 +175,7 @@ class Vosekast():
                           self.constant_tank, self.measuring_tank]
 
             # scale
-            self.scale = Scale(self, emulate=self.emulate)
+            self.scale = Scale('measuring_scale', self, emulate=self.emulate)
 
             # testsequence
             self.testsequence = TestSequence(self)
@@ -251,7 +251,7 @@ class Vosekast():
         #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
         #     writer.writerow(["timestamp", "scale value", "flow",
         #                      "average flow from last 5 values"])
-        
+
     async def shutdown(self):
 
         self.clean()
@@ -311,7 +311,7 @@ class Vosekast():
                     if command['command'] == 'close':
                         valve.close()
                         return
-                    if command['command'] == 'open':
+                    if command['command'] == 'ope"":"cn':
                         valve.open()
                         return
                     else:
