@@ -7,7 +7,7 @@
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "valve",
-	"target_id": "Measuring Drain Valve",
+	"target_id": "measuring_drain_valve",
 	"command": "close",
 	"data": null
 } 
@@ -25,7 +25,7 @@
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "valve",
-	"target_id": "Measuring Tank Switch",
+	"target_id": "measuring_tank_switch",
 	"command": "open",
 	"data": null
 } 
@@ -40,7 +40,7 @@
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "pump",
-	"target_id": "Pump Constant Tank",
+	"target_id": "pump_constant_tank",
 	"command": "toggle",
 	"data": null
 } 
@@ -55,7 +55,7 @@
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "tank",
-	"target_id": "Constant Tank",
+	"target_id": "constant_tank",
 	"command": "prepare_to_fill",
 	"data": null
 } 
@@ -74,7 +74,7 @@
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "scale",
-	"target_id": "scale",
+	"target_id": "measuring_scale",
 	"command": "print_diagnostics",
 	"data": null
 } 

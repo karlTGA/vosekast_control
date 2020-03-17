@@ -384,8 +384,6 @@ class Vosekast():
                     self.scale.print_diagnostics()
                 elif command['command'] == 'read_value_from_scale':
                     self.scale.read_value_from_scale()
-                # elif command['command'] == 'toggle_publishing':
-                #     self.scale.toggle_publishing()
 
                 else:
                     self.logger.warning(

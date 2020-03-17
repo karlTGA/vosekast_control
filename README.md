@@ -15,7 +15,7 @@ poetry run start
 
 ### Development:
 
-To run in delelopment mode, use following command:
+To run in development mode, use following command:
 
 ```
 poetry run dev
