@@ -311,12 +311,12 @@ class Vosekast():
                     if command['command'] == 'close':
                         valve.close()
                         return
-                    if command['command'] == 'ope"":"cn':
+                    if command['command'] == 'open':
                         valve.open()
                         return
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -336,7 +336,7 @@ class Vosekast():
                         pump.toggle()
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -354,15 +354,15 @@ class Vosekast():
                     if command['command'] == 'prepare_to_fill':
                         tank.prepare_to_fill()
                         return
-                    if command['command'] == '_handle_drained':
-                        tank._handle_drained()
-                        return
-                    if command['command'] == '_handle_filling':
-                        tank._handle_filling()
-                        return
+                    # if command['command'] == '_handle_drained':
+                    #     tank._handle_drained()
+                    #     return
+                    # if command['command'] == '_handle_filling':
+                    #     tank._handle_filling()
+                    #     return
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -371,7 +371,7 @@ class Vosekast():
 
         # scales
         elif command['target'] == 'scale':
-            if command['target_id'] == 'scale':
+            if command['target_id'] == 'measuring_scale':
                 if command['command'] == 'open_connection':
                     self.scale.open_connection()
                 elif command['command'] == 'close_connection':
@@ -382,12 +382,10 @@ class Vosekast():
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'print_diagnostics':
                     self.scale.print_diagnostics()
-                elif command['command'] == 'read_value_from_scale':
-                    self.scale.read_value_from_scale()
 
                 else:
                     self.logger.warning(
-                        f'command {command["command"]} did not execute.')
+                        f'target_id found. command {command["command"]} did not execute.')
 
                 return
 
@@ -403,8 +401,6 @@ class Vosekast():
                     self.clean()
                 elif command['command'] == 'prepare_measuring':
                     self.prepare_measuring()
-                elif command['command'] == 'ready_to_measure':
-                    self.ready_to_measure()
                 elif command['command'] == 'start_sequence':
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
@@ -418,7 +414,7 @@ class Vosekast():
 
                 else:
                     self.logger.warning(
-                        f'command {command["command"]} did not execute.')
+                        f'target_id found. command {command["command"]} did not execute.')
 
                 return
 

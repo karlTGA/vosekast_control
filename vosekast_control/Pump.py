@@ -44,18 +44,18 @@ class Pump():
         """
         toggle the pump
         """
-        if self.state != States.RUNNING:
+        if self.state != self.RUNNING:
             self.start()
         else:
             self.stop()
 
     @property
     def is_stopped(self):
-        return self.state == States.STOPPED
+        return self.state == self.STOPPED
 
     @property
     def is_running(self):
-        return self.state == States.RUNNING
+        return self.state == self.RUNNING
 
     @property
     def state(self):

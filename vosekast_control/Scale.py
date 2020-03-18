@@ -69,6 +69,7 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
+            #self.connection = True
 
     def close_connection(self):
         if not self.emulate:
@@ -86,22 +87,16 @@ class Scale:
             self.start_measurement_thread()
 
         while self.is_running:
+            new_value = self.read_value_from_scale()
 
-            if self.emulate:
-                new_value = 10.0 + uniform(0.0, 0.2)
+            if new_value is not None:
                 self.add_new_value(new_value)
                 self.timestamp = datetime.now()
+                # deque scale history
+                self.scale_history.appendleft(self.timestamp)
+                self.scale_history.appendleft(new_value)
             else:
-                new_value = self.read_value_from_scale()
-
-                if new_value is not None:
-                    self.add_new_value(new_value)
-                    self.timestamp = datetime.now()
-                    # deque scale history
-                    self.scale_history.appendleft(self.timestamp)
-                    self.scale_history.appendleft(new_value)
-                else:
-                    self.logger.warning("Reached loop with new value = None.")
+                self.logger.warning("Reached loop with new value = None.")
 
             sleep(1)
 
@@ -124,25 +119,44 @@ class Scale:
 
     # diagnostics
     def print_diagnostics(self):
-        self.logger.info("Printing diagnostics:")
-        self.logger.info("self.threads: " + str(self.threads))
-        self.logger.info("self.connection.is_open: " +
-                         str(self.connection.is_open))
-        self.logger.info("Thread loop alive: " +
-                         str(self.thread_loop.is_alive()))
-        self.logger.info("Thread readscale alive: " +
-                         str(self.thread_readscale.is_alive()))
-        self.logger.info("self.is_running = " + str(self.is_running))
-        self.logger.info("constant_tank_ready: " +
-                         str(self.vosekast.constant_tank.is_filled))
-        self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
-                                                        and not self.vosekast.measuring_tank.is_filled))
-        self.logger.info("constant_pump_running: " +
-                         str(self.vosekast.pump_constant_tank.is_running))
-        self.logger.info("measuring_drain_valve.is_closed: " +
-                         str(self.vosekast.measuring_drain_valve.is_closed))
-        self.logger.info("measuring_tank.is_filled: " +
-                         str(self.vosekast.measuring_tank.is_filled))
+        if self.emulate:
+            self.logger.info("Printing diagnostics:")
+            self.logger.info("self.threads: " + str(self.threads))
+            self.logger.info("Thread loop alive: " +
+                str(self.thread_loop.is_alive()))
+            self.logger.info("Thread readscale alive: " +
+                            str(self.thread_readscale.is_alive()))
+            self.logger.info("self.is_running = " + str(self.is_running))
+            self.logger.info("constant_tank_ready: " +
+                            str(self.vosekast.constant_tank.is_filled))
+            self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
+                                                            and not self.vosekast.measuring_tank.is_filled))
+            self.logger.info("constant_pump_running: " +
+                            str(self.vosekast.pump_constant_tank.is_running))
+            self.logger.info("measuring_drain_valve.is_closed: " +
+                            str(self.vosekast.measuring_drain_valve.is_closed))
+            self.logger.info("measuring_tank.is_filled: " +
+                            str(self.vosekast.measuring_tank.is_filled))
+        else:
+            self.logger.info("Printing diagnostics:")
+            self.logger.info("self.threads: " + str(self.threads))
+            self.logger.info("self.connection.is_open: " +
+                            str(self.connection.is_open))
+            self.logger.info("Thread loop alive: " +
+                            str(self.thread_loop.is_alive()))
+            self.logger.info("Thread readscale alive: " +
+                            str(self.thread_readscale.is_alive()))
+            self.logger.info("self.is_running = " + str(self.is_running))
+            self.logger.info("constant_tank_ready: " +
+                            str(self.vosekast.constant_tank.is_filled))
+            self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
+                                                            and not self.vosekast.measuring_tank.is_filled))
+            self.logger.info("constant_pump_running: " +
+                            str(self.vosekast.pump_constant_tank.is_running))
+            self.logger.info("measuring_drain_valve.is_closed: " +
+                            str(self.vosekast.measuring_drain_valve.is_closed))
+            self.logger.info("measuring_tank.is_filled: " +
+                            str(self.vosekast.measuring_tank.is_filled))
 
     def stop_measurement_thread(self):
         self.is_running = False
@@ -155,7 +169,7 @@ class Scale:
         self.logger.debug("Stopped measurement thread.")
 
     def _scale_input_buffer(self):
-        if self.connection is not None and self.connection.is_open:
+        if self.connection is not None and not self.emulate and self.connection.is_open:
             self.scale_input_buffer.appendleft(b'+ 0.000 kg')
             while self.is_running:
                 scale_input = self.connection.readline()
@@ -178,41 +192,52 @@ class Scale:
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(0.05)
 
+        elif self.emulate:
+            self.scale_input_buffer.appendleft(b'+ 0.000 kg')
+            while self.is_running:
+                scale_input = 0.0 + uniform(0.0, 0.2)
+                self.scale_publish = True
+                self.scale_input_buffer.appendleft(scale_input)
+
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
 
             line = self.scale_input_buffer[0]
 
-            splitted_line = line.split()
+            split_line = line.split()
 
-            if len(splitted_line) == 3:
-                splitted_line_formatted = splitted_line[1]
+            if len(split_line) == 3:
+                split_line_formatted = split_line[1]
 
-                splitted_line_str = splitted_line_formatted.decode("utf-8")
-                new_value = float(splitted_line_str)
+                split_line_str = split_line_formatted.decode("utf-8")
+                new_value = float(split_line_str)
                 return new_value
 
-            elif len(splitted_line) == 2:
-                splitted_line_formatted = splitted_line[1]
+            elif len(split_line) == 2:
+                split_line_formatted = split_line[1]
 
-                # if splitted_line[0] == b'-':
+                # if split_line[0] == b'-':
                 #    self.logger.warning("Negative weight. Discarding value.")
-                #    self.logger.debug("Input: " + str(splitted_line))
+                #    self.logger.debug("Input: " + str(split_line))
                 #    return
-                # if splitted_line[1] == b'kg':
+                # if split_line[1] == b'kg':
                 #    self.logger.info("Invalid input.")
-                #    self.logger.debug("Input: " + str(splitted_line))
+                #    self.logger.debug("Input: " + str(split_line))
                 #    return
 
-                splitted_line_str = splitted_line_formatted.decode("utf-8")
-                new_value = float(splitted_line_str)
+                split_line_str = split_line_formatted.decode("utf-8")
+                new_value = float(split_line_str)
                 return new_value
             else:
                 self.logger.warning("Scale output too short.")
-                self.logger.debug("splitted_line: " + str(splitted_line))
+                self.logger.debug("split_line: " + str(split_line))
 
         elif self.connection is not None:
             return 0.00
+        
+        elif self.emulate:
+            split_line = self.scale_input_buffer[0]
+            return split_line
 
         else:
             self.logger.debug(self.connection.is_open)
