@@ -157,6 +157,7 @@ class Vosekast():
                 self.pump_constant_tank,
                 vosekast=self,
                 protect_overflow=False,
+                emulate=self.emulate,
             )
 
             self.measuring_tank = Tank(
@@ -169,6 +170,7 @@ class Vosekast():
                 self.pump_measuring_tank,
                 vosekast=self,
                 protect_draining=False,
+                emulate=self.emulate,
             )
 
             self.tanks = [self.stock_tank,
@@ -178,7 +180,7 @@ class Vosekast():
             self.scale = Scale('measuring_scale', self, emulate=self.emulate)
 
             # testsequence
-            self.testsequence = TestSequence(self)
+            self.testsequence = TestSequence(self, emulate=self.emulate)
 
             # change state if ok
             self._state = self.INITED
@@ -210,13 +212,13 @@ class Vosekast():
         self._state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
+    @property
     def ready_to_measure(self):
         """
         is vosekast ready to measure
         :return: measuring ready
         """
 
-        # constant tank ready
         constant_tank_ready = self.constant_tank.is_filled
 
         measuring_tank_ready = (

@@ -32,6 +32,7 @@ class Tank():
         vosekast,
         protect_draining=True,
         protect_overflow=True,
+        emulate=False,
     ):
 
         super().__init__()
@@ -48,6 +49,7 @@ class Tank():
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
         self.protect_overflow = protect_overflow
+        self.emulate = emulate
 
         # register callback for overfill if necessary
         # todo
@@ -86,7 +88,7 @@ class Tank():
         self.logger.info("Constant Tank state: " +
                          str(self.vosekast.constant_tank.state))
 
-        if not self._state == self.FILLED:
+        if not self._state == self.FILLED and not self.emulate:
             try:
                 # get time
                 time_filling_t0 = datetime.now()
@@ -114,6 +116,29 @@ class Tank():
                                  str(self.vosekast.measuring_tank.state))
                 self.logger.info("Constant Tank state: " +
                                  str(self.vosekast.constant_tank.state))
+                return
+            except:
+                self._state = self.STOPPED
+                self.logger.warning("Filling {} aborted.".format(self.name))
+                return
+        elif self.emulate:
+            try:
+                time_filling_t0 = datetime.now()
+                self.vosekast.prepare_measuring()
+                self._state = self.IS_FILLING
+
+                while not self._state == self.FILLED and self._state == self.IS_FILLING:
+                    time_filling_t1 = datetime.now()
+                    time_filling_passed = time_filling_t1 - time_filling_t0
+                    delta_time_filling = time_filling_passed.total_seconds()
+
+                    if delta_time_filling >= 20:
+                        self._state = self.FILLED
+
+                    self.logger.debug(
+                        str(delta_time_filling) + 's < time allotted (90s)')
+                    await asyncio.sleep(1)
+                
                 return
             except:
                 self._state = self.STOPPED
