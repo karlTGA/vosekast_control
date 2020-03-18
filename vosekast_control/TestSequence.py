@@ -39,7 +39,7 @@ class TestSequence():
         self.scale_value_stop = []
 
     async def start_sequence(self):
-        print(self.state)
+
         if not self.state == self.WAITING and not self.state == self.MEASURING:
             try:
                 self.logger.info("Initialising sequence.")
@@ -93,76 +93,144 @@ class TestSequence():
             self.logger.info("Already measuring.")
 
     async def write_loop(self):
+        if not self.emulate:
+            try:
+                # null scale
+                if abs(self.scale.scale_history[0]) < 0.15:
+                    scale_nulled = self.scale.scale_history[0]
+                else:
+                    scale_nulled = 0
 
-        try:
-            # null scale
-            if abs(self.scale.scale_history[0]) < 0.15:
-                scale_nulled = self.scale.scale_history[0]
-            else:
-                scale_nulled = 0
+                while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
+                    # get flow average
+                    flow_average = self.scale.flow_average()
+                    scale_actual = round(
+                        self.scale.scale_history[0] - scale_nulled, 5)
 
-            while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
-                # get flow average
-                flow_average = self.scale.flow_average()
-                scale_actual = round(
-                    self.scale.scale_history[0] - scale_nulled, 5)
+                    # #write values to csv file
+                    # with open('sequence_values.csv', 'a', newline='') as file:
+                    #     writer = csv.writer(file, delimiter=',',
+                    #                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    #     writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
 
-                # #write values to csv file
-                # with open('sequence_values.csv', 'a', newline='') as file:
-                #     writer = csv.writer(file, delimiter=',',
-                #                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                #     writer.writerow([self.scale.scale_history[1], scale_actual, self.scale.flow_history[0], flow_average])
-
-                # db
-                dbconnect = sqlite3.connect('sequence_values.db')
-                c = dbconnect.cursor()
-                c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
-                    description text,
-                    timestamp real,
-                    scale_value real,
-                    flow_current real,
-                    flow_average_of_5 real
-                    )""")
-
-                dbconnect.commit()
-
-                try:
-                    c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
-                        'description': "description",
-                        'timestamp': self.scale.scale_history[1],
-                        'scale_value': scale_actual,
-                        'flow_current': self.scale.flow_history[0],
-                        'flow_average': flow_average
-                    })
+                    # db
+                    dbconnect = sqlite3.connect('sequence_values.db')
+                    c = dbconnect.cursor()
+                    c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
+                        description text,
+                        timestamp real,
+                        scale_value real,
+                        flow_current real,
+                        flow_average_of_5 real
+                        )""")
 
                     dbconnect.commit()
 
-                except Error as e:
-                    self.logger.warning(e)
+                    try:
+                        c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
+                            'description': "description",
+                            'timestamp': self.scale.scale_history[1],
+                            'scale_value': scale_actual,
+                            'flow_current': self.scale.flow_history[0],
+                            'flow_average': flow_average
+                        })
 
-                except:
-                    self.logger.warning("Error writing to db.")
-                    dbconnect.close()
+                        dbconnect.commit()
 
-                self.logger.debug(
-                    str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
-                await asyncio.sleep(1)
+                    except Error as e:
+                        self.logger.warning(e)
 
-            dbconnect.close()
+                    except:
+                        self.logger.warning("Error writing to db.")
+                        dbconnect.close()
 
-            # todo sqlite
+                    self.logger.debug(
+                        str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
+                    await asyncio.sleep(1)
 
-            # interrupt if measuring_tank full
-            if self.vosekast.measuring_tank.is_filled:
-                self.vosekast.measuring_tank_switch.close()
-                self.vosekast.measuring_tank.drain_tank()
-                self.logger.debug(
-                    "Draining measuring tank, opening Measuring Tank bypass.")
+                dbconnect.close()
 
-        except:
-            self.logger.warning("Write loop killed, stopping sequence.")
-            dbconnect.close()
-            await self.stop_sequence()
+                # todo sqlite
+
+                # interrupt if measuring_tank full
+                if self.vosekast.measuring_tank.is_filled:
+                    self.vosekast.measuring_tank_switch.close()
+                    self.vosekast.measuring_tank.drain_tank()
+                    self.logger.debug(
+                        "Draining measuring tank, opening Measuring Tank bypass.")
+
+            except:
+                self.logger.warning("Write loop killed, stopping sequence.")
+                dbconnect.close()
+                await self.stop_sequence()
+        else:
+            time_sequence_t0 = datetime.now()
+            
+            try:
+                while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
+                    # timeout
+                    time_sequence_t1 = datetime.now()
+                    time_sequence_passed = time_sequence_t1 - time_sequence_t0
+                    delta_time_sequence = time_sequence_passed.total_seconds()
+                    
+                    if delta_time_sequence >= 30:
+                        self.vosekast.measuring_tank.state = self.vosekast.measuring_tank.FILLED
+                    
+                    # get flow average
+                    flow_average = self.scale.flow_average()
+
+                    scale_actual = round(self.scale.scale_history[0], 5)
+
+                    # db
+                    dbconnect = sqlite3.connect('sequence_values.db')
+                    c = dbconnect.cursor()
+                    c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
+                        description text,
+                        timestamp real,
+                        scale_value real,
+                        flow_current real,
+                        flow_average_of_5 real
+                        )""")
+
+                    dbconnect.commit()
+
+                    try:
+                        c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
+                            'description': "description",
+                            'timestamp': self.scale.scale_history[1],
+                            'scale_value': scale_actual,
+                            'flow_current': self.scale.flow_history[0],
+                            'flow_average': flow_average
+                        })
+
+                        dbconnect.commit()
+
+                    except Error as e:
+                        self.logger.warning(e)
+
+                    except:
+                        self.logger.warning("Error writing to db.")
+                        dbconnect.close()
+
+                    self.logger.debug(
+                        str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
+                    await asyncio.sleep(1)
+
+                dbconnect.close()
+
+                # todo sqlite
+
+                # interrupt if measuring_tank full
+                if self.vosekast.measuring_tank.is_filled:
+                    self.vosekast.measuring_tank_switch.close()
+                    self.vosekast.measuring_tank.drain_tank()
+                    self.logger.debug(
+                        "Draining measuring tank, opening Measuring Tank bypass.")
+
+            except:
+                self.logger.error("Emulate write loop killed, stopping sequence.")
+                dbconnect.close()
+                await self.stop_sequence()
 
     async def start_measuring(self):
         try:

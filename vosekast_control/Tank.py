@@ -132,7 +132,7 @@ class Tank():
                     time_filling_passed = time_filling_t1 - time_filling_t0
                     delta_time_filling = time_filling_passed.total_seconds()
 
-                    if delta_time_filling >= 20:
+                    if delta_time_filling >= 10:
                         self._state = self.FILLED
 
                     self.logger.debug(
