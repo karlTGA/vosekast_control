@@ -83,12 +83,7 @@ class Tank():
             self._on_draining()
 
     async def fill(self):
-        self.logger.info("Measuring Tank state: " +
-                         str(self.vosekast.measuring_tank.state))
-        self.logger.info("Constant Tank state: " +
-                         str(self.vosekast.constant_tank.state))
-
-        if not self._state == self.FILLED and not self.emulate:
+        if not self._state == self.FILLED:
             try:
                 # get time
                 time_filling_t0 = datetime.now()
@@ -103,13 +98,15 @@ class Tank():
                     delta_time_filling = time_filling_passed.total_seconds()
 
                     # if filling takes longer than 90s
-                    if delta_time_filling >= 90:
+                    if delta_time_filling >= 10 and self.emulate:
+                        self._state = self.FILLED
+                    if delta_time_filling >= 75 and not self.emulate:
                         self.logger.error(
                             "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
                         raise TankFillingTimeout("Tank Filling Timeout.")
 
                     self.logger.debug(
-                        str(delta_time_filling) + 's < time allotted (90s)')
+                        str(delta_time_filling) + 's < time allotted (75s)')
                     await asyncio.sleep(1)
 
                 self.logger.info("Measuring Tank state: " +
@@ -121,32 +118,12 @@ class Tank():
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
                 return
-        elif self.emulate:
-            try:
-                time_filling_t0 = datetime.now()
-                self.vosekast.prepare_measuring()
-                self._state = self.IS_FILLING
-
-                while not self._state == self.FILLED and self._state == self.IS_FILLING:
-                    time_filling_t1 = datetime.now()
-                    time_filling_passed = time_filling_t1 - time_filling_t0
-                    delta_time_filling = time_filling_passed.total_seconds()
-
-                    if delta_time_filling >= 10:
-                        self._state = self.FILLED
-
-                    self.logger.debug(
-                        str(delta_time_filling) + 's < time allotted (90s)')
-                    await asyncio.sleep(1)
-                
-                return
-            except:
-                self._state = self.STOPPED
-                self.logger.warning("Filling {} aborted.".format(self.name))
-                return
-        else:
+        elif self._state == self.FILLED:
             self.logger.info(
                 "{} already filled. Continuing.".format(self.name))
+        else:
+            self.logger.warning(
+                "Something bad happened while filling {}.".format(self.name))
 
     def _on_draining(self):
         """
@@ -203,5 +180,5 @@ class Tank():
     @state.setter
     def state(self, new_state):
         self._state = new_state
-        self.logger.info(f"New Tank state is: {new_state}")
+        self.logger.info(f"New {self.name} state is: {new_state}")
         self.mqtt.publish_message(StatusMessage('tank', self.name, new_state))

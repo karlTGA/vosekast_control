@@ -102,6 +102,10 @@ class Scale:
 
         self.logger.info("Stopped measuring with scale.")
 
+    def start(self):
+        self.open_connection()
+        self.start_measurement_thread()
+
     def start_measurement_thread(self):
         self.is_running = True
 
@@ -119,45 +123,28 @@ class Scale:
 
     # diagnostics
     def print_diagnostics(self):
-        if self.emulate:
-            self.logger.info("Printing diagnostics:")
-            self.logger.info("self.threads: " + str(self.threads))
-            self.logger.info("Thread loop alive: " +
-                str(self.thread_loop.is_alive()))
-            self.logger.info("Thread readscale alive: " +
-                            str(self.thread_readscale.is_alive()))
-            self.logger.info("self.is_running = " + str(self.is_running))
-            self.logger.info("constant_tank_ready: " +
-                            str(self.vosekast.constant_tank.is_filled))
-            self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
-                                                            and not self.vosekast.measuring_tank.is_filled))
-            self.logger.info("constant_pump_running: " +
-                            str(self.vosekast.pump_constant_tank.is_running))
-            self.logger.info("measuring_drain_valve.is_closed: " +
-                            str(self.vosekast.measuring_drain_valve.is_closed))
-            self.logger.info("measuring_tank.is_filled: " +
-                            str(self.vosekast.measuring_tank.is_filled))
-        else:
-            self.logger.info("Printing diagnostics:")
-            self.logger.info("self.threads: " + str(self.threads))
-            self.logger.info("self.connection.is_open: " +
-                            str(self.connection.is_open))
-            self.logger.info("Thread loop alive: " +
-                            str(self.thread_loop.is_alive()))
-            self.logger.info("Thread readscale alive: " +
-                            str(self.thread_readscale.is_alive()))
-            self.logger.info("self.is_running = " + str(self.is_running))
-            self.logger.info("constant_tank_ready: " +
-                            str(self.vosekast.constant_tank.is_filled))
-            self.logger.info("measuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
-                                                            and not self.vosekast.measuring_tank.is_filled))
-            self.logger.info("constant_pump_running: " +
-                            str(self.vosekast.pump_constant_tank.is_running))
-            self.logger.info("measuring_drain_valve.is_closed: " +
-                            str(self.vosekast.measuring_drain_valve.is_closed))
-            self.logger.info("measuring_tank.is_filled: " +
-                            str(self.vosekast.measuring_tank.is_filled))
-
+        self.logger.info("Diagnostics:" +
+        "\nself.threads: " + str(self.threads) +
+        "\nThread loop alive: " + str(self.thread_loop.is_alive()) +
+        "\nThread readscale alive: " +
+                        str(self.thread_readscale.is_alive()) +
+        "\nself.is_running = " + str(self.is_running) +
+        "\nconstant_tank_ready: " +
+                        str(self.vosekast.constant_tank.is_filled) +
+        "\nmeasuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
+                                                        and not self.vosekast.measuring_tank.is_filled) +
+        "\nconstant_pump_running: " +
+                        str(self.vosekast.pump_constant_tank.is_running) +
+        "\nmeasuring_drain_valve.is_closed: " +
+                        str(self.vosekast.measuring_drain_valve.is_closed) +
+        "\nmeasuring_tank.is_filled: " +
+                        str(self.vosekast.measuring_tank.is_filled) +
+        "\nconstant_tank state: " + str(self.vosekast.constant_tank.state) +
+        "\nmeasuring_tank state: " + str(self.vosekast.measuring_tank.state)
+                        )
+        if not self.emulate:
+            self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
+            
     def stop_measurement_thread(self):
         self.is_running = False
 

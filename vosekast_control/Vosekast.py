@@ -269,6 +269,7 @@ class Vosekast():
         self._app_control.shutdown()
 
     def clean(self):
+        self.testsequence.state = self.testsequence.STOPPED
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
 
@@ -291,8 +292,7 @@ class Vosekast():
         if self.emulate:
             self.logger.info("Start Vosekast in Debug Mode.")
 
-        self.scale.open_connection()
-        self.scale.start_measurement_thread()
+        self.scale.start()
 
         await self.mqtt_client.connect()
         self._state = self.RUNNING
