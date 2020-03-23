@@ -157,6 +157,7 @@ class Vosekast():
                 self.pump_constant_tank,
                 vosekast=self,
                 protect_overflow=False,
+                emulate=self.emulate,
             )
 
             self.measuring_tank = Tank(
@@ -169,6 +170,7 @@ class Vosekast():
                 self.pump_measuring_tank,
                 vosekast=self,
                 protect_draining=False,
+                emulate=self.emulate,
             )
 
             self.tanks = [self.stock_tank,
@@ -178,7 +180,7 @@ class Vosekast():
             self.scale = Scale('measuring_scale', self, emulate=self.emulate)
 
             # testsequence
-            self.testsequence = TestSequence(self)
+            self.testsequence = TestSequence(self, emulate=self.emulate)
 
             # change state if ok
             self._state = self.INITED
@@ -210,13 +212,13 @@ class Vosekast():
         self._state = new_state
         self.logger.debug(f"New Vosekast state is: {new_state}")
 
+    @property
     def ready_to_measure(self):
         """
         is vosekast ready to measure
         :return: measuring ready
         """
 
-        # constant tank ready
         constant_tank_ready = self.constant_tank.is_filled
 
         measuring_tank_ready = (
@@ -267,6 +269,7 @@ class Vosekast():
         self._app_control.shutdown()
 
     def clean(self):
+        self.testsequence.state = self.testsequence.STOPPED
         self.measuring_tank.drain_tank()
         self.logger.debug("Draining measuring tank.")
 
@@ -289,8 +292,7 @@ class Vosekast():
         if self.emulate:
             self.logger.info("Start Vosekast in Debug Mode.")
 
-        self.scale.open_connection()
-        self.scale.start_measurement_thread()
+        self.scale.start()
 
         await self.mqtt_client.connect()
         self._state = self.RUNNING
@@ -311,12 +313,12 @@ class Vosekast():
                     if command['command'] == 'close':
                         valve.close()
                         return
-                    if command['command'] == 'ope"":"cn':
+                    if command['command'] == 'open':
                         valve.open()
                         return
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -336,7 +338,7 @@ class Vosekast():
                         pump.toggle()
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -354,15 +356,15 @@ class Vosekast():
                     if command['command'] == 'prepare_to_fill':
                         tank.prepare_to_fill()
                         return
-                    if command['command'] == '_handle_drained':
-                        tank._handle_drained()
-                        return
-                    if command['command'] == '_handle_filling':
-                        tank._handle_filling()
-                        return
+                    # if command['command'] == '_handle_drained':
+                    #     tank._handle_drained()
+                    #     return
+                    # if command['command'] == '_handle_filling':
+                    #     tank._handle_filling()
+                    #     return
                     else:
                         self.logger.warning(
-                            f'command {command["command"]} did not execute.')
+                            f'target_id found. command {command["command"]} did not execute.')
 
                     return
 
@@ -371,7 +373,7 @@ class Vosekast():
 
         # scales
         elif command['target'] == 'scale':
-            if command['target_id'] == 'scale':
+            if command['target_id'] == 'measuring_scale':
                 if command['command'] == 'open_connection':
                     self.scale.open_connection()
                 elif command['command'] == 'close_connection':
@@ -382,14 +384,10 @@ class Vosekast():
                     self.scale.stop_measurement_thread()
                 elif command['command'] == 'print_diagnostics':
                     self.scale.print_diagnostics()
-                elif command['command'] == 'read_value_from_scale':
-                    self.scale.read_value_from_scale()
-                # elif command['command'] == 'toggle_publishing':
-                #     self.scale.toggle_publishing()
 
                 else:
                     self.logger.warning(
-                        f'command {command["command"]} did not execute.')
+                        f'target_id found. command {command["command"]} did not execute.')
 
                 return
 
@@ -405,8 +403,6 @@ class Vosekast():
                     self.clean()
                 elif command['command'] == 'prepare_measuring':
                     self.prepare_measuring()
-                elif command['command'] == 'ready_to_measure':
-                    self.ready_to_measure()
                 elif command['command'] == 'start_sequence':
                     await self.testsequence.start_sequence()
                 elif command['command'] == 'stop_sequence':
@@ -420,7 +416,7 @@ class Vosekast():
 
                 else:
                     self.logger.warning(
-                        f'command {command["command"]} did not execute.')
+                        f'target_id found. command {command["command"]} did not execute.')
 
                 return
 

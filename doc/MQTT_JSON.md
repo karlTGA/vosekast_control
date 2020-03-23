@@ -9,7 +9,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 	* Sensors publish to their on topic under /status, i.e. vosekast/status/Stock_Tank 
 	* Standard Log events will publish to /log, i.e. vosekast/log
 	* Log events with level "Error" or "Critical" publish to /error, i.e. vosekast/error/Stock_Tank
-	* Vosekast is listening for commands on /command, i.e. vosekast/command/Stock_Tank
+	* Vosekast is listening for commands on /commands, i.e. vosekast/commands/Stock_Tank
 * Data is distinguished by sensor_id and timestamp.
 
 ```json
@@ -17,7 +17,7 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "status",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "i.e. CONSTANT_TANK",
+	"sensor_id": "i.e. constant_tank",
 	"value1": 100,
 	"unit1": "%",
 	"value2": 100,
@@ -32,14 +32,14 @@ We decided to use the JSON:API for its ease of use, flexibility and lightweight 
 {
 	"type": "error message",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
-	"sensor_id": "i.e. CONSTANT_TANK",
+	"sensor_id": "i.e. constant_tank",
 	"message": "Water level low."
 },
 {
 	"type": "command",
 	"timestamp": "2019-11-20T19:03:59.975Z+0100",
 	"target": "valve/tank/pump/scale/system",
-	"target_id": "i.e. Measuring Drain Valve",
+	"target_id": "i.e. measuring_drain_valve",
 	"command": "close",
 	"data": null
 } 
