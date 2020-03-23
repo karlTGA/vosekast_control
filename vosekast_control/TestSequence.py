@@ -158,8 +158,6 @@ class TestSequence():
 
             dbconnect.close()
 
-            # todo sqlite
-
             # interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
                 self.vosekast.measuring_tank_switch.close()
@@ -196,8 +194,6 @@ class TestSequence():
             self.vosekast.measuring_tank_switch.close()
             self.logger.debug('Stopped test sequence')
             self.vosekast.state = self.vosekast.RUNNING
-
-            # todo kill start_measurement
 
             self.vosekast.clean()
         else:

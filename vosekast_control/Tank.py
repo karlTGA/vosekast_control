@@ -52,7 +52,6 @@ class Tank():
         self.emulate = emulate
 
         # register callback for overfill if necessary
-        # todo
         if overflow_sensor is not None:
             self.overflow_sensor.add_callback(self._up_state_changed)
 
