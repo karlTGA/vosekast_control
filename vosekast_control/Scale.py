@@ -124,23 +124,17 @@ class Scale:
     # diagnostics
     def print_diagnostics(self):
         self.logger.info("Diagnostics:" +
-        "\nself.threads: " + str(self.threads) +
-        "\nThread loop alive: " + str(self.thread_loop.is_alive()) +
-        "\nThread readscale alive: " +
-                        str(self.thread_readscale.is_alive()) +
-        "\nself.is_running = " + str(self.is_running) +
-        "\nconstant_tank_ready: " +
-                        str(self.vosekast.constant_tank.is_filled) +
-        "\nmeasuring_tank_ready: " + str(self.vosekast.measuring_drain_valve.is_closed
-                                                        and not self.vosekast.measuring_tank.is_filled) +
-        "\nconstant_pump_running: " +
-                        str(self.vosekast.pump_constant_tank.is_running) +
-        "\nmeasuring_drain_valve.is_closed: " +
-                        str(self.vosekast.measuring_drain_valve.is_closed) +
-        "\nmeasuring_tank.is_filled: " +
-                        str(self.vosekast.measuring_tank.is_filled) +
-        "\nconstant_tank state: " + str(self.vosekast.constant_tank.state) +
-        "\nmeasuring_tank state: " + str(self.vosekast.measuring_tank.state)
+        str(f"self.threads: {str(self.threads)}\n") + 
+        str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n") +
+        str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n") +
+        str(f"self.is_running: {str(self.is_running)}\n") +
+        str(f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n") +
+        str(f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n") +
+        str(f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n") +
+        str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
+        str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
+        str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
+        str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
                         )
         if not self.emulate:
             self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
