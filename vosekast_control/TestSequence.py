@@ -2,7 +2,7 @@ import logging
 import threading
 import time
 import asyncio
-import csv
+#import csv
 
 from vosekast_control.Log import LOGGER
 
