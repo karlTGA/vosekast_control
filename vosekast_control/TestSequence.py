@@ -6,9 +6,10 @@ import asyncio
 
 from vosekast_control.Log import LOGGER
 
-import sqlite3
-from sqlite3 import Error
+#import sqlite3
+#from sqlite3 import Error
 from datetime import datetime
+from vosecast_control.DB import db_instance
 
 
 class TestSequence():
@@ -121,42 +122,35 @@ class TestSequence():
                     self.scale.scale_history[0] - scale_nulled, 5)
 
                 # todo move the db init in a class or a singleton
-                #db
-                dbconnect = sqlite3.connect('sequence_values.db')
-                c = dbconnect.cursor()
-                c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
-                    description text,
-                    timestamp real,
-                    scale_value real,
-                    flow_current real,
-                    flow_average_of_5 real
-                    )""")
-
-                dbconnect.commit()
+                
+                # old:
+                # dbconnect = sqlite3.connect('sequence_values.db')
+                # c = dbconnect.cursor()
+                # c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
+                #     description text,
+                #     timestamp real,
+                #     scale_value real,
+                #     flow_current real,
+                #     flow_average_of_5 real
+                #     )""")
+                # dbconnect.commit()
 
                 try:
-                    c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
-                        'description': "description",
+                    values = {
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
                         'flow_average': flow_average
-                    })
+                        })
 
-                    dbconnect.commit()
-
-                except Error as e:
-                    self.logger.warning(e)
+                    db_instance.insert_datapoint(values)
 
                 except:
-                    self.logger.warning("Error writing to db.")
-                    dbconnect.close()
+                    self.logger.warning("Error sending to db.")
 
                 self.logger.debug(
                     str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
                 await asyncio.sleep(1)
-
-            dbconnect.close()
 
             # interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
@@ -168,7 +162,6 @@ class TestSequence():
 
         except:
             self.logger.warning("Write loop killed, stopping sequence.")
-            dbconnect.close()
             await self.stop_sequence()
 
     async def start_measuring(self):

@@ -24,17 +24,14 @@ class DBconnector():
             )""")
         self._db_connection.commit()
 
-    def insertvalues(self, timestamp, scale_actual, flow_current, flow_average):
+    def insert_datapoint(self, values):
         try:
-            # self.c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
-            #     'description': "description",
-            #     'timestamp': self.scale.scale_history[1],
-            #     'scale_value': scale_actual,
-            #     'flow_current': self.scale.flow_history[0],
-            #     'flow_average': flow_average
-            #     })
-            values = [('', 'timestamp', 'scale_actual', 'flow_current', 'flow_average'),]
-            self._db_connection.executemany("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", values)
+            # values = {
+            #     'timestamp': 0000, 
+            #     'scale_actual': 0000,
+            #     'flow_current': 0000,
+            #     'flow_average': 0000}
+            self._db_connection.executemany("INSERT INTO sequence_values VALUES (:timestamp, :scale_value, :flow_current, :flow_average)", values)
 
             self._db_connection.commit()
 
@@ -48,10 +45,12 @@ class DBconnector():
 
     # todo 
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed
+    # https://dba.stackexchange.com/questions/223267/in-sqlite-how-to-check-the-table-is-empty-or-not
     @property
     def isConnected(self):
         try:
-            result = self._db_connection.execute("SELECT 1 FROM sequence_values LIMIT 1;")
+            #should return 0 if empty
+            self._db_connection.execute("SELECT count(*) FROM (select 0 from sequence_values limit 1);")
             return True
         except ProgrammingError as e:
             self.logger.warning(e)

@@ -34,10 +34,6 @@ async def main(emulate=False):
         vosekast = Vosekast(app_control, GPIO, emulate=emulate)
         app_control.start()
 
-        #todo this is not needed if I import the instance, correct?
-        # initialise DB
-        db = DBconnector()
-
         await vosekast.run()
     
     finally:
