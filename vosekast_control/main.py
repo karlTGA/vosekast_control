@@ -11,7 +11,7 @@ from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
 from vosekast_control.Vosekast import Vosekast
-from vosecast_control.DB import DBconnector
+from vosecast_control.DB import db_instance
 
 # add mqtt resources
 import asyncio
@@ -34,21 +34,22 @@ async def main(emulate=False):
         vosekast = Vosekast(app_control, GPIO, emulate=emulate)
         app_control.start()
 
+        #todo this is not needed if I import the instance, correct?
         # initialise DB
         db = DBconnector()
 
         await vosekast.run()
-       
-        # vosekast.run hast exited
-        if emulate:
-            sys.exit(0)
-        else:
-            os.system('sudo shutdown -h now')
     
     finally:
         vosekast.clean()
         GPIO.cleanup()
-        db.db_close()
+        db_instance.db_close()
+
+        if emulate:
+            sys.exit(0)
+            print("system exit")
+        else:
+            os.system('sudo shutdown -h now')
 
 if __name__ == "__main__":
     asyncio.run(main())
