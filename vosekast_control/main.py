@@ -38,9 +38,9 @@ async def main(emulate=False):
     
     finally:
         vosekast.clean()
-        GPIO.cleanup()
         db_instance.close()
-
+        GPIO.cleanup()
+        
         if emulate:
             sys.exit(0)
             print("system exit")

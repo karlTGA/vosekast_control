@@ -8,7 +8,7 @@ from random import uniform
 from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
-
+from vosekast_control.DB import db_instance
 from collections import deque
 from datetime import datetime
 
@@ -134,7 +134,8 @@ class Scale:
         str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
         str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
         str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
-        str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}")
+        str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") + 
+        str(f"db connection established: {str(db_instance.isConnected)}")
                         )
         if not self.emulate:
             self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
@@ -145,8 +146,11 @@ class Scale:
         # terminate threads
         self.thread_loop.join()
         self.thread_readscale.join()
-        self.threads.remove(self.thread_loop)
-        self.threads.remove(self.thread_readscale)
+        try:
+            self.threads.remove(self.thread_loop)
+            self.threads.remove(self.thread_readscale)
+        except:
+            pass
         self.logger.debug("Stopped measurement thread.")
 
     def _scale_input_buffer(self):
