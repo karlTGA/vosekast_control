@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 from vosekast_control.Log import LOGGER
 
+
 class DBconnector():
 
     def __init__(self):
@@ -19,7 +20,7 @@ class DBconnector():
             self.logger.warning(e)
         except:
             self.logger.info("Failed to establish DB connection.")
-        #cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
+        # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
         #cursor = self._db_connection.cursor()
         self._db_connection.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
             timestamp real,
@@ -32,14 +33,15 @@ class DBconnector():
     def insert_datapoint(self, data):
         try:
             # values = {
-            #     'timestamp': 0000, 
+            #     'timestamp': 0000,
             #     'scale_actual': 0000,
             #     'flow_current': 0000,
             #     'flow_average': 0000}
 
-            #https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
-            self._db_connection.executemany("INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average) VALUES (:timestamp, :scale_value, :flow_current, :flow_average);", data)
-            
+            # https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
+            self._db_connection.execute(
+                "INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average) VALUES (:timestamp, :scale_value, :flow_current, :flow_average);", data)
+
             self._db_connection.commit()
 
         except Error as e:
@@ -53,18 +55,19 @@ class DBconnector():
         self._db_connection.close()
         self.logger.info("DB connection closed.")
 
-    # todo 
+    # todo
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed
     # https://dba.stackexchange.com/questions/223267/in-sqlite-how-to-check-the-table-is-empty-or-not
     @property
     def isConnected(self):
         try:
-            #should return 0 if empty
-            self._db_connection.execute("SELECT count(*) FROM (select 0 from sequence_values limit 1);")
+            # should return 0 if empty
+            self._db_connection.execute(
+                "SELECT count(*) FROM (select 0 from sequence_values limit 1);")
             return True
         except ProgrammingError as e:
             self.logger.warning(e)
             return False
 
-db_instance = DBconnector()
 
+db_instance = DBconnector()

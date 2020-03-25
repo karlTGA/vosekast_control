@@ -46,7 +46,7 @@ class TestSequence():
 
                 # change state
                 self.state = self.WAITING
-                
+
                 # check if already running
                 if self.scale.is_running != True:
                     self.scale.start()
@@ -70,7 +70,7 @@ class TestSequence():
                     self.scale.print_diagnostics()
                     self.state = self.STOPPED
                     return
-                
+
                 # check if state has been changed
                 elif self.state == self.STOPPED or self.state == self.PAUSED:
                     return
@@ -121,16 +121,16 @@ class TestSequence():
                     scale_actual = round(self.scale.scale_history[0], 5)
                 else:
                     scale_actual = round(
-                    self.scale.scale_history[0] - scale_nulled, 5)
+                        self.scale.scale_history[0] - scale_nulled, 5)
 
                 try:
-                    data = [{
+                    data = {
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
                         'flow_average': flow_average
-                        }]
-                    
+                    }
+
                     db_instance.insert_datapoint(data)
                 except:
                     self.logger.warning("Error sending to db.")
@@ -188,14 +188,15 @@ class TestSequence():
 
             # switch to measuring_tank bypass
             self.vosekast.measuring_tank_switch.close()
-            
+
             self.logger.info("Paused. Measuring Tank bypass open.")
-        
+
         # if constant_tank has not been filled yet
         elif self.state == self.WAITING and self.vosekast.PREPARING_MEASUREMENT:
             self.state = self.STOPPED
             self.vosekast.state = self.vosekast.RUNNING
-            self.logger.info("Measuring has not yet started, continuing to fill constant_tank.")
+            self.logger.info(
+                "Measuring has not yet started, continuing to fill constant_tank.")
         elif self.state == self.PAUSED or self.state == self.STOPPED:
             self.logger.info("Sequence already paused.")
         else:
@@ -215,4 +216,3 @@ class TestSequence():
             self.logger.info("Sequence has not been paused.")
         else:
             self.logger.info("Sequence has not yet been started.")
-
