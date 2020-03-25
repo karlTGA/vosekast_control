@@ -9,7 +9,7 @@ from vosekast_control.Log import LOGGER
 #import sqlite3
 #from sqlite3 import Error
 from datetime import datetime
-from vosecast_control.DB import db_instance
+from vosekast_control.DB import db_instance
 
 
 class TestSequence():
@@ -104,6 +104,8 @@ class TestSequence():
             else:
                 scale_nulled = 0
 
+            db_instance.connect()
+
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
                 flow_average = self.scale.flow_average()
@@ -121,30 +123,15 @@ class TestSequence():
                     scale_actual = round(
                     self.scale.scale_history[0] - scale_nulled, 5)
 
-                # todo move the db init in a class or a singleton
-                
-                # old:
-                # dbconnect = sqlite3.connect('sequence_values.db')
-                # c = dbconnect.cursor()
-                # c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
-                #     description text,
-                #     timestamp real,
-                #     scale_value real,
-                #     flow_current real,
-                #     flow_average_of_5 real
-                #     )""")
-                # dbconnect.commit()
-
                 try:
-                    values = {
+                    data = [{
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
                         'flow_average': flow_average
-                        })
-
-                    db_instance.insert_datapoint(values)
-
+                        }]
+                    
+                    db_instance.insert_datapoint(data)
                 except:
                     self.logger.warning("Error sending to db.")
 

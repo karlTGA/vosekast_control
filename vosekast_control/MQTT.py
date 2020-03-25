@@ -36,6 +36,7 @@ class MQTTController():
         self.tries += 1
         try:
             await self.client.connect(self.host)
+            
         except ConnectionRefusedError:
 
             await self.connection_refused()
@@ -106,7 +107,8 @@ class MQTTController():
 
     def on_subscribe(self, client, mid, qos, properties):
         self.logger.debug('Vosekast listening on: \"' + self.topic + "\"")
-
+        
+ 
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)
 

@@ -1,47 +1,57 @@
 import sqlite3
 from sqlite3 import Error
 from datetime import datetime
+import logging
+from vosekast_control.Log import LOGGER
 
 class DBconnector():
 
     def __init__(self):
         self._db_connection = None
-        
+        self.foo = 12
+        self.logger = logging.getLogger(LOGGER)
+
     def connect(self):
         try:
             self._db_connection = sqlite3.connect('sequence_values.db')
+            self.logger.info("Established DB connection.")
         except Error as e:
             self.logger.warning(e)
-
+        except:
+            self.logger.info("Failed to establish DB connection.")
         #cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
         #cursor = self._db_connection.cursor()
         self._db_connection.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
-            description text,
             timestamp real,
             scale_value real,
             flow_current real,
-            flow_average_of_5 real
+            flow_average real
             )""")
         self._db_connection.commit()
 
-    def insert_datapoint(self, values):
+    def insert_datapoint(self, data):
         try:
             # values = {
             #     'timestamp': 0000, 
             #     'scale_actual': 0000,
             #     'flow_current': 0000,
             #     'flow_average': 0000}
-            self._db_connection.executemany("INSERT INTO sequence_values VALUES (:timestamp, :scale_value, :flow_current, :flow_average)", values)
 
+            #https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
+            self._db_connection.executemany("INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average) VALUES (:timestamp, :scale_value, :flow_current, :flow_average);", data)
+            
             self._db_connection.commit()
 
         except Error as e:
-            self.logger.warning(e)
+            self.logger.error(e)
+        except ProgrammingError as e:
+            self.logger.error(e)
 
     # todo def read(self):
 
     def close(self):
         self._db_connection.close()
+        self.logger.info("DB connection closed.")
 
     # todo 
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed
