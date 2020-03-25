@@ -259,9 +259,9 @@ class Vosekast():
         self.clean()
         self.logger.info("Shutting down.")
 
-        # GPIO cleanup
-        self._gpio_controller.cleanup()
-        self.logger.debug("GPIO cleanup.")
+        # # GPIO cleanup
+        # self._gpio_controller.cleanup()
+        # self.logger.debug("GPIO cleanup.")
 
         await self.mqtt_client.disconnect()
         self.logger.debug("MQTT client disconnected.")

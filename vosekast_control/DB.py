@@ -48,22 +48,30 @@ class DBconnector():
             self.logger.error(e)
 
     # todo def read(self):
+    
+    # todo find while loop that does not sleep
 
     def close(self):
-        self._db_connection.close()
-        self.logger.info("DB connection closed.")
+        try:
+            self._db_connection.close()
+            self.logger.info("DB connection closed.")
+        except:
+            return
 
     # todo 
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed
     # https://dba.stackexchange.com/questions/223267/in-sqlite-how-to-check-the-table-is-empty-or-not
+
     @property
     def isConnected(self):
         try:
             #should return 0 if empty
             self._db_connection.execute("SELECT count(*) FROM (select 0 from sequence_values limit 1);")
             return True
-        except ProgrammingError as e:
+        except Error as e:
             self.logger.warning(e)
+            return False
+        except:
             return False
 
 db_instance = DBconnector()
