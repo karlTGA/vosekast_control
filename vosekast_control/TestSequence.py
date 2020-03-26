@@ -106,16 +106,11 @@ class TestSequence():
             else:
                 scale_nulled = 0
 
-
-<< << << < HEAD
-            DBConnection.connect()
-== == == =
             # generate sequence_id
             sequence_id = random.randint(10000000000, 100000000000)
 
             # connect db
-            db_instance.connect()
->>>>>> > db-develop
+            DBConnection.connect()
 
             # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
@@ -149,13 +144,8 @@ class TestSequence():
                         'measuring_tank_switch_state': self.vosekast.measuring_tank_switch.state,
                         'sequence_id': sequence_id
                     }
-
-<< << << < HEAD
                     DBConnection.insert_datapoint(data)
-== == == =
-                    db_instance.insert_datapoint(data)
 
->>>>>> > db-develop
                 except:
                     self.logger.warning("Error sending to db.")
 
