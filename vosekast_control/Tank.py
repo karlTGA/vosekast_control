@@ -4,6 +4,8 @@ import asyncio
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
+from vosekast_control.connectors import MQTTConnection
+
 
 class TankFillingTimeout(Exception):
     pass
@@ -44,7 +46,6 @@ class Tank():
         self.drain_valve = drain_valve
         self.source_pump = source_pump
         self.vosekast = vosekast
-        self.mqtt = self.vosekast.mqtt_client
         self._state = self.UNKNOWN
         self.logger = logging.getLogger(LOGGER)
         self.protect_draining = protect_draining
@@ -180,4 +181,5 @@ class Tank():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New {self.name} state is: {new_state}")
-        self.mqtt.publish_message(StatusMessage('tank', self.name, new_state))
+        MQTTConnection.publish_message(
+            StatusMessage('tank', self.name, new_state))

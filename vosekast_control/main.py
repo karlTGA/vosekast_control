@@ -10,7 +10,6 @@ import traceback
 from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
-from vosekast_control.Vosekast import Vosekast
 from vosekast_control.DB import db_instance
 
 # add mqtt resources
@@ -21,8 +20,14 @@ logger = setup_custom_logger()
 
 
 async def main(emulate=False):
+    # overwrite the emulate param with the env if exist
+    emulate = os.getenv('EMULATE', str(emulate)) == "True"
+
     # import the rpi module at event start to prevent the early opening of the emulator gui
     import RPi.GPIO as GPIO
+
+    # import vosekast at runtime to prefend different event loops
+    from vosekast_control.Vosekast import Vosekast
 
     try:
         # GPIO.cleanup()
@@ -35,12 +40,15 @@ async def main(emulate=False):
         app_control.start()
 
         await vosekast.run()
-    
+
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+
     finally:
         vosekast.clean()
         db_instance.close()
         GPIO.cleanup()
-        
+
         if emulate:
             sys.exit(0)
             print("system exit")

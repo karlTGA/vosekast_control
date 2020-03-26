@@ -10,6 +10,7 @@ from vosekast_control.Log import LOGGER
 #from sqlite3 import Error
 from datetime import datetime
 from vosekast_control.DB import db_instance
+from vosekast_control.connectors import MQTTConnection
 
 
 class TestSequence():
@@ -35,7 +36,6 @@ class TestSequence():
         self.scale = self.vosekast.scale
         self.emulate = emulate
         self.state = self.UNKNOWN
-        self.mqtt = self.vosekast.mqtt_client
         self.scale_value_start = []
         self.scale_value_stop = []
 
