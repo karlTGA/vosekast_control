@@ -5,11 +5,13 @@ import asyncio
 import random
 from vosekast_control.Log import LOGGER
 
-#import sqlite3
-#from sqlite3 import Error
+# import sqlite3
+# from sqlite3 import Error
 from datetime import datetime
-from vosekast_control.DB import db_instance
+from vosekast_control.connectors import DBConnection
+from vosekast_control.connectors import MQTTConnection
 from random import uniform
+
 
 class TestSequence():
     # TestSequence states
@@ -34,7 +36,6 @@ class TestSequence():
         self.scale = self.vosekast.scale
         self.emulate = emulate
         self.state = self.UNKNOWN
-        self.mqtt = self.vosekast.mqtt_client
         self.scale_value_start = []
         self.scale_value_stop = []
 
@@ -109,7 +110,7 @@ class TestSequence():
             sequence_id = random.randint(10000000000, 100000000000)
 
             # connect db
-            db_instance.connect()
+            DBConnection.connect()
 
             # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
@@ -143,8 +144,7 @@ class TestSequence():
                         'measuring_tank_switch_state': self.vosekast.measuring_tank_switch.state,
                         'sequence_id': sequence_id
                     }
-
-                    db_instance.insert_datapoint(data)
+                    DBConnection.insert_datapoint(data)
 
                 except:
                     self.logger.warning("Error sending to db.")

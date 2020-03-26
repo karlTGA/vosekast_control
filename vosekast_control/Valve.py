@@ -2,6 +2,8 @@ import logging
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
 
+from vosekast_control.connectors import MQTTConnection
+
 
 class Valve():
     # regulations
@@ -30,7 +32,6 @@ class Valve():
         super().__init__()
 
         self.vosekast = vosekast
-        self.mqtt = self.vosekast.mqtt_client
         self.name = name
         self._pin = control_pin
         self.valve_type = valve_type
@@ -84,4 +85,5 @@ class Valve():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New state of valve {self.name} is: {new_state}")
-        self.mqtt.publish_message(StatusMessage('valve', self.name, new_state))
+        MQTTConnection.publish_message(
+            StatusMessage('valve', self.name, new_state))

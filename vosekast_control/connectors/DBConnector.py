@@ -5,11 +5,10 @@ import logging
 from vosekast_control.Log import LOGGER
 
 
-class DBconnector():
+class DBConnector():
 
     def __init__(self):
         self._db_connection = None
-        self.foo = 12
         self.logger = logging.getLogger(LOGGER)
 
     # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
@@ -21,7 +20,7 @@ class DBconnector():
             self.logger.warning(e)
         except:
             self.logger.info("Failed to establish DB connection.")
-        
+
         self._db_connection.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
             timestamp real,
             scale_value real,
@@ -55,10 +54,10 @@ class DBconnector():
         except ProgrammingError as e:
             self.logger.error(e)
 
-    # todo 
+    # todo
     def read(self):
         pass
-    
+
     # (todo) find while loop that does not sleep
     # probably fixed, needs testing
 
@@ -86,4 +85,4 @@ class DBconnector():
             return False
 
 
-db_instance = DBconnector()
+DBConnection = DBConnector()

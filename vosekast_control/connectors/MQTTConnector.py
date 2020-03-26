@@ -4,13 +4,17 @@ from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
 import logging
 import asyncio
+import os
 
 
 def noop(*args, **kwargs):
     pass
 
 
-class MQTTController():
+HOST = os.getenv('MQTT_HOST', 'localhost')
+
+
+class MQTTConnector():
 
     def __init__(self, host):
         self.client = MQTTClient("Vosekast")
@@ -36,10 +40,11 @@ class MQTTController():
         self.tries += 1
         try:
             await self.client.connect(self.host)
-            
-        except ConnectionRefusedError:
 
+        except ConnectionRefusedError:
             await self.connection_refused()
+        except:
+            raise
 
     async def connection_refused(self):
         self.logger.warning(
@@ -107,10 +112,12 @@ class MQTTController():
 
     def on_subscribe(self, client, mid, qos, properties):
         self.logger.debug('Vosekast listening on: \"' + self.topic + "\"")
-        
- 
+
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)
 
     def connection_test(self):
         return self.client.is_connected
+
+
+MQTTConnection = MQTTConnector(host=HOST)
