@@ -91,10 +91,10 @@ class Scale:
 
             if new_value is not None:
                 self.add_new_value(new_value)
-                self.timestamp = datetime.now()
-                # deque scale history
-                self.scale_history.appendleft(self.timestamp)
-                self.scale_history.appendleft(new_value)
+                # self.timestamp = datetime.now()
+                # # deque scale history
+                # self.scale_history.appendleft(self.timestamp)
+                # self.scale_history.appendleft(new_value)
             else:
                 self.logger.warning("Reached loop with new value = None.")
 
@@ -232,7 +232,12 @@ class Scale:
             self.logger.info("Initialising connection to scale. Please retry.")
 
     def add_new_value(self, new_value):
-
+        
+        self.timestamp = datetime.now()
+        # deque scale history
+        self.scale_history.appendleft(self.timestamp)
+        self.scale_history.appendleft(new_value)
+        
         # calculate volume flow
         if len(self.scale_history) > 2:
 

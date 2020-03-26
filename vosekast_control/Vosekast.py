@@ -297,6 +297,7 @@ class Vosekast():
         await self.mqtt_client.connect()
         self._state = self.RUNNING
         self.logger.debug("Vosekast started ok.")
+        
         if self.emulate:
             await self.testsequence.start_sequence()
 
