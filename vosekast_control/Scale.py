@@ -193,8 +193,6 @@ class Scale:
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(1)
 
-                sleep(0.05)
-
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
 
@@ -242,12 +240,12 @@ class Scale:
             self.logger.info("Initialising connection to scale. Please retry.")
 
     def add_new_value(self, new_value):
-        
+
         self.timestamp = datetime.now()
         # deque scale history
         self.scale_history.appendleft(self.timestamp)
         self.scale_history.appendleft(new_value)
-        
+
         # calculate volume flow
         if len(self.scale_history) > 2:
 
