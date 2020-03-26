@@ -296,6 +296,11 @@ class Vosekast():
         await MQTTConnection.connect()
         self._state = self.RUNNING
         self.logger.debug("Vosekast started ok.")
+        
+        if self.emulate:
+            self.logger.info("Starting sequence in 7s.")
+            await asyncio.sleep(7)
+            await self.testsequence.start_sequence()
 
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)

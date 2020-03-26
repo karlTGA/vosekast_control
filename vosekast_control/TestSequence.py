@@ -2,15 +2,15 @@ import logging
 import threading
 import time
 import asyncio
-#import csv
-
+import random
 from vosekast_control.Log import LOGGER
 
-#import sqlite3
-#from sqlite3 import Error
+# import sqlite3
+# from sqlite3 import Error
 from datetime import datetime
 from vosekast_control.connectors import DBConnection
 from vosekast_control.connectors import MQTTConnection
+from random import uniform
 
 
 class TestSequence():
@@ -96,20 +96,33 @@ class TestSequence():
 
     async def write_loop(self):
         try:
+            # get start time
             time_sequence_t0 = datetime.now()
             delta_time_sequence = 0
-            # null scale
+
+            # tare scale
             if abs(self.scale.scale_history[0]) < 0.15:
                 scale_nulled = self.scale.scale_history[0]
             else:
                 scale_nulled = 0
 
-            DBConnection.connect()
 
+<< << << < HEAD
+            DBConnection.connect()
+== == == =
+            # generate sequence_id
+            sequence_id = random.randint(10000000000, 100000000000)
+
+            # connect db
+            db_instance.connect()
+>>>>>> > db-develop
+
+            # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
                 flow_average = self.scale.flow_average()
 
+                # emulate measuring_tank filled
                 if self.emulate and delta_time_sequence >= 30:
                     self.vosekast.measuring_tank.state = self.vosekast.measuring_tank.FILLED
                 if self.emulate:
@@ -119,6 +132,7 @@ class TestSequence():
                     delta_time_sequence = time_sequence_passed.total_seconds()
 
                     scale_actual = round(self.scale.scale_history[0], 5)
+                # if not emulate use scale value
                 else:
                     scale_actual = round(
                         self.scale.scale_history[0] - scale_nulled, 5)
@@ -128,10 +142,20 @@ class TestSequence():
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
-                        'flow_average': flow_average
+                        'flow_average': flow_average,
+                        'pump_constant_tank_state': self.vosekast.pump_constant_tank.state,
+                        'pump_measuring_tank_state': self.vosekast.pump_measuring_tank.state,
+                        'measuring_drain_valve_state': self.vosekast.measuring_drain_valve.state,
+                        'measuring_tank_switch_state': self.vosekast.measuring_tank_switch.state,
+                        'sequence_id': sequence_id
                     }
 
+<< << << < HEAD
                     DBConnection.insert_datapoint(data)
+== == == =
+                    db_instance.insert_datapoint(data)
+
+>>>>>> > db-develop
                 except:
                     self.logger.warning("Error sending to db.")
 
@@ -158,7 +182,7 @@ class TestSequence():
             self.vosekast.pump_measuring_tank.start()
             self.logger.debug("Measuring Pump spin up. Please wait.")
 
-            await asyncio.sleep(3)
+            await asyncio.sleep(2)
 
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
@@ -166,7 +190,7 @@ class TestSequence():
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
-            self.vosekast.state = "RUNNING"
+            self.vosekast.state = self.vosekast.RUNNING
 
     async def stop_sequence(self):
         if self.state == self.MEASURING or self.state == self.PAUSED or self.state == self.WAITING:
