@@ -175,7 +175,7 @@ class Scale:
                     self.scale_publish = True
 
                 self.scale_input_buffer.appendleft(scale_input)
-                sleep(0.05)
+                sleep(0.1)
 
         elif self.emulate:
             self.scale_input_buffer.appendleft(b'+ 0.000 kg')
@@ -183,6 +183,7 @@ class Scale:
                 scale_input = 0.0 + uniform(0.0, 0.2)
                 self.scale_publish = True
                 self.scale_input_buffer.appendleft(scale_input)
+                sleep(1)
 
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
