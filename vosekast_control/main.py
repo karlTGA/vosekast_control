@@ -42,8 +42,8 @@ async def main(emulate=False):
         GPIO.cleanup()
         
         if emulate:
-            sys.exit(0)
             print("system exit")
+            sys.exit(0)
         else:
             os.system('sudo shutdown -h now')
 

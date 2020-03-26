@@ -95,9 +95,11 @@ class TestSequence():
 
     async def write_loop(self):
         try:
+            # get start time
             time_sequence_t0 = datetime.now()
             delta_time_sequence = 0
-            # null scale
+
+            # tare scale
             if abs(self.scale.scale_history[0]) < 0.15:
                 scale_nulled = self.scale.scale_history[0]
             else:
@@ -106,12 +108,15 @@ class TestSequence():
             # generate sequence_id
             sequence_id = random.randint(10000000000, 100000000000)
 
+            # connect db
             db_instance.connect()
 
+            # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
                 flow_average = self.scale.flow_average()
 
+                # emulate measuring_tank filled
                 if self.emulate and delta_time_sequence >= 30:
                     self.vosekast.measuring_tank.state = self.vosekast.measuring_tank.FILLED
                 if self.emulate:
@@ -121,12 +126,12 @@ class TestSequence():
                     delta_time_sequence = time_sequence_passed.total_seconds()
 
                     scale_actual = round(self.scale.scale_history[0], 5)
+                # if not emulate use scale value
                 else:
                     scale_actual = round(
                         self.scale.scale_history[0] - scale_nulled, 5)
 
                 try:
-
                     data = {
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
@@ -140,6 +145,7 @@ class TestSequence():
                     }
 
                     db_instance.insert_datapoint(data)
+
                 except:
                     self.logger.warning("Error sending to db.")
 
@@ -166,7 +172,7 @@ class TestSequence():
             self.vosekast.pump_measuring_tank.start()
             self.logger.debug("Measuring Pump spin up. Please wait.")
 
-            await asyncio.sleep(3)
+            await asyncio.sleep(2)
 
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
@@ -174,7 +180,7 @@ class TestSequence():
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
-            self.vosekast.state = "RUNNING"
+            self.vosekast.state = self.vosekast.RUNNING
 
     async def stop_sequence(self):
         if self.state == self.MEASURING or self.state == self.PAUSED or self.state == self.WAITING:

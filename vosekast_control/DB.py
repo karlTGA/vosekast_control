@@ -12,6 +12,7 @@ class DBconnector():
         self.foo = 12
         self.logger = logging.getLogger(LOGGER)
 
+    # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
     def connect(self):
         try:
             self._db_connection = sqlite3.connect('sequence_values.db')
@@ -20,8 +21,7 @@ class DBconnector():
             self.logger.warning(e)
         except:
             self.logger.info("Failed to establish DB connection.")
-        # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
-        #cursor = self._db_connection.cursor()
+        
         self._db_connection.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
             timestamp real,
             scale_value real,
@@ -55,9 +55,12 @@ class DBconnector():
         except ProgrammingError as e:
             self.logger.error(e)
 
-    # todo def read(self):
+    # todo 
+    def read(self):
+        pass
     
-    # todo find while loop that does not sleep
+    # (todo) find while loop that does not sleep
+    # probably fixed, needs testing
 
     def close(self):
         try:
@@ -66,10 +69,9 @@ class DBconnector():
         except:
             return
 
-    # todo
+    # workaround to show if connected
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed
     # https://dba.stackexchange.com/questions/223267/in-sqlite-how-to-check-the-table-is-empty-or-not
-
     @property
     def isConnected(self):
         try:
