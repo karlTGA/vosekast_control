@@ -129,8 +129,6 @@ class Scale:
     def print_diagnostics(self):
         self.logger.info("Diagnostics:" +
                          str(f"self.threads: {str(self.threads)}\n") +
-                         str(f"self.threads: {str(self.threads)}\n") +
-                         str(f"self.threads: {str(self.threads)}\n") +
                          str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n") +
                          str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n") +
                          str(f"self.is_running: {str(self.is_running)}\n") +
@@ -140,8 +138,6 @@ class Scale:
                          str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
                          str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
                          str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
-                         str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
-                         str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
                          str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
                          str(
                              f"db connection established: {str(db_instance.isConnected)}")
@@ -195,6 +191,8 @@ class Scale:
                 scale_input = 0.0 + uniform(0.0, 0.2)
                 self.scale_publish = True
                 self.scale_input_buffer.appendleft(scale_input)
+
+                sleep(0.05)
 
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:

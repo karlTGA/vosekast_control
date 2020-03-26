@@ -50,8 +50,6 @@ class DBconnector():
             self.logger.error(e)
 
     # todo def read(self):
-    
-    # todo find while loop that does not sleep
 
     def close(self):
         try:
