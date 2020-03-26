@@ -1,0 +1,49 @@
+@import "~antd/dist/antd.css";
+
+#root {
+  height: 100%;
+}
+
+.ant-layout {
+  height: 100%;
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+
+  .ant-layout-header {
+    display: flex;
+    background: #002f5d;
+
+    .logo {
+      width: 120px;
+      height: 31px;
+      background: rgba(255, 255, 255, 0.2);
+      margin: 16px 28px 16px 0;
+      float: left;
+    }
+
+    .ant-menu-dark {
+      background: #002f5d;
+      line-height: 64px;
+      width: 100%;
+    }
+
+    .ant-menu-item {
+      float: left;
+    }
+
+    .account-submenu {
+      float: right;
+    }
+
+    .login-menuitem {
+      float: right;
+
+      a:visited {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+  }
+}
