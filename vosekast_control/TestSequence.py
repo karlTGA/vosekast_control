@@ -9,7 +9,7 @@ from vosekast_control.Log import LOGGER
 #import sqlite3
 #from sqlite3 import Error
 from datetime import datetime
-from vosekast_control.DB import db_instance
+from vosekast_control.connectors import DBConnection
 from vosekast_control.connectors import MQTTConnection
 
 
@@ -104,7 +104,7 @@ class TestSequence():
             else:
                 scale_nulled = 0
 
-            db_instance.connect()
+            DBConnection.connect()
 
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
@@ -131,7 +131,7 @@ class TestSequence():
                         'flow_average': flow_average
                     }
 
-                    db_instance.insert_datapoint(data)
+                    DBConnection.insert_datapoint(data)
                 except:
                     self.logger.warning("Error sending to db.")
 

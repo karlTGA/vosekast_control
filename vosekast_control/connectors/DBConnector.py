@@ -5,11 +5,10 @@ import logging
 from vosekast_control.Log import LOGGER
 
 
-class DBconnector():
+class DBConnector():
 
     def __init__(self):
         self._db_connection = None
-        self.foo = 12
         self.logger = logging.getLogger(LOGGER)
 
     def connect(self):
@@ -76,4 +75,4 @@ class DBconnector():
             return False
 
 
-db_instance = DBconnector()
+DBConnection = DBConnector()

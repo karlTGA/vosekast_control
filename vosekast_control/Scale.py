@@ -8,7 +8,7 @@ from random import uniform
 from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
-from vosekast_control.DB import db_instance
+from vosekast_control.connectors import DBConnection
 from collections import deque
 from datetime import datetime
 from vosekast_control.connectors import MQTTConnection
@@ -140,7 +140,7 @@ class Scale:
                          str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
                          str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
                          str(
-                             f"db connection established: {str(db_instance.isConnected)}")
+                             f"db connection established: {str(DBConnection.isConnected)}")
                          )
         if not self.emulate:
             self.logger.info("self.connection.is_open: " +

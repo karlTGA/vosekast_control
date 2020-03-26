@@ -10,7 +10,6 @@ import traceback
 from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
 from multiprocessing.dummy import Pool as ThreadPool
-from vosekast_control.DB import db_instance
 
 # add mqtt resources
 import asyncio
@@ -27,6 +26,7 @@ async def main(emulate=False):
     import RPi.GPIO as GPIO
 
     # import vosekast at runtime to prefend different event loops
+    from vosekast_control.connectors import DBConnection
     from vosekast_control.Vosekast import Vosekast
 
     try:
@@ -46,7 +46,7 @@ async def main(emulate=False):
 
     finally:
         vosekast.clean()
-        db_instance.close()
+        DBConnection.close()
         GPIO.cleanup()
 
         if emulate:
