@@ -10,7 +10,7 @@ import { message } from "antd";
 import moment from "moment";
 
 type MessageTypes = "status" | "log" | "message" | "command";
-type Targets = "system" | "pump";
+type Targets = "system" | "pump" | "valve";
 
 interface Message {
   type: MessageTypes;

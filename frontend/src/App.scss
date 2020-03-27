@@ -52,6 +52,10 @@
     background-color: transparent;
     border-right: solid 1px lightgrey;
 
+    .ant-layout-sider-children {
+      overflow: auto;
+    }
+
     .device-command-button {
       height: 180px;
       width: 180px;
@@ -62,7 +66,15 @@
       margin: 3px 10px 10px 10px;
 
       span {
+        margin-top: 7px;
         font-weight: bold;
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      img {
+        width: 120px;
+        height: 120px;
       }
     }
 
