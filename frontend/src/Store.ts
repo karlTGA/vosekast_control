@@ -12,6 +12,18 @@ export type TankState =
   | "STOPPED"
   | "IS_DRAINING"
   | "IS_FILLING";
+export type Commands =
+  | "start"
+  | "stop"
+  | "toggle"
+  | "close"
+  | "open"
+  | "drain_tank"
+  | "prepare_to_fill"
+  | "shutdown"
+  | "clean"
+  | "start_sequence"
+  | "stop_sequence";
 
 export interface ScaleState {
   value: string;

@@ -9,18 +9,30 @@ import {
 import { message } from "antd";
 import moment from "moment";
 
+type MessageTypes = "status" | "log" | "message" | "command";
+type Targets = "system" | "pump";
+
 interface Message {
-  type: "status" | "log" | "message" | "command";
-  time: string;
+  type: MessageTypes;
+  time?: string;
+}
+
+interface CommandMessage extends Message {
+  type: "command";
+  target: Targets;
+  target_id: string;
+  command: string;
 }
 
 interface StatusMessage extends Message {
+  type: "status";
   device_type: "scale" | "system" | "pump" | "valve" | "tank";
   device_id: string;
   new_state: string;
 }
 
 interface LogMessage extends Message {
+  type: "log";
   sensor_id: "Pump" | "Valve";
   message: string;
   level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
@@ -57,6 +69,19 @@ class MQTTConnector {
     this.client.on("close", this.handleDissconnect);
     this.client.on("error", this.handleError);
     this.client.on("offline", this.handleOffline);
+  };
+
+  publishCommand = (target: Targets, targetId: string, command: string) => {
+    this.publishMessage("vosekast/commands", {
+      type: "command",
+      target,
+      target_id: targetId,
+      command
+    });
+  };
+
+  publishMessage = (topic: string, messageObject: CommandMessage) => {
+    this.client?.publish(topic, JSON.stringify(messageObject));
   };
 
   handleConnect = () => {

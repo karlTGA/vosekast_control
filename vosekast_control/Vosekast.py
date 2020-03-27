@@ -317,12 +317,12 @@ class Vosekast():
                     if command['command'] == 'close':
                         valve.close()
                         return
-                    if command['command'] == 'open':
+                    elif command['command'] == 'open':
                         valve.open()
                         return
                     else:
                         self.logger.warning(
-                            f'target_id not found. command {command["command"]} did not execute.')
+                            f'did not found target_id {target_id}. command {command["command"]} did not execute.')
 
                     return
 

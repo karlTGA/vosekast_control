@@ -3,6 +3,7 @@ import { Tag } from "antd";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
 import { CommandButton } from "./CommandButtonsBar";
+import MQTTConnection from "../utils/MQTTConnection";
 
 interface PumpActionProps {
   pumpId: string;
@@ -24,7 +25,7 @@ export function PumpButton({ pumpId, title }: PumpActionProps) {
   const isActive = pumpState === "RUNNING";
 
   function handlePumpToggle() {
-    console.log("Try to activate pump");
+    MQTTConnection.publishCommand("pump", pumpId, isActive ? "stop" : "start");
   }
 
   return (
