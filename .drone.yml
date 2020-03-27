@@ -4,9 +4,15 @@ type: docker
 name: default
 
 steps:
-  - name: Test Frontend
+  - name: Typescript Linting
     image: node
     commands:
       - cd frontend
       - yarn install
       - yarn eslint . --ext .js,.jsx,.ts,.tsx
+
+  - name: Python Linting
+    image: python
+    commands:
+      - poetry install
+      - flake8 vosekast_control
