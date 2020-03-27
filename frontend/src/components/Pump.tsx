@@ -21,7 +21,7 @@ export function PumpTag({ pumpId, title }: PumpActionProps) {
 
 export function PumpButton({ pumpId, title }: PumpActionProps) {
   const pumpState = useStoreState(VosekastStore, s => s.pumpStates.get(pumpId));
-  const isDeactivated = pumpState == null;
+  const isActive = pumpState === "RUNNING";
 
   function handlePumpToggle() {
     console.log("Try to activate pump");
@@ -31,7 +31,7 @@ export function PumpButton({ pumpId, title }: PumpActionProps) {
     <CommandButton
       title={title}
       imagePath="/img/icons/manufacturing/017-pump.svg"
-      isActive={!isDeactivated}
+      isActive={isActive}
       onClick={handlePumpToggle}
     />
   );

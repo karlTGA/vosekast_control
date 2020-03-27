@@ -1,5 +1,11 @@
 import mqtt from "mqtt";
-import { MQTTStore, VosekastStore } from "../Store";
+import {
+  MQTTStore,
+  VosekastStore,
+  PumpState,
+  ValveState,
+  TankState
+} from "../Store";
 import { message } from "antd";
 import moment from "moment";
 
@@ -9,7 +15,7 @@ interface Message {
 }
 
 interface StatusMessage extends Message {
-  device_type: "scale" | "system" | "pump" | "valve";
+  device_type: "scale" | "system" | "pump" | "valve" | "tank";
   device_id: string;
   new_state: string;
 }
@@ -18,6 +24,18 @@ interface LogMessage extends Message {
   sensor_id: "Pump" | "Valve";
   message: string;
   level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
+}
+
+interface PumpStatusMessage extends StatusMessage {
+  new_state: PumpState;
+}
+
+interface ValveStatusMessage extends StatusMessage {
+  new_state: ValveState;
+}
+
+interface TankStatusMessage extends StatusMessage {
+  new_state: TankState;
 }
 
 class MQTTConnector {
@@ -120,8 +138,30 @@ class MQTTConnector {
         }
         break;
       case "pump":
+        const {
+          device_id: pumpId,
+          new_state: pumpState
+        } = message as PumpStatusMessage;
         VosekastStore.update(s => {
-          s.pumpStates.set(message.device_id, message.new_state);
+          s.pumpStates.set(pumpId, pumpState);
+        });
+        break;
+      case "valve":
+        const {
+          device_id: valveId,
+          new_state: valveState
+        } = message as ValveStatusMessage;
+        VosekastStore.update(s => {
+          s.valveStates.set(valveId, valveState);
+        });
+        break;
+      case "tank":
+        const {
+          device_id: tankId,
+          new_state: tankState
+        } = message as TankStatusMessage;
+        VosekastStore.update(s => {
+          s.tankStates.set(tankId, tankState);
         });
         break;
       default:
