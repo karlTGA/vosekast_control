@@ -14,6 +14,6 @@ steps:
   - name: Python Linting
     image: python
     commands:
-      - pip install --user poetry
-      - poetry install
-      - poetry run flake8 vosekast_control
+      - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+      - /root/.poetry/bin/poetry install
+      - /root/.poetry/bin/poetry run flake8 vosekast_control
