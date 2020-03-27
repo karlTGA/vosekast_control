@@ -322,7 +322,7 @@ class Vosekast():
                         return
                     else:
                         self.logger.warning(
-                            f'target_id found. command {command["command"]} did not execute.')
+                            f'target_id not found. command {command["command"]} did not execute.')
 
                     return
 
@@ -342,7 +342,7 @@ class Vosekast():
                         pump.toggle()
                     else:
                         self.logger.warning(
-                            f'target_id found. command {command["command"]} did not execute.')
+                            f'target_id not found. command {command["command"]} did not execute.')
 
                     return
 
@@ -368,7 +368,7 @@ class Vosekast():
                     #     return
                     else:
                         self.logger.warning(
-                            f'target_id found. command {command["command"]} did not execute.')
+                            f'target_id not found. command {command["command"]} did not execute.')
 
                     return
 
@@ -391,7 +391,7 @@ class Vosekast():
 
                 else:
                     self.logger.warning(
-                        f'target_id found. command {command["command"]} did not execute.')
+                        f'target_id not found. command {command["command"]} did not execute.')
 
                 return
 
@@ -420,7 +420,7 @@ class Vosekast():
 
                 else:
                     self.logger.warning(
-                        f'target_id found. command {command["command"]} did not execute.')
+                        f'target_id not found. command {command["command"]} did not execute.')
 
                 return
 
