@@ -33,7 +33,7 @@ export function CommandButton({
       })}
       onClick={onClick}
     >
-      <img src={imagePath} />
+      <img src={imagePath} alt="" />
       {title}
     </Button>
   );

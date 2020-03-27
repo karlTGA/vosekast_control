@@ -1,8 +1,7 @@
 import React from "react";
-import { Button, Tag } from "antd";
+import { Tag } from "antd";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
-import classNames from "classnames";
 import { CommandButton } from "./CommandButtonsBar";
 
 interface PumpActionProps {

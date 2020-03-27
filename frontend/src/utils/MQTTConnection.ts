@@ -20,31 +20,37 @@ interface LogMessage extends Message {
   level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
 }
 
-export default class MQTTConnector {
-  client: mqtt.MqttClient;
+class MQTTConnector {
+  client?: mqtt.MqttClient;
+  private connectionOptions: mqtt.IClientOptions = {};
+  private host: string = "";
 
   constructor(url: string, username?: string, password?: string) {
-    const options: mqtt.IClientOptions = {};
-    if (username != null) options.username = username;
-    if (password != null) options.password = password;
+    if (username != null) this.connectionOptions.username = username;
+    if (password != null) this.connectionOptions.password = password;
+    this.host = url;
+  }
 
-    this.client = mqtt.connect(url, options);
+  connect = () => {
+    this.client = mqtt.connect(this.host, this.connectionOptions);
 
     this.client.on("connect", this.handleConnect);
     this.client.on("message", this.handleMessage);
     this.client.on("close", this.handleDissconnect);
     this.client.on("error", this.handleError);
     this.client.on("offline", this.handleOffline);
-  }
+  };
 
   handleConnect = () => {
-    MQTTStore.update(s => {
-      s.isConnected = true;
-      s.connectionError = undefined;
-      s.mqttInterrupted = false;
-    });
+    if (this.client != null) {
+      MQTTStore.update(s => {
+        s.isConnected = true;
+        s.connectionError = undefined;
+        s.mqttInterrupted = false;
+      });
 
-    this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+      this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+    }
   };
 
   handleMessage = (
@@ -142,3 +148,7 @@ export default class MQTTConnector {
     }
   };
 }
+
+// export singleton for reusing of the connection
+const MQTTConnection = new MQTTConnector("ws://localhost:9001");
+export default MQTTConnection;
