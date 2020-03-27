@@ -15,9 +15,9 @@ rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "pla
 pendulum = "^2.0.5"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.4.4"
 rope = "^0.16.0"
-autopep8 = "^1.5"
+black = {version = "^19.10b0", allow-prereleases = true}
+flake8 = "^3.7.9"
 
 [tool.poetry.scripts]
 dev = 'vosekast_control.scripts:dev'
