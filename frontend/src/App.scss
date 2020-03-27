@@ -34,16 +34,29 @@
       float: left;
     }
 
-    .account-submenu {
-      float: right;
+    .indicator-menu-item {
+      padding: 0 5px;
+      cursor: default;
+
+      .indicator {
+        font-weight: bold;
+
+        span {
+          margin: 0;
+        }
+      }
+
+      .indicator-success {
+        color: rgb(1, 190, 1);
+      }
+
+      .indicator-error {
+        color: rgb(250, 57, 57);
+      }
     }
 
-    .login-menuitem {
+    .account-submenu {
       float: right;
-
-      a:visited {
-        color: rgba(255, 255, 255, 0.65);
-      }
     }
   }
 
