@@ -3,6 +3,7 @@ import { Button, Tag } from "antd";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
 import classNames from "classnames";
+import { CommandButton } from "./CommandButtonsBar";
 
 interface PumpActionProps {
   pumpId: string;
@@ -21,15 +22,18 @@ export function PumpTag({ pumpId, title }: PumpActionProps) {
 
 export function PumpButton({ pumpId, title }: PumpActionProps) {
   const pumpState = useStoreState(VosekastStore, s => s.pumpStates.get(pumpId));
-  const isActivated = pumpState != null && pumpState === "Activated";
+  const isDeactivated = pumpState == null;
+
+  function handlePumpToggle() {
+    console.log("Try to activate pump");
+  }
 
   return (
-    <Button
-      className={classNames("device-command-button", {
-        "device-activated": isActivated
-      })}
-    >
-      {title}
-    </Button>
+    <CommandButton
+      title={title}
+      imagePath="/img/icons/manufacturing/017-pump.svg"
+      isActive={!isDeactivated}
+      onClick={handlePumpToggle}
+    />
   );
 }

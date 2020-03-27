@@ -7,7 +7,7 @@ const { Sider, Content } = Layout;
 const OverView = () => {
   return (
     <Layout>
-      <Sider>
+      <Sider className="sider-overview">
         <CommandButtonsBar />
       </Sider>
       <Content>Content</Content>

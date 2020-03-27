@@ -46,4 +46,28 @@
       }
     }
   }
+
+  .sider-overview {
+    margin-top: 10px;
+    background-color: transparent;
+    border-right: solid 1px lightgrey;
+
+    .device-command-button {
+      height: 180px;
+      width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 3px 10px 10px 10px;
+
+      span {
+        font-weight: bold;
+      }
+    }
+
+    .device-command-button.device-deactivated img {
+      opacity: 0.5;
+    }
+  }
 }
