@@ -75,7 +75,7 @@ class MQTTConnector {
     this.publishMessage("vosekast/commands", {
       type: "command",
       target,
-      target_id: targetId,
+      target_id: targetId, // eslint-disable-line @typescript-eslint/camelcase
       command
     });
   };
@@ -149,12 +149,13 @@ class MQTTConnector {
 
   handleStatusMessage = (message: StatusMessage) => {
     switch (message.device_type) {
-      case "scale":
+      case "scale": {
         VosekastStore.update(s => {
           s.scaleState.value = message.new_state;
         });
         break;
-      case "system":
+      }
+      case "system": {
         if (message.device_id === "health" && message.new_state === "OK") {
           VosekastStore.update(s => {
             s.isHealthy = message.new_state === "OK";
@@ -162,7 +163,8 @@ class MQTTConnector {
           });
         }
         break;
-      case "pump":
+      }
+      case "pump": {
         const {
           device_id: pumpId,
           new_state: pumpState
@@ -171,7 +173,8 @@ class MQTTConnector {
           s.pumpStates.set(pumpId, pumpState);
         });
         break;
-      case "valve":
+      }
+      case "valve": {
         const {
           device_id: valveId,
           new_state: valveState
@@ -180,7 +183,8 @@ class MQTTConnector {
           s.valveStates.set(valveId, valveState);
         });
         break;
-      case "tank":
+      }
+      case "tank": {
         const {
           device_id: tankId,
           new_state: tankState
@@ -189,8 +193,10 @@ class MQTTConnector {
           s.tankStates.set(tankId, tankState);
         });
         break;
-      default:
+      }
+      default: {
         console.log(`Receive unknown message: ${JSON.stringify(message)}`);
+      }
     }
   };
 
