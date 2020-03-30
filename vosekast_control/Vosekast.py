@@ -13,6 +13,7 @@ from sqlite3 import Error
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import StatusMessage
 
 import os
 
@@ -117,6 +118,7 @@ class Vosekast:
                 LevelSensor.HIGH,
                 self._gpio_controller,
             )
+            self.level_sensors = [self.level_measuring_high, self.level_measuring_low, self.level_constant_high, self.level_constant_low]
 
             # pumps
             self.pump_constant_tank = Pump(
@@ -230,22 +232,10 @@ class Vosekast:
 
         self.pump_measuring_tank.stop()
 
-    # def create_file(self):
-    # # create file, write header to csv file
-    # with open('sequence_values.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file, delimiter=',',
-    #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    #     writer.writerow(["timestamp", "scale value", "flow",
-    #                      "average flow from last 5 values"])
-
     async def shutdown(self):
 
         self.clean()
         self.logger.info("Shutting down.")
-
-        # # GPIO cleanup
-        # self._gpio_controller.cleanup()
-        # self.logger.debug("GPIO cleanup.")
 
         await MQTTConnection.disconnect()
         self.logger.debug("MQTT client disconnected.")
@@ -291,6 +281,10 @@ class Vosekast:
             await asyncio.sleep(1)
 
         self.logger.debug("Vosekast stopped.")
+
+    def state_overview(self):
+        for device in self.tanks + self.pumps + self.valves + self.level_sensors:
+            device.publish_state()
 
     # handle incoming mqtt commands
     async def handle_command(self, command):
@@ -350,6 +344,7 @@ class Vosekast:
                         tank.drain_tank()
                     elif command_id == "prepare_to_fill":
                         tank.prepare_to_fill()
+
                     else:
                         self.logger.warning(
                             f"receive unknown command {command_id} for \
@@ -403,6 +398,8 @@ class Vosekast:
                     self.testsequence.pause_sequence()
                 elif command_id == "continue_sequence":
                     await self.testsequence.continue_sequence()
+                elif command['command'] == 'state_overview':
+                    self.state_overview()
 
                 else:
                     self.logger.warning(

@@ -1,5 +1,6 @@
 import asyncio
-
+from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import StatusMessage
 
 class LevelSensor:
     # Positions
@@ -50,3 +51,10 @@ class LevelSensor:
         self._gpio_controller.add_event_detect(
             self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
+    
+    @property
+    def state(self):
+        return self.position
+
+    def publish_state(self):
+        MQTTConnection.publish_message(StatusMessage('level_sensor', self.name, self._gpio_controller.input(self._pin)))
