@@ -1,18 +1,29 @@
 import { Store } from "pullstate";
 import moment from "moment";
 
-export interface PumpState {
-  output: number;
-}
-
-export interface ValveState {
-  position: number;
-}
-
-export interface TankState {
-  level: number;
-  isDraining: boolean;
-}
+export type PumpState = "STOPPED" | "RUNNING" | "UNKNOWN";
+export type ValveState = "OPEN" | "CLOSED" | "UNKNOWN";
+export type TankState =
+  | "UNKNOWN"
+  | "DRAINED"
+  | "EMPTY"
+  | "FILLED"
+  | "PAUSED"
+  | "STOPPED"
+  | "IS_DRAINING"
+  | "IS_FILLING";
+export type Commands =
+  | "start"
+  | "stop"
+  | "toggle"
+  | "close"
+  | "open"
+  | "drain_tank"
+  | "prepare_to_fill"
+  | "shutdown"
+  | "clean"
+  | "start_sequence"
+  | "stop_sequence";
 
 export interface ScaleState {
   value: string;
@@ -29,9 +40,9 @@ export interface VosekastState {
   lastHealthUpdate?: moment.Moment;
   isRunning: boolean;
   isMeasuring: boolean;
-  pumpStates: Map<string, string>;
-  valveStates: Map<string, string>;
-  tankStates: Map<string, string>;
+  pumpStates: Map<string, PumpState>;
+  valveStates: Map<string, ValveState>;
+  tankStates: Map<string, TankState>;
   scaleState: ScaleState;
 }
 

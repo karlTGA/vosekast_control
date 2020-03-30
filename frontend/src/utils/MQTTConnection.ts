@@ -1,50 +1,99 @@
 import mqtt from "mqtt";
-import { MQTTStore, VosekastStore } from "../Store";
+import {
+  MQTTStore,
+  VosekastStore,
+  PumpState,
+  ValveState,
+  TankState
+} from "../Store";
 import { message } from "antd";
 import moment from "moment";
 
+type MessageTypes = "status" | "log" | "message" | "command";
+type Targets = "system" | "pump" | "valve";
+
 interface Message {
-  type: "status" | "log" | "message" | "command";
-  time: string;
+  type: MessageTypes;
+  time?: string;
+}
+
+interface CommandMessage extends Message {
+  type: "command";
+  target: Targets;
+  target_id: string;
+  command: string;
 }
 
 interface StatusMessage extends Message {
-  device_type: "scale" | "system" | "pump" | "valve";
+  type: "status";
+  device_type: "scale" | "system" | "pump" | "valve" | "tank";
   device_id: string;
   new_state: string;
 }
 
 interface LogMessage extends Message {
+  type: "log";
   sensor_id: "Pump" | "Valve";
   message: string;
   level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
 }
 
-export default class MQTTConnector {
-  client: mqtt.MqttClient;
+interface PumpStatusMessage extends StatusMessage {
+  new_state: PumpState;
+}
+
+interface ValveStatusMessage extends StatusMessage {
+  new_state: ValveState;
+}
+
+interface TankStatusMessage extends StatusMessage {
+  new_state: TankState;
+}
+
+class MQTTConnector {
+  client?: mqtt.MqttClient;
+  private connectionOptions: mqtt.IClientOptions = {};
+  private host: string = "";
 
   constructor(url: string, username?: string, password?: string) {
-    const options: mqtt.IClientOptions = {};
-    if (username != null) options.username = username;
-    if (password != null) options.password = password;
+    if (username != null) this.connectionOptions.username = username;
+    if (password != null) this.connectionOptions.password = password;
+    this.host = url;
+  }
 
-    this.client = mqtt.connect(url, options);
+  connect = () => {
+    this.client = mqtt.connect(this.host, this.connectionOptions);
 
     this.client.on("connect", this.handleConnect);
     this.client.on("message", this.handleMessage);
     this.client.on("close", this.handleDissconnect);
     this.client.on("error", this.handleError);
     this.client.on("offline", this.handleOffline);
-  }
+  };
+
+  publishCommand = (target: Targets, targetId: string, command: string) => {
+    this.publishMessage("vosekast/commands", {
+      type: "command",
+      target,
+      target_id: targetId,
+      command
+    });
+  };
+
+  publishMessage = (topic: string, messageObject: CommandMessage) => {
+    this.client?.publish(topic, JSON.stringify(messageObject));
+  };
 
   handleConnect = () => {
-    MQTTStore.update(s => {
-      s.isConnected = true;
-      s.connectionError = undefined;
-      s.mqttInterrupted = false;
-    });
+    if (this.client != null) {
+      MQTTStore.update(s => {
+        s.isConnected = true;
+        s.connectionError = undefined;
+        s.mqttInterrupted = false;
+      });
 
-    this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+      this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+    }
   };
 
   handleMessage = (
@@ -114,8 +163,30 @@ export default class MQTTConnector {
         }
         break;
       case "pump":
+        const {
+          device_id: pumpId,
+          new_state: pumpState
+        } = message as PumpStatusMessage;
         VosekastStore.update(s => {
-          s.pumpStates.set(message.device_id, message.new_state);
+          s.pumpStates.set(pumpId, pumpState);
+        });
+        break;
+      case "valve":
+        const {
+          device_id: valveId,
+          new_state: valveState
+        } = message as ValveStatusMessage;
+        VosekastStore.update(s => {
+          s.valveStates.set(valveId, valveState);
+        });
+        break;
+      case "tank":
+        const {
+          device_id: tankId,
+          new_state: tankState
+        } = message as TankStatusMessage;
+        VosekastStore.update(s => {
+          s.tankStates.set(tankId, tankState);
         });
         break;
       default:
@@ -142,3 +213,7 @@ export default class MQTTConnector {
     }
   };
 }
+
+// export singleton for reusing of the connection
+const MQTTConnection = new MQTTConnector("ws://localhost:9001");
+export default MQTTConnection;
