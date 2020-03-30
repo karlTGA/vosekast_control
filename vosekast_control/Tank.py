@@ -11,7 +11,7 @@ class TankFillingTimeout(Exception):
     pass
 
 
-class Tank():
+class Tank:
     # tank states
     UNKNOWN = "UNKNOWN"
     DRAINED = "DRAINED"
@@ -64,15 +64,13 @@ class Tank():
             self.drain_valve.open()
             self._state = self.IS_DRAINING
         else:
-            self.logger.warning(
-                "No valve to drain the tank {}".format(self.name))
+            self.logger.warning("No valve to drain the tank {}".format(self.name))
 
     def prepare_to_fill(self):
         if self.drain_valve is not None:
             self.drain_valve.close()
         else:
-            self.logger.debug(
-                "No drain valve on the {}".format(self.name))
+            self.logger.debug("No drain valve on the {}".format(self.name))
             return
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
@@ -102,28 +100,32 @@ class Tank():
                         self._state = self.FILLED
                     if delta_time_filling >= 75 and not self.emulate:
                         self.logger.error(
-                            "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting.")
+                            "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
+                        )
                         raise TankFillingTimeout("Tank Filling Timeout.")
 
                     self.logger.debug(
-                        str(delta_time_filling) + 's < time allotted (75s)')
+                        str(delta_time_filling) + "s < time allotted (75s)"
+                    )
                     await asyncio.sleep(1)
 
-                self.logger.info("Measuring Tank state: " +
-                                 str(self.vosekast.measuring_tank.state))
-                self.logger.info("Constant Tank state: " +
-                                 str(self.vosekast.constant_tank.state))
+                self.logger.info(
+                    "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
+                )
+                self.logger.info(
+                    "Constant Tank state: " + str(self.vosekast.constant_tank.state)
+                )
                 return
-            except:
+            except Exception:
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
                 return
         elif self._state == self.FILLED:
-            self.logger.info(
-                "{} already filled. Continuing.".format(self.name))
+            self.logger.info("{} already filled. Continuing.".format(self.name))
         else:
             self.logger.warning(
-                "Something bad happened while filling {}.".format(self.name))
+                "Something bad happened while filling {}.".format(self.name)
+            )
 
     def _on_draining(self):
         """
@@ -182,6 +184,6 @@ class Tank():
         self._state = new_state
         self.logger.info(f"New {self.name} state is: {new_state}")
         self.publish_state()
-            
+
     def publish_state(self):
-        MQTTConnection.publish_message(StatusMessage('tank', self.name, self.state))
+        MQTTConnection.publish_message(StatusMessage("tank", self.name, self.state))

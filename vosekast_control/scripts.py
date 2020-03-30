@@ -1,7 +1,6 @@
 import subprocess
 import asyncio
 from vosekast_control.main import main
-import os
 
 
 def backend(emulate=False):
@@ -9,12 +8,12 @@ def backend(emulate=False):
 
 
 def frontend():
-    subprocess.call('cd frontend && yarn start', shell=True)
+    subprocess.call("cd frontend && yarn start", shell=True)
 
 
 def build():
     print("Build frontend for app:")
-    subprocess.call('cd frontend && yarn build', shell=True)
+    subprocess.call("cd frontend && yarn build", shell=True)
 
 
 def start():

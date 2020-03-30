@@ -11,11 +11,10 @@ def noop(*args, **kwargs):
     pass
 
 
-HOST = os.getenv('MQTT_HOST', 'localhost')
+HOST = os.getenv("MQTT_HOST", "localhost")
 
 
-class MQTTConnector():
-
+class MQTTConnector:
     def __init__(self, host):
         self.client = MQTTClient("Vosekast")
         self.host = host
@@ -43,12 +42,13 @@ class MQTTConnector():
 
         except ConnectionRefusedError:
             await self.connection_refused()
-        except:
+        except Exception:
             raise
 
     async def connection_refused(self):
         self.logger.warning(
-            "Connection refused. Is the MQTT broker accessible? Retrying.")
+            "Connection refused. Is the MQTT broker accessible? Retrying."
+        )
 
         if self.tries <= 3:
             await self.connect()
@@ -74,7 +74,7 @@ class MQTTConnector():
     def on_connect(self, client, flags, rc, properties):
         self.client.subscribe(self.topic, qos=0)
         if self.connected:
-            self.logger.debug('Connected to host: \"' + self.host + "\"")
+            self.logger.debug('Connected to host: "' + self.host + '"')
             asyncio.create_task(self._start_healthy_loop())
 
     async def _start_healthy_loop(self):
@@ -82,7 +82,7 @@ class MQTTConnector():
 
         while self.connected:
             if runs == 3:
-                msg = StatusMessage('system', 'health', 'OK')
+                msg = StatusMessage("system", "health", "OK")
                 self.publish_message(msg)
                 runs = 0
 
@@ -95,12 +95,11 @@ class MQTTConnector():
         try:
             command = json.loads(message)
 
-            if command['type'] == 'command':
+            if command["type"] == "command":
                 await self.on_command(command)
 
         except ValueError:
-            self.logger.debug("unexpected formatting: " +
-                              str(payload.decode("utf-8")))
+            self.logger.debug("unexpected formatting: " + str(payload.decode("utf-8")))
             self.logger.debug(ValueError)
         except KeyError:
             self.logger.debug("Got message without type.")
@@ -108,10 +107,10 @@ class MQTTConnector():
         # print('Received: \"' + str(payload.decode("utf-8")) + "\" from client: " + self.client._client_id)
 
     def on_disconnect(self, client, packet, exc=None):
-        self.logger.debug('MQTT Client Disconnected')
+        self.logger.debug("MQTT Client Disconnected")
 
     def on_subscribe(self, client, mid, qos, properties):
-        self.logger.debug('Vosekast listening on: \"' + self.topic + "\"")
+        self.logger.debug('Vosekast listening on: "' + self.topic + '"')
 
     def set_credentials(self, username, password):
         self.client.set_auth_credentials(username, password)

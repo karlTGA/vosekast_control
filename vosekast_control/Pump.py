@@ -5,7 +5,7 @@ from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
 
 
-class Pump():
+class Pump:
     RUNNING = "RUNNING"
     STOPPED = "STOPPED"
     UNKNOWN = "UNKNOWN"
@@ -69,4 +69,4 @@ class Pump():
         self.publish_state()
 
     def publish_state(self):
-        MQTTConnection.publish_message(StatusMessage('pump', self.name, self.state))
+        MQTTConnection.publish_message(StatusMessage("pump", self.name, self.state))

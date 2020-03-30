@@ -9,7 +9,6 @@ from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import DBConnection
-from collections import deque
 from datetime import datetime
 from vosekast_control.connectors import MQTTConnection
 
@@ -72,7 +71,7 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
-            #self.connection = True
+            # self.connection = True
 
     def close_connection(self):
         if not self.emulate:
@@ -127,24 +126,33 @@ class Scale:
 
     # diagnostics
     def print_diagnostics(self):
-        self.logger.info("Diagnostics:" +
-                         str(f"self.threads: {str(self.threads)}\n") +
-                         str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n") +
-                         str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n") +
-                         str(f"self.is_running: {str(self.is_running)}\n") +
-                         str(f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n") +
-                         str(f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n") +
-                         str(f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n") +
-                         str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
-                         str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
-                         str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
-                         str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
-                         str(
-                             f"db connection established: {str(DBConnection.isConnected)}")
-                         )
+        self.logger.info(
+            "Diagnostics:"
+            + str(f"self.threads: {str(self.threads)}\n")
+            + str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n")
+            + str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n")
+            + str(f"self.is_running: {str(self.is_running)}\n")
+            + str(
+                f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n"
+            )
+            + str(
+                f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n"
+            )
+            + str(
+                f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n"
+            )
+            + str(
+                f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n"
+            )
+            + str(
+                f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n"
+            )
+            + str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n")
+            + str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
+            + str(f"db connection established: {str(DBConnection.isConnected)}")
+        )
         if not self.emulate:
-            self.logger.info("self.connection.is_open: " +
-                             str(self.connection.is_open))
+            self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
 
     def stop_measurement_thread(self):
         self.is_running = False
@@ -156,7 +164,7 @@ class Scale:
         try:
             self.threads.remove(self.thread_loop)
             self.threads.remove(self.thread_readscale)
-        except:
+        except Exception:
             pass
         self.logger.debug("Stopped measurement thread.")
         self.threads_started = False
@@ -171,13 +179,15 @@ class Scale:
                 if len(scale_input) == 0:
                     scale_input = self.scale_input_buffer[0]
                     self.logger.warning(
-                        "Cannot read from scale. Did you remember to turn on the scale?")
+                        "Cannot read from scale. Did you remember to turn on the scale?"
+                    )
                     sleep(5)
                     self.scale_publish = False
                 elif len(scale_input) != 16:
                     scale_input = self.scale_input_buffer[0]
                     self.logger.info(
-                        "readline() read less than 16 char. Reusing last value.")
+                        "readline() read less than 16 char. Reusing last value."
+                    )
                     self.scale_publish = False
                 else:
                     self.scale_publish = True
@@ -281,8 +291,9 @@ class Scale:
         if not self.scale_publish:
             return
         else:
-            MQTTConnection.publish_message(StatusMessage(
-                "scale", self.name, f"{new_value} Kg"))
+            MQTTConnection.publish_message(
+                StatusMessage("scale", self.name, f"{new_value} Kg")
+            )
             # if volume_flow is not None:
             #     self.mqtt.publish_message(StatusMessage(
             #         "scale", self.name, f"{volume_flow} L/s"))

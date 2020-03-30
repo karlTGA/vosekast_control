@@ -5,7 +5,7 @@ import logging
 
 
 class Message:
-    type = 'default'
+    type = "default"
 
     def __init__(self):
         self.timestamp = datetime.now().isoformat()
@@ -14,14 +14,11 @@ class Message:
         return json.dumps(self.get_message_object())
 
     def get_message_object(self):
-        return {
-            'type': self.type,
-            'time': self.timestamp
-        }
+        return {"type": self.type, "time": self.timestamp}
 
 
 class LogMessage(Message):
-    type = 'log'
+    type = "log"
 
     def __init__(self, record: LogRecord):
         super().__init__()
@@ -31,12 +28,15 @@ class LogMessage(Message):
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object['sensor_id'] = self.sensor_id
-        message_object['message'] = self.record.message
-        message_object['level'] = self.record.levelname
+        message_object["sensor_id"] = self.sensor_id
+        message_object["message"] = self.record.message
+        message_object["level"] = self.record.levelname
 
-        if self.record.levelno == logging.ERROR or self.record.levelno == logging.CRITICAL:
-            message_object['type'] = self.record.levelname
+        if (
+            self.record.levelno == logging.ERROR
+            or self.record.levelno == logging.CRITICAL
+        ):
+            message_object["type"] = self.record.levelname
 
         return message_object
 
@@ -47,15 +47,18 @@ class LogMessage(Message):
     @property
     def topic(self):
 
-        if self.record.levelno == logging.ERROR or self.record.levelno == logging.CRITICAL:
-            return f'vosekast/error/{self.sensor_id}'
+        if (
+            self.record.levelno == logging.ERROR
+            or self.record.levelno == logging.CRITICAL
+        ):
+            return f"vosekast/error/{self.sensor_id}"
 
         else:
-            return 'vosekast/log'
+            return "vosekast/log"
 
 
 class StatusMessage(Message):
-    type = 'status'
+    type = "status"
 
     def __init__(self, device_type: str, device_id: str, new_state: str):
         super().__init__()
@@ -66,19 +69,19 @@ class StatusMessage(Message):
 
     @property
     def topic(self):
-        return f'vosekast/status/{self.device_type}/{self.device_id}'
+        return f"vosekast/status/{self.device_type}/{self.device_id}"
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object['device_type'] = self.device_type
-        message_object['device_id'] = self.device_id
-        message_object['new_state'] = self.new_state
+        message_object["device_type"] = self.device_type
+        message_object["device_id"] = self.device_id
+        message_object["new_state"] = self.new_state
 
         return message_object
 
 
 class Command(Message):
-    type = 'command'
+    type = "command"
 
     def __init__(self, sensor_id, description, state):
         super().__init__()
@@ -89,12 +92,12 @@ class Command(Message):
 
     @property
     def topic(self):
-        return f'vosekast/command/{self.sensor_id}'
+        return f"vosekast/command/{self.sensor_id}"
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object['sensor_id'] = self.sensor_id
-        message_object['description'] = self.description
-        message_object['state'] = self.state
+        message_object["sensor_id"] = self.sensor_id
+        message_object["description"] = self.description
+        message_object["state"] = self.state
 
         return message_object

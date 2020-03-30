@@ -1,0 +1,19 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: Typescript Linting
+    image: node
+    commands:
+      - cd frontend
+      - yarn install
+      - yarn eslint . --ext .js,.jsx,.ts,.tsx
+
+  - name: Python Linting
+    image: python
+    commands:
+      - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+      - /root/.poetry/bin/poetry install
+      - /root/.poetry/bin/poetry run flake8 vosekast_control
