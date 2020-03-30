@@ -38,6 +38,9 @@ async def main(emulate=False):
         # initialise vosekast
         vosekast = Vosekast(app_control, GPIO, emulate=emulate)
         app_control.start()
+        
+        # connect db
+        DBConnection.connect()
 
         await vosekast.run()
 
