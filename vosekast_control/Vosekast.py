@@ -12,7 +12,7 @@ import sqlite3
 from sqlite3 import Error
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
-from vosekast_control.MQTT import MQTTController
+from vosekast_control.connectors import MQTTConnection
 
 import os
 
@@ -58,9 +58,8 @@ class Vosekast():
         self._app_control = app_control
 
         # set mqtt client, host
-        self.mqtt_client = MQTTController('localhost')
-        self.mqtt_client.on_command = self.handle_command
-        add_mqtt_logger_handler(self.mqtt_client)
+        MQTTConnection.on_command = self.handle_command
+        add_mqtt_logger_handler(MQTTConnection)
 
         try:
             self._gpio_controller = gpio_controller
@@ -259,11 +258,11 @@ class Vosekast():
         self.clean()
         self.logger.info("Shutting down.")
 
-        # GPIO cleanup
-        self._gpio_controller.cleanup()
-        self.logger.debug("GPIO cleanup.")
+        # # GPIO cleanup
+        # self._gpio_controller.cleanup()
+        # self.logger.debug("GPIO cleanup.")
 
-        await self.mqtt_client.disconnect()
+        await MQTTConnection.disconnect()
         self.logger.debug("MQTT client disconnected.")
 
         self._app_control.shutdown()
@@ -294,9 +293,14 @@ class Vosekast():
 
         self.scale.start()
 
-        await self.mqtt_client.connect()
+        await MQTTConnection.connect()
         self._state = self.RUNNING
         self.logger.debug("Vosekast started ok.")
+
+        if self.emulate:
+            self.logger.info("Starting sequence in 7s.")
+            await asyncio.sleep(7)
+            await self.testsequence.start_sequence()
 
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)
