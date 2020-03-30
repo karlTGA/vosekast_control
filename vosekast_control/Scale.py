@@ -8,9 +8,12 @@ from random import uniform
 from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
-
+from vosekast_control.connectors import DBConnection
 from collections import deque
 from datetime import datetime
+from vosekast_control.connectors import MQTTConnection
+
+from typing import Deque
 
 
 class Scale:
@@ -40,6 +43,7 @@ class Scale:
         self.connection = None
         self.last_values = deque([], 10)
         self.thread_loop = Thread()
+        self.threads_started = False
         self.thread_readscale = Thread()
         self.emulate = emulate
         self.is_running = False
@@ -48,12 +52,11 @@ class Scale:
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
         self.state = self.UNKNOWN
-        self.mqtt = self.vosekast.mqtt_client
         self.scale_publish = True
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
-        self.scale_input_buffer = deque([], maxlen=10)
+        self.scale_input_buffer: Deque[float] = deque([], maxlen=10)
         self.flow_history_average = deque([], maxlen=5)
 
     def open_connection(self):
@@ -91,10 +94,10 @@ class Scale:
 
             if new_value is not None:
                 self.add_new_value(new_value)
-                self.timestamp = datetime.now()
-                # deque scale history
-                self.scale_history.appendleft(self.timestamp)
-                self.scale_history.appendleft(new_value)
+                # self.timestamp = datetime.now()
+                # # deque scale history
+                # self.scale_history.appendleft(self.timestamp)
+                # self.scale_history.appendleft(new_value)
             else:
                 self.logger.warning("Reached loop with new value = None.")
 
@@ -120,38 +123,47 @@ class Scale:
             self.logger.debug("Starting Threads loop & readscale.")
             self.thread_readscale.start()
             self.thread_loop.start()
+            self.threads_started = True
 
     # diagnostics
     def print_diagnostics(self):
         self.logger.info("Diagnostics:" +
-        str(f"self.threads: {str(self.threads)}\n") + 
-        str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n") +
-        str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n") +
-        str(f"self.is_running: {str(self.is_running)}\n") +
-        str(f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n") +
-        str(f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n") +
-        str(f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n") +
-        str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
-        str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
-        str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
-        str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
-                        )
+                         str(f"self.threads: {str(self.threads)}\n") +
+                         str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n") +
+                         str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n") +
+                         str(f"self.is_running: {str(self.is_running)}\n") +
+                         str(f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n") +
+                         str(f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n") +
+                         str(f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n") +
+                         str(f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n") +
+                         str(f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n") +
+                         str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n") +
+                         str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n") +
+                         str(
+                             f"db connection established: {str(DBConnection.isConnected)}")
+                         )
         if not self.emulate:
-            self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
-            
+            self.logger.info("self.connection.is_open: " +
+                             str(self.connection.is_open))
+
     def stop_measurement_thread(self):
         self.is_running = False
 
         # terminate threads
-        self.thread_loop.join()
-        self.thread_readscale.join()
-        self.threads.remove(self.thread_loop)
-        self.threads.remove(self.thread_readscale)
+        if self.threads_started:
+            self.thread_loop.join()
+            self.thread_readscale.join()
+        try:
+            self.threads.remove(self.thread_loop)
+            self.threads.remove(self.thread_readscale)
+        except:
+            pass
         self.logger.debug("Stopped measurement thread.")
+        self.threads_started = False
 
     def _scale_input_buffer(self):
         if self.connection is not None and not self.emulate and self.connection.is_open:
-            self.scale_input_buffer.appendleft(b'+ 0.000 kg')
+            self.scale_input_buffer.appendleft(0)
             while self.is_running:
                 scale_input = self.connection.readline()
 
@@ -174,11 +186,12 @@ class Scale:
                 sleep(0.05)
 
         elif self.emulate:
-            self.scale_input_buffer.appendleft(b'+ 0.000 kg')
+            self.scale_input_buffer.appendleft(0)
             while self.is_running:
                 scale_input = 0.0 + uniform(0.0, 0.2)
                 self.scale_publish = True
                 self.scale_input_buffer.appendleft(scale_input)
+                sleep(1)
 
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
@@ -215,7 +228,7 @@ class Scale:
 
         elif self.connection is not None:
             return 0.00
-        
+
         elif self.emulate:
             split_line = self.scale_input_buffer[0]
             return split_line
@@ -227,6 +240,11 @@ class Scale:
             self.logger.info("Initialising connection to scale. Please retry.")
 
     def add_new_value(self, new_value):
+
+        self.timestamp = datetime.now()
+        # deque scale history
+        self.scale_history.appendleft(self.timestamp)
+        self.scale_history.appendleft(new_value)
 
         # calculate volume flow
         if len(self.scale_history) > 2:
@@ -263,7 +281,7 @@ class Scale:
         if not self.scale_publish:
             return
         else:
-            self.mqtt.publish_message(StatusMessage(
+            MQTTConnection.publish_message(StatusMessage(
                 "scale", self.name, f"{new_value} Kg"))
             # if volume_flow is not None:
             #     self.mqtt.publish_message(StatusMessage(

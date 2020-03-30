@@ -2,13 +2,15 @@ import logging
 import threading
 import time
 import asyncio
-import csv
-
+import random
 from vosekast_control.Log import LOGGER
 
-import sqlite3
-from sqlite3 import Error
+# import sqlite3
+# from sqlite3 import Error
 from datetime import datetime
+from vosekast_control.connectors import DBConnection
+from vosekast_control.connectors import MQTTConnection
+from random import uniform
 
 
 class TestSequence():
@@ -34,7 +36,6 @@ class TestSequence():
         self.scale = self.vosekast.scale
         self.emulate = emulate
         self.state = self.UNKNOWN
-        self.mqtt = self.vosekast.mqtt_client
         self.scale_value_start = []
         self.scale_value_stop = []
 
@@ -45,7 +46,7 @@ class TestSequence():
 
                 # change state
                 self.state = self.WAITING
-                
+
                 # check if already running
                 if self.scale.is_running != True:
                     self.scale.start()
@@ -69,7 +70,7 @@ class TestSequence():
                     self.scale.print_diagnostics()
                     self.state = self.STOPPED
                     return
-                
+
                 # check if state has been changed
                 elif self.state == self.STOPPED or self.state == self.PAUSED:
                     return
@@ -95,18 +96,25 @@ class TestSequence():
 
     async def write_loop(self):
         try:
+            # get start time
             time_sequence_t0 = datetime.now()
             delta_time_sequence = 0
-            # null scale
+
+            # tare scale
             if abs(self.scale.scale_history[0]) < 0.15:
                 scale_nulled = self.scale.scale_history[0]
             else:
                 scale_nulled = 0
 
+            # generate sequence_id
+            sequence_id = random.randint(10000000000, 100000000000)
+
+            # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
                 flow_average = self.scale.flow_average()
 
+                # emulate measuring_tank filled
                 if self.emulate and delta_time_sequence >= 30:
                     self.vosekast.measuring_tank.state = self.vosekast.measuring_tank.FILLED
                 if self.emulate:
@@ -116,47 +124,31 @@ class TestSequence():
                     delta_time_sequence = time_sequence_passed.total_seconds()
 
                     scale_actual = round(self.scale.scale_history[0], 5)
+                # if not emulate use scale value
                 else:
                     scale_actual = round(
-                    self.scale.scale_history[0] - scale_nulled, 5)
-
-                # todo move the db init in a class or a singleton
-                #db
-                dbconnect = sqlite3.connect('sequence_values.db')
-                c = dbconnect.cursor()
-                c.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
-                    description text,
-                    timestamp real,
-                    scale_value real,
-                    flow_current real,
-                    flow_average_of_5 real
-                    )""")
-
-                dbconnect.commit()
+                        self.scale.scale_history[0] - scale_nulled, 5)
 
                 try:
-                    c.execute("INSERT INTO sequence_values VALUES (:description, :timestamp, :scale_value, :flow_current, :flow_average)", {
-                        'description': "description",
+                    data = {
                         'timestamp': self.scale.scale_history[1],
                         'scale_value': scale_actual,
                         'flow_current': self.scale.flow_history[0],
-                        'flow_average': flow_average
-                    })
-
-                    dbconnect.commit()
-
-                except Error as e:
-                    self.logger.warning(e)
+                        'flow_average': flow_average,
+                        'pump_constant_tank_state': self.vosekast.pump_constant_tank.state,
+                        'pump_measuring_tank_state': self.vosekast.pump_measuring_tank.state,
+                        'measuring_drain_valve_state': self.vosekast.measuring_drain_valve.state,
+                        'measuring_tank_switch_state': self.vosekast.measuring_tank_switch.state,
+                        'sequence_id': sequence_id
+                    }
+                    DBConnection.insert_datapoint(data)
 
                 except:
-                    self.logger.warning("Error writing to db.")
-                    dbconnect.close()
+                    self.logger.warning("Error sending to db.")
 
                 self.logger.debug(
                     str(scale_actual) + " kg, flow rate (average) " + str(flow_average) + " L/s")
                 await asyncio.sleep(1)
-
-            dbconnect.close()
 
             # interrupt if measuring_tank full
             if self.vosekast.measuring_tank.is_filled:
@@ -168,7 +160,6 @@ class TestSequence():
 
         except:
             self.logger.warning("Write loop killed, stopping sequence.")
-            dbconnect.close()
             await self.stop_sequence()
 
     async def start_measuring(self):
@@ -178,7 +169,7 @@ class TestSequence():
             self.vosekast.pump_measuring_tank.start()
             self.logger.debug("Measuring Pump spin up. Please wait.")
 
-            await asyncio.sleep(3)
+            await asyncio.sleep(2)
 
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
@@ -186,7 +177,7 @@ class TestSequence():
         except:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
-            self.vosekast.state = "RUNNING"
+            self.vosekast.state = self.vosekast.RUNNING
 
     async def stop_sequence(self):
         if self.state == self.MEASURING or self.state == self.PAUSED or self.state == self.WAITING:
@@ -208,14 +199,15 @@ class TestSequence():
 
             # switch to measuring_tank bypass
             self.vosekast.measuring_tank_switch.close()
-            
+
             self.logger.info("Paused. Measuring Tank bypass open.")
-        
+
         # if constant_tank has not been filled yet
         elif self.state == self.WAITING and self.vosekast.PREPARING_MEASUREMENT:
             self.state = self.STOPPED
             self.vosekast.state = self.vosekast.RUNNING
-            self.logger.info("Measuring has not yet started, continuing to fill constant_tank.")
+            self.logger.info(
+                "Measuring has not yet started, continuing to fill constant_tank.")
         elif self.state == self.PAUSED or self.state == self.STOPPED:
             self.logger.info("Sequence already paused.")
         else:
@@ -235,4 +227,3 @@ class TestSequence():
             self.logger.info("Sequence has not been paused.")
         else:
             self.logger.info("Sequence has not yet been started.")
-
