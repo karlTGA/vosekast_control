@@ -109,9 +109,6 @@ class TestSequence():
             # generate sequence_id
             sequence_id = random.randint(10000000000, 100000000000)
 
-            # connect db
-            DBConnection.connect()
-
             # send values to db
             while self.state == self.MEASURING and not self.vosekast.measuring_tank.is_filled:
                 # get flow average
