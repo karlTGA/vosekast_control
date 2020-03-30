@@ -50,3 +50,7 @@ class LevelSensor:
         self._gpio_controller.add_event_detect(
             self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
+    
+    @property
+    def state(self):
+        return self.position

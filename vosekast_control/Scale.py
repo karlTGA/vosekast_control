@@ -183,7 +183,7 @@ class Scale:
                     self.scale_publish = True
 
                 self.scale_input_buffer.appendleft(scale_input)
-                sleep(0.1)
+                sleep(0.05)
 
         elif self.emulate:
             self.scale_input_buffer.appendleft(0)
