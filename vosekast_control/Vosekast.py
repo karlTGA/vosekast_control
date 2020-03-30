@@ -41,7 +41,7 @@ CONSTANT_TANK = "CONSTANT_TANK"
 MEASURING_TANK = "MEASURING_TANK"
 
 
-class Vosekast():
+class Vosekast:
 
     # Vosekast States
     INITED = "INITED"
@@ -83,8 +83,7 @@ class Vosekast():
                 Valve.BINARY,
                 self._gpio_controller,
             )
-            self.valves = [self.measuring_drain_valve,
-                           self.measuring_tank_switch]
+            self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
 
             # throttle
             # self.volume_flow_throttle = Valve('VOLUME_FLOW_THROTTLE', PIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
@@ -121,29 +120,16 @@ class Vosekast():
 
             # pumps
             self.pump_constant_tank = Pump(
-                self,
-                "pump_constant_tank",
-                PIN_PUMP_CONSTANT,
-                self._gpio_controller,
+                self, "pump_constant_tank", PIN_PUMP_CONSTANT, self._gpio_controller,
             )
             self.pump_measuring_tank = Pump(
-                self,
-                "pump_measuring_tank",
-                PIN_PUMP_MEASURING,
-                self._gpio_controller,
+                self, "pump_measuring_tank", PIN_PUMP_MEASURING, self._gpio_controller,
             )
             self.pumps = [self.pump_measuring_tank, self.pump_constant_tank]
 
             # tanks
             self.stock_tank = Tank(
-                "stock_tank",
-                200,
-                None,
-                None,
-                None,
-                None,
-                None,
-                vosekast=self
+                "stock_tank", 200, None, None, None, None, None, vosekast=self
             )
 
             self.constant_tank = Tank(
@@ -172,11 +158,10 @@ class Vosekast():
                 emulate=self.emulate,
             )
 
-            self.tanks = [self.stock_tank,
-                          self.constant_tank, self.measuring_tank]
+            self.tanks = [self.stock_tank, self.constant_tank, self.measuring_tank]
 
             # scale
-            self.scale = Scale('measuring_scale', self, emulate=self.emulate)
+            self.scale = Scale("measuring_scale", self, emulate=self.emulate)
 
             # testsequence
             self.testsequence = TestSequence(self, emulate=self.emulate)
@@ -221,8 +206,7 @@ class Vosekast():
         constant_tank_ready = self.constant_tank.is_filled
 
         measuring_tank_ready = (
-            self.measuring_drain_valve.is_closed
-            and not self.measuring_tank.is_filled
+            self.measuring_drain_valve.is_closed and not self.measuring_tank.is_filled
         )
         constant_pump_running = self.pump_constant_tank.is_running
 
@@ -234,7 +218,8 @@ class Vosekast():
     async def empty(self):
         self._state = self.EMPTYING
         self.logger.warning(
-            "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow.")
+            "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow."
+        )
         self.pump_measuring_tank.start()
         self.pump_constant_tank.stop()
         self.measuring_tank_switch.close()
@@ -246,12 +231,12 @@ class Vosekast():
         self.pump_measuring_tank.stop()
 
     # def create_file(self):
-        # # create file, write header to csv file
-        # with open('sequence_values.csv', 'w', newline='') as file:
-        #     writer = csv.writer(file, delimiter=',',
-        #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        #     writer.writerow(["timestamp", "scale value", "flow",
-        #                      "average flow from last 5 values"])
+    # # create file, write header to csv file
+    # with open('sequence_values.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file, delimiter=',',
+    #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    #     writer.writerow(["timestamp", "scale value", "flow",
+    #                      "average flow from last 5 values"])
 
     async def shutdown(self):
 
@@ -305,132 +290,133 @@ class Vosekast():
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)
 
-        self.logger.debug('Vosekast stopped.')
+        self.logger.debug("Vosekast stopped.")
 
     # handle incoming mqtt commands
     async def handle_command(self, command):
-        # valves
-        if command['target'] == 'valve':
+        target = command.get("target")
+        target_id = command.get("target_id")
+        command_id = command.get("command")
+
+        if target == "valve":
             for valve in self.valves:
-                target_id = command['target_id']
                 if valve.name == target_id:
-                    if command['command'] == 'close':
+                    if command_id == "close":
                         valve.close()
                         return
-                    elif command['command'] == 'open':
+                    elif command_id == "open":
                         valve.open()
                         return
                     else:
                         self.logger.warning(
-                            f'did not found target_id {target_id}. command {command["command"]} did not execute.')
+                            f"receive unknown command {command_id} for \
+                            target_id {target_id}."
+                        )
 
                     return
 
             self.logger.warning(
-                f'target_id {command["target_id"]} could not be found.')
+                f"target_id {target_id} could not \
+                is unknown."
+            )
 
         # pumps
-        elif command['target'] == 'pump':
+        elif target == "pump":
             for pump in self.pumps:
-                target_id = command['target_id']
+                target_id = target_id
                 if pump.name == target_id:
-                    if command['command'] == 'start':
+                    if command_id == "start":
                         pump.start()
-                    if command['command'] == 'stop':
+                    elif command_id == "stop":
                         pump.stop()
-                    if command['command'] == 'toggle':
+                    elif command_id == "toggle":
                         pump.toggle()
                     else:
                         self.logger.warning(
-                            f'target_id not found. command {command["command"]} did not execute.')
+                            f"receive unknown command {command_id} for \
+                            target_id {target_id}."
+                        )
 
                     return
 
-            self.logger.warning(
-                f'target_id {command["target_id"]} could not be found.')
+            self.logger.warning(f"target_id {target_id} is unknown.")
 
         # tanks
-        elif command['target'] == 'tank':
+        elif target == "tank":
             for tank in self.tanks:
-                target_id = command['target_id']
+                target_id = target_id
                 if tank.name == target_id:
-                    if command['command'] == 'drain_tank':
+                    if command_id == "drain_tank":
                         tank.drain_tank()
-                        return
-                    if command['command'] == 'prepare_to_fill':
+                    elif command_id == "prepare_to_fill":
                         tank.prepare_to_fill()
-                        return
-                    # if command['command'] == '_handle_drained':
-                    #     tank._handle_drained()
-                    #     return
-                    # if command['command'] == '_handle_filling':
-                    #     tank._handle_filling()
-                    #     return
                     else:
                         self.logger.warning(
-                            f'target_id not found. command {command["command"]} did not execute.')
+                            f"receive unknown command {command_id} for \
+                            target_id {target_id}."
+                        )
 
                     return
 
-            self.logger.warning(
-                f'target_id {command["target_id"]} could not be found.')
+            self.logger.warning(f"target_id {target_id} could not be found.")
 
         # scales
-        elif command['target'] == 'scale':
-            if command['target_id'] == 'measuring_scale':
-                if command['command'] == 'open_connection':
+        elif target == "scale":
+            if target_id == "measuring_scale":
+                if command_id == "open_connection":
                     self.scale.open_connection()
-                elif command['command'] == 'close_connection':
+                elif command_id == "close_connection":
                     self.scale.close_connection()
-                elif command['command'] == 'start_measurement_thread':
+                elif command_id == "start_measurement_thread":
                     self.scale.start_measurement_thread()
-                elif command['command'] == 'stop_measurement_thread':
+                elif command_id == "stop_measurement_thread":
                     self.scale.stop_measurement_thread()
-                elif command['command'] == 'print_diagnostics':
+                elif command_id == "print_diagnostics":
                     self.scale.print_diagnostics()
 
                 else:
                     self.logger.warning(
-                        f'target_id not found. command {command["command"]} did not execute.')
+                        f"receive unknown command {command_id} for \
+                            target_id {target_id}."
+                    )
 
                 return
 
-            self.logger.warning(
-                f'target_id {command["target_id"]} could not be found.')
+            self.logger.warning(f"target_id {target_id} could not be found.")
 
         # system
-        elif command['target'] == 'system':
-            if command['target_id'] == 'system':
-                if command['command'] == 'shutdown':
+        elif target == "system":
+            if target_id == "system":
+                if command_id == "shutdown":
                     await self.shutdown()
-                elif command['command'] == 'clean':
+                elif command_id == "clean":
                     self.clean()
-                elif command['command'] == 'prepare_measuring':
+                elif command_id == "prepare_measuring":
                     self.prepare_measuring()
-                elif command['command'] == 'start_sequence':
+                elif command_id == "start_sequence":
                     await self.testsequence.start_sequence()
-                elif command['command'] == 'stop_sequence':
+                elif command_id == "stop_sequence":
                     await self.testsequence.stop_sequence()
-                elif command['command'] == 'empty_tanks':
+                elif command_id == "empty_tanks":
                     await self.empty()
-                elif command['command'] == 'pause_sequence':
+                elif command_id == "pause_sequence":
                     self.testsequence.pause_sequence()
-                elif command['command'] == 'continue_sequence':
+                elif command_id == "continue_sequence":
                     await self.testsequence.continue_sequence()
 
                 else:
                     self.logger.warning(
-                        f'target_id not found. command {command["command"]} did not execute.')
+                        f"receive unknown command {command_id} for \
+                            target_id {target_id}."
+                    )
 
                 return
 
-            self.logger.warning(
-                f'target_id {command["target_id"]} could not be found.')
+            self.logger.warning(f"target_id {target_id} is unknown.")
 
         # exception
         else:
-            self.logger.warning(
-                f'target {command["target"]} could not be found.')
+            self.logger.warning(f"command target {target} is unknown.")
 
 
 class NoGPIOControllerError(Exception):
