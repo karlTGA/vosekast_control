@@ -66,8 +66,7 @@ class Pump():
     def state(self, new_state):
         self._state = new_state
         self.logger.info(f"New state of pump {self.name} is: {new_state}")
-        MQTTConnection.publish_message(
-            StatusMessage('pump', self.name, new_state))
+        self.publish_state()
 
     def publish_state(self):
         MQTTConnection.publish_message(StatusMessage('pump', self.name, self.state))

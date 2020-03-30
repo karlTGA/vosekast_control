@@ -298,15 +298,6 @@ class Vosekast():
         self.logger.debug('Vosekast stopped.')
 
     def state_overview(self):
-        # for tank in self.tanks:
-        #     MQTTConnection.publish_message(StatusMessage('tank', tank.name, tank.state))
-        # for pump in self.pumps:
-        #     MQTTConnection.publish_message(StatusMessage('pump', pump.name, pump.state))
-        # for valve in self.valves:
-        #     MQTTConnection.publish_message(StatusMessage('valve', valve.name, valve.state))
-        # for level_sensor in self.level_sensors:
-        #     MQTTConnection.publish_message(StatusMessage('level_sensor', level_sensor.name, level_sensor.state))
-        
         for device in self.tanks + self.pumps + self.valves + self.level_sensors:
             device.publish_state()
 
@@ -363,12 +354,6 @@ class Vosekast():
                     if command['command'] == 'prepare_to_fill':
                         tank.prepare_to_fill()
                         return
-                    # if command['command'] == '_handle_drained':
-                    #     tank._handle_drained()
-                    #     return
-                    # if command['command'] == '_handle_filling':
-                    #     tank._handle_filling()
-                    #     return
                     else:
                         self.logger.warning(
                             f'target_id found. command {command["command"]} did not execute.')
