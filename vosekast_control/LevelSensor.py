@@ -59,11 +59,9 @@ class LevelSensor:
 
     @property
     def state(self):
-        return self.position
+        return self._gpio_controller.input(self._pin)
 
     def publish_state(self):
         MQTTConnection.publish_message(
-            StatusMessage(
-                "level_sensor", self.name, self._gpio_controller.input(self._pin)
-            )
+            StatusMessage("level_sensor", self.name, self.state)
         )
