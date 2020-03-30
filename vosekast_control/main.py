@@ -1,15 +1,11 @@
 #!/usr/bin/python3
 
 import sys
-import platform
-import time
-import subprocess
 import os
 import traceback
 
 from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
-from multiprocessing.dummy import Pool as ThreadPool
 
 # add mqtt resources
 import asyncio

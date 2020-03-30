@@ -1,6 +1,5 @@
 import sqlite3
 from sqlite3 import Error
-from datetime import datetime
 import logging
 from vosekast_control.Log import LOGGER
 
@@ -17,7 +16,7 @@ class DBConnector:
             self.logger.info("Established DB connection.")
         except Error as e:
             self.logger.warning(e)
-        except:
+        except Exception:
             self.logger.info("Failed to establish DB connection.")
 
         self._db_connection.execute(
@@ -52,9 +51,7 @@ class DBConnector:
 
             self._db_connection.commit()
 
-        except Error as e:
-            self.logger.error(e)
-        except ProgrammingError as e:
+        except Exception as e:
             self.logger.error(e)
 
     # todo
@@ -68,7 +65,7 @@ class DBConnector:
         try:
             self._db_connection.close()
             self.logger.info("DB connection closed.")
-        except:
+        except Exception:
             return
 
     # workaround to show if connected
@@ -85,7 +82,7 @@ class DBConnector:
         except Error as e:
             self.logger.warning(e)
             return False
-        except:
+        except Exception:
             return False
 
 

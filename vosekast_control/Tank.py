@@ -116,7 +116,7 @@ class Tank:
                     "Constant Tank state: " + str(self.vosekast.constant_tank.state)
                 )
                 return
-            except:
+            except Exception:
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
                 return

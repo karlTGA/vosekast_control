@@ -1,7 +1,6 @@
 import subprocess
 import asyncio
 from vosekast_control.main import main
-import os
 
 
 def backend(emulate=False):

@@ -9,7 +9,6 @@ from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import DBConnection
-from collections import deque
 from datetime import datetime
 from vosekast_control.connectors import MQTTConnection
 
@@ -165,7 +164,7 @@ class Scale:
         try:
             self.threads.remove(self.thread_loop)
             self.threads.remove(self.thread_readscale)
-        except:
+        except Exception:
             pass
         self.logger.debug("Stopped measurement thread.")
         self.threads_started = False

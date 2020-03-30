@@ -1,6 +1,4 @@
 import logging
-import threading
-import time
 import asyncio
 import random
 from vosekast_control.Log import LOGGER
@@ -9,8 +7,6 @@ from vosekast_control.Log import LOGGER
 # from sqlite3 import Error
 from datetime import datetime
 from vosekast_control.connectors import DBConnection
-from vosekast_control.connectors import MQTTConnection
-from random import uniform
 
 
 class TestSequence:
@@ -46,7 +42,7 @@ class TestSequence:
                 self.state = self.WAITING
 
                 # check if already running
-                if self.scale.is_running != True:
+                if not self.scale.is_running:
                     self.scale.start()
                     self.logger.info(
                         "Initialising scale connection & measurement thread. Please wait."
@@ -89,7 +85,7 @@ class TestSequence:
                 await self.write_loop()
 
             # TankFillingTimeout
-            except:
+            except Exception:
                 self.logger.error("Error, aborting test sequence.")
 
                 await self.stop_sequence()
@@ -151,7 +147,7 @@ class TestSequence:
                     }
                     DBConnection.insert_datapoint(data)
 
-                except:
+                except Exception:
                     self.logger.warning("Error sending to db.")
 
                 self.logger.debug(
@@ -171,7 +167,7 @@ class TestSequence:
                     "Draining measuring tank, opening Measuring Tank bypass."
                 )
 
-        except:
+        except Exception:
             self.logger.warning("Write loop killed, stopping sequence.")
             await self.stop_sequence()
 
@@ -187,7 +183,7 @@ class TestSequence:
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
 
-        except:
+        except Exception:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pump_measuring_tank.stop()
             self.vosekast.state = self.vosekast.RUNNING
