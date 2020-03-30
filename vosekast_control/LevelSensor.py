@@ -2,6 +2,7 @@ import asyncio
 from vosekast_control.connectors import MQTTConnection
 from vosekast_control.utils.Msg import StatusMessage
 
+
 class LevelSensor:
     # Positions
     HIGH = "HIGH"
@@ -15,13 +16,18 @@ class LevelSensor:
         self._gpio_controller = gpio_controller
 
         # init gpio_pins
-        self._gpio_controller.setup(self._pin, self._gpio_controller.IN, pull_up_down=self._gpio_controller.PUD_DOWN)
+        self._gpio_controller.setup(
+            self._pin,
+            self._gpio_controller.IN,
+            pull_up_down=self._gpio_controller.PUD_DOWN,
+        )
 
         # add a thread for event detection
         self._gpio_controller.add_event_detect(
             self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
-    #todo fix bounce
+
+    # todo fix bounce
     def add_callback(self, callback_function):
         """
         add callback function that fires every time the sensor is triggered
@@ -39,8 +45,7 @@ class LevelSensor:
 
             loop.create_task(callback_function(pin, alert))
 
-        self._gpio_controller.add_event_callback(
-            self._pin, extra_callback_function)
+        self._gpio_controller.add_event_callback(self._pin, extra_callback_function)
 
     def clear_callbacks(self):
         """
@@ -51,10 +56,14 @@ class LevelSensor:
         self._gpio_controller.add_event_detect(
             self._pin, self._gpio_controller.BOTH, bouncetime=500
         )
-    
+
     @property
     def state(self):
         return self.position
 
     def publish_state(self):
-        MQTTConnection.publish_message(StatusMessage('level_sensor', self.name, self._gpio_controller.input(self._pin)))
+        MQTTConnection.publish_message(
+            StatusMessage(
+                "level_sensor", self.name, self._gpio_controller.input(self._pin)
+            )
+        )

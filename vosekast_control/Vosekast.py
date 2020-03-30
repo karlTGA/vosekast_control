@@ -7,15 +7,9 @@ from vosekast_control.TestSequence import TestSequence
 
 import logging
 import asyncio
-import csv
-import sqlite3
-from sqlite3 import Error
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
-from vosekast_control.utils.Msg import StatusMessage
-
-import os
 
 
 # GPIO Assignment
@@ -118,7 +112,12 @@ class Vosekast:
                 LevelSensor.HIGH,
                 self._gpio_controller,
             )
-            self.level_sensors = [self.level_measuring_high, self.level_measuring_low, self.level_constant_high, self.level_constant_low]
+            self.level_sensors = [
+                self.level_measuring_high,
+                self.level_measuring_low,
+                self.level_constant_high,
+                self.level_constant_low,
+            ]
 
             # pumps
             self.pump_constant_tank = Pump(
@@ -398,7 +397,7 @@ class Vosekast:
                     self.testsequence.pause_sequence()
                 elif command_id == "continue_sequence":
                     await self.testsequence.continue_sequence()
-                elif command['command'] == 'state_overview':
+                elif command["command"] == "state_overview":
                     self.state_overview()
 
                 else:

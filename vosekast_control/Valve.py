@@ -5,7 +5,7 @@ from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
 
 
-class Valve():
+class Valve:
     # regulations
     BINARY = "BINARY"
     ANALOG = "ANALOG"
@@ -21,13 +21,7 @@ class Valve():
     CLOSED = "CLOSED"
 
     def __init__(
-        self,
-        vosekast,
-        name,
-        control_pin,
-        valve_type,
-        regulation,
-        gpio_controller,
+        self, vosekast, name, control_pin, valve_type, regulation, gpio_controller,
     ):
         super().__init__()
 
@@ -88,4 +82,4 @@ class Valve():
         self.publish_state()
 
     def publish_state(self):
-        MQTTConnection.publish_message(StatusMessage('valve', self.name, self.state))
+        MQTTConnection.publish_message(StatusMessage("valve", self.name, self.state))

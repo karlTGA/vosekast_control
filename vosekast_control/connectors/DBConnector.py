@@ -5,8 +5,7 @@ import logging
 from vosekast_control.Log import LOGGER
 
 
-class DBConnector():
-
+class DBConnector:
     def __init__(self):
         self._db_connection = None
         self.logger = logging.getLogger(LOGGER)
@@ -14,14 +13,15 @@ class DBConnector():
     # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
     def connect(self):
         try:
-            self._db_connection = sqlite3.connect('sequence_values.db')
+            self._db_connection = sqlite3.connect("sequence_values.db")
             self.logger.info("Established DB connection.")
         except Error as e:
             self.logger.warning(e)
         except:
             self.logger.info("Failed to establish DB connection.")
 
-        self._db_connection.execute("""CREATE TABLE IF NOT EXISTS sequence_values (
+        self._db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS sequence_values (
             timestamp real,
             scale_value real,
             flow_current real,
@@ -31,7 +31,8 @@ class DBConnector():
             measuring_drain_valve_state integer,
             measuring_tank_switch_state integer,
             sequence_id real
-            )""")
+            )"""
+        )
         self._db_connection.commit()
         self.logger.info("DB created.")
 
@@ -45,7 +46,9 @@ class DBConnector():
 
             # https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
             self._db_connection.execute(
-                "INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average,pump_constant_tank_state,pump_measuring_tank_state,measuring_drain_valve_state,measuring_tank_switch_state,sequence_id) VALUES (:timestamp, :scale_value, :flow_current, :flow_average, :pump_constant_tank_state, :pump_measuring_tank_state, :measuring_drain_valve_state, :measuring_tank_switch_state, :sequence_id);", data)
+                "INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average,pump_constant_tank_state,pump_measuring_tank_state,measuring_drain_valve_state,measuring_tank_switch_state,sequence_id) VALUES (:timestamp, :scale_value, :flow_current, :flow_average, :pump_constant_tank_state, :pump_measuring_tank_state, :measuring_drain_valve_state, :measuring_tank_switch_state, :sequence_id);",
+                data,
+            )
 
             self._db_connection.commit()
 
@@ -76,7 +79,8 @@ class DBConnector():
         try:
             # should return 0 if empty
             self._db_connection.execute(
-                "SELECT count(*) FROM (select 0 from sequence_values limit 1);")
+                "SELECT count(*) FROM (select 0 from sequence_values limit 1);"
+            )
             return True
         except Error as e:
             self.logger.warning(e)
