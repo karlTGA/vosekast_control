@@ -1,5 +1,6 @@
 import asyncio
-
+from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import StatusMessage
 
 class LevelSensor:
     # Positions
@@ -54,3 +55,6 @@ class LevelSensor:
     @property
     def state(self):
         return self.position
+
+    def publish_state(self):
+        MQTTConnection.publish_message(StatusMessage('level_sensor', self.name, self.state))

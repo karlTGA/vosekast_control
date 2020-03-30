@@ -298,15 +298,17 @@ class Vosekast():
         self.logger.debug('Vosekast stopped.')
 
     def state_overview(self):
-        for tank in self.tanks:
-            MQTTConnection.publish_message(StatusMessage('tank', tank.name, tank.state))
-        for pump in self.pumps:
-            MQTTConnection.publish_message(StatusMessage('pump', pump.name, pump.state))
-        for valve in self.valves:
-            MQTTConnection.publish_message(StatusMessage('valve', valve.name, valve.state))
-        for level_sensor in self.level_sensors:
-            MQTTConnection.publish_message(StatusMessage('level_sensor', level_sensor.name, level_sensor.state))
-
+        # for tank in self.tanks:
+        #     MQTTConnection.publish_message(StatusMessage('tank', tank.name, tank.state))
+        # for pump in self.pumps:
+        #     MQTTConnection.publish_message(StatusMessage('pump', pump.name, pump.state))
+        # for valve in self.valves:
+        #     MQTTConnection.publish_message(StatusMessage('valve', valve.name, valve.state))
+        # for level_sensor in self.level_sensors:
+        #     MQTTConnection.publish_message(StatusMessage('level_sensor', level_sensor.name, level_sensor.state))
+        
+        for device in self.tanks + self.pumps + self.valves + self.level_sensors:
+            device.publish_state()
 
     # handle incoming mqtt commands
     async def handle_command(self, command):

@@ -87,3 +87,6 @@ class Valve():
         self.logger.info(f"New state of valve {self.name} is: {new_state}")
         MQTTConnection.publish_message(
             StatusMessage('valve', self.name, new_state))
+
+    def publish_state(self):
+        MQTTConnection.publish_message(StatusMessage('valve', self.name, self.state))
