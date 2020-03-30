@@ -1,23 +1,31 @@
 import React from "react";
 import { useStoreState } from "pullstate";
-import { Alert, Tag } from "antd";
+import { Alert } from "antd";
 import {
-  CheckCircleTwoTone,
-  ExclamationCircleTwoTone
+  CheckCircleOutlined,
+  ExclamationCircleOutlined
 } from "@ant-design/icons";
 import { MQTTStore, VosekastStore } from "../Store";
 
-export function OnlineIndicator({ isConnected }: { isConnected: boolean }) {
+export function OnlineIndicator({
+  isConnected,
+  connectText = "Connected",
+  dissconnectText = "Dissconnect"
+}: {
+  isConnected: boolean;
+  connectText?: string;
+  dissconnectText?: string;
+}) {
   return (
     <>
       {isConnected ? (
-        <Tag color="success">
-          <CheckCircleTwoTone twoToneColor="#52c41a" /> Connected
-        </Tag>
+        <div className="indicator indicator-success">
+          <CheckCircleOutlined /> {connectText}
+        </div>
       ) : (
-        <Tag color="warning">
-          <ExclamationCircleTwoTone twoToneColor="#fcba03" /> Dissconnected
-        </Tag>
+        <div className="indicator indicator-error">
+          <ExclamationCircleOutlined /> {dissconnectText}
+        </div>
       )}
     </>
   );
@@ -25,12 +33,20 @@ export function OnlineIndicator({ isConnected }: { isConnected: boolean }) {
 
 export function MQTTOnlineIndicator() {
   const isConnected = useStoreState(MQTTStore, s => s.isConnected);
-  return OnlineIndicator({ isConnected });
+  return OnlineIndicator({
+    isConnected,
+    connectText: "MQTT",
+    dissconnectText: "MQTT"
+  });
 }
 
 export function VosekastOnlineIndicator() {
   const isConnected = useStoreState(VosekastStore, s => s.isHealthy);
-  return OnlineIndicator({ isConnected });
+  return OnlineIndicator({
+    isConnected,
+    connectText: "Vosekast",
+    dissconnectText: "Vosekast"
+  });
 }
 
 export function ErrorIndicator() {

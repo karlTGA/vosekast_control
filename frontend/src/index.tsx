@@ -3,9 +3,9 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import MQTTConnector from "./utils/MQTTConnector";
+import MQTTConnection from "./utils/MQTTConnection";
 
-new MQTTConnector("ws://localhost:9001");
+MQTTConnection.connect();
 ReactDOM.render(<App />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change

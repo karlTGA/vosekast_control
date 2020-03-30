@@ -1,21 +1,14 @@
 import React from "react";
-import "./App.css";
-import {
-  MQTTOnlineIndicator,
-  VosekastOnlineIndicator,
-  ErrorIndicator
-} from "./components/Indicators";
-import { ScaleTag } from "./components/Scale";
-import { PumpTag } from "./components/Pump";
+import "./App.scss";
+import MainView from "./components/views/MainView";
+import { BrowserRouter as Router } from "react-router-dom";
 
 function App() {
   return (
     <div className="App">
-      <MQTTOnlineIndicator />
-      <VosekastOnlineIndicator />
-      <ErrorIndicator />
-      <ScaleTag />
-      <PumpTag pumpId="pump_measuring_tank" />
+      <Router>
+        <MainView />
+      </Router>
     </div>
   );
 }

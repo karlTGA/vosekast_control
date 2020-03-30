@@ -1,0 +1,98 @@
+@import "~antd/dist/antd.css";
+
+#root {
+  height: 100%;
+}
+
+.ant-layout {
+  height: 100%;
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+
+  .ant-layout-header {
+    display: flex;
+    background: #002f5d;
+
+    .logo {
+      width: 120px;
+      height: 31px;
+      background: rgba(255, 255, 255, 0.2);
+      margin: 16px 28px 16px 0;
+      float: left;
+    }
+
+    .ant-menu-dark {
+      background: #002f5d;
+      line-height: 64px;
+      width: 100%;
+    }
+
+    .ant-menu-item {
+      float: left;
+    }
+
+    .indicator-menu-item {
+      padding: 0 5px;
+      cursor: default;
+
+      .indicator {
+        font-weight: bold;
+
+        span {
+          margin: 0;
+        }
+      }
+
+      .indicator-success {
+        color: rgb(1, 190, 1);
+      }
+
+      .indicator-error {
+        color: rgb(250, 57, 57);
+      }
+    }
+
+    .account-submenu {
+      float: right;
+    }
+  }
+
+  .sider-overview {
+    margin-top: 10px;
+    background-color: transparent;
+    border-right: solid 1px lightgrey;
+
+    .ant-layout-sider-children {
+      overflow: auto;
+    }
+
+    .device-command-button {
+      height: 180px;
+      width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 3px 10px 10px 10px;
+
+      span {
+        margin-top: 7px;
+        font-weight: bold;
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      img {
+        width: 120px;
+        height: 120px;
+      }
+    }
+
+    .device-command-button.device-deactivated img {
+      opacity: 0.5;
+    }
+  }
+}

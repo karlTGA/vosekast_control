@@ -81,7 +81,7 @@ class MQTTConnector():
         runs = 0
 
         while self.connected:
-            if runs == 10:
+            if runs == 3:
                 msg = StatusMessage('system', 'health', 'OK')
                 self.publish_message(msg)
                 runs = 0
