@@ -21,13 +21,11 @@ async def main(emulate=False):
     # import the rpi module at event start to prevent the early opening of the emulator gui
     import RPi.GPIO as GPIO
 
-    # import vosekast at runtime to prefend different event loops
+    # import vosekast at runtime to prevent different event loops
     from vosekast_control.connectors import DBConnection
     from vosekast_control.Vosekast import Vosekast
 
     try:
-        # GPIO.cleanup()
-
         # process state
         app_control = AppControl()
 

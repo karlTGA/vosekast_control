@@ -71,7 +71,6 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
-            # self.connection = True
 
     def close_connection(self):
         if not self.emulate:
@@ -93,10 +92,6 @@ class Scale:
 
             if new_value is not None:
                 self.add_new_value(new_value)
-                # self.timestamp = datetime.now()
-                # # deque scale history
-                # self.scale_history.appendleft(self.timestamp)
-                # self.scale_history.appendleft(new_value)
             else:
                 self.logger.warning("Reached loop with new value = None.")
 
@@ -286,7 +281,6 @@ class Scale:
 
         # publish via mqtt
         # new_value = weight measured by scale
-        # volume_flow = calculated volume flow
 
         if not self.scale_publish:
             return
@@ -294,9 +288,6 @@ class Scale:
             MQTTConnection.publish_message(
                 StatusMessage("scale", self.name, f"{new_value} Kg")
             )
-            # if volume_flow is not None:
-            #     self.mqtt.publish_message(StatusMessage(
-            #         "scale", self.name, f"{volume_flow} L/s"))
 
             if len(self.last_values) == 10:
                 # calculate square mean error

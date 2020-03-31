@@ -58,8 +58,22 @@ class DBConnector:
     def read(self):
         pass
 
-    # (todo) find while loop that does not sleep
-    # probably fixed, needs testing
+    # get sequence_id data from db
+    def get_sequence_data(self, data):
+
+        # sample sequence_id for testing: 61986369442
+        sequence_id = data
+        
+        try:
+            sequence_id_query = """SELECT * FROM sequence_values WHERE sequence_id = ?"""
+            self._db_connection.execute(
+                    sequence_id_query, (sequence_id,)
+                )
+            print(self._db_connection.fetchall())
+        except sqlite3.Error as error:
+            self.logger.error("Failed to read data from sqlite table")
+        except:
+            self.logger.info("This is not the sequence_id you are looking for.")
 
     def close(self):
         try:
