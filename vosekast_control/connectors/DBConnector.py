@@ -13,6 +13,7 @@ class DBConnector:
     def connect(self):
         try:
             self._db_connection = sqlite3.connect("sequence_values.db")
+            self.cursor = self._db_connection.cursor()
             self.logger.info("Established DB connection.")
         except Error as e:
             self.logger.warning(e)
@@ -56,7 +57,8 @@ class DBConnector:
 
     # todo
     def read(self):
-        pass
+        self.cursor.execute("SELECT * FROM sequence_values")
+        record = self.cursor.fetchall()
 
     # get sequence_id data from db
     def get_sequence_data(self, data):
@@ -65,13 +67,17 @@ class DBConnector:
         sequence_id = data
         
         try:
-            sequence_id_query = """SELECT * FROM sequence_values WHERE sequence_id = ?"""
-            self._db_connection.execute(
-                    sequence_id_query, (sequence_id,)
-                )
-            print(self._db_connection.fetchall())
+            sequence_id_query = ('sequence_id',)
+            self.cursor.execute("SELECT * FROM sequence_values WHERE sequence_id = ?", sequence_id_query)
+            record = self.cursor.fetchall()
+            print("Reading from db:")
+            print(record)
+            # result: [] with matching sequence_id
+            
         except sqlite3.Error as error:
             self.logger.error("Failed to read data from sqlite table")
+        except Exception as e:
+            self.logger.error(e)
         except:
             self.logger.info("This is not the sequence_id you are looking for.")
 
