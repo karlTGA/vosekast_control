@@ -2,6 +2,9 @@ import sqlite3
 from sqlite3 import Error
 import logging
 from vosekast_control.Log import LOGGER
+from vosekast_control.utils.Msg import DataMessage
+from vosekast_control.connectors import MQTTConnection
+
 
 
 class DBConnector:
@@ -55,24 +58,30 @@ class DBConnector:
         except Exception as e:
             self.logger.error(e)
 
-    # todo
-    def read(self):
-        self.cursor.execute("SELECT * FROM sequence_values")
+    # todo read
+    def read(self, data):
+        data = data.get("data")
+        self.cursor.execute("SELECT * FROM sequence_values WHERE data = ?", (data,))
         record = self.cursor.fetchall()
+        return record
 
     # get sequence_id data from db
     def get_sequence_data(self, data):
-
-        # sample sequence_id for testing: 61986369442
-        sequence_id = data
+        
+        # data = {"sequence_id": "61986369442"}
+        sequence_id = data.get("sequence_id")
         
         try:
-            sequence_id_query = ('sequence_id',)
+            self.logger.debug(f"DB lookup for sequence_id: {sequence_id}")
+            sequence_id_query = (sequence_id,)
             self.cursor.execute("SELECT * FROM sequence_values WHERE sequence_id = ?", sequence_id_query)
             record = self.cursor.fetchall()
-            print("Reading from db:")
-            print(record)
-            # result: [] with matching sequence_id
+            
+            # send data to mqtt
+            MQTTConnection.publish_message(
+                DataMessage("db_lookup", sequence_id, record)
+            )
+            return record
             
         except sqlite3.Error as error:
             self.logger.error("Failed to read data from sqlite table")
