@@ -6,7 +6,6 @@ from vosekast_control.utils.Msg import DataMessage
 from vosekast_control.connectors import MQTTConnection
 
 
-
 class DBConnector:
     def __init__(self):
         self._db_connection = None
@@ -25,7 +24,7 @@ class DBConnector:
 
         self._db_connection.execute(
             """CREATE TABLE IF NOT EXISTS sequence_values (
-            timestamp real,
+            timestamp integer,
             scale_value real,
             flow_current real,
             flow_average real,
@@ -33,7 +32,7 @@ class DBConnector:
             pump_measuring_tank_state real,
             measuring_drain_valve_state integer,
             measuring_tank_switch_state integer,
-            sequence_id real
+            sequence_id text
             )"""
         )
         self._db_connection.commit()
@@ -60,6 +59,7 @@ class DBConnector:
 
     # todo read
     def read(self, data):
+        # https://pynative.com/python-sqlite-select-from-table/
         data = data.get("data")
         self.cursor.execute("SELECT * FROM sequence_values WHERE data = ?", (data,))
         record = self.cursor.fetchall()
@@ -67,28 +67,27 @@ class DBConnector:
 
     # get sequence_id data from db
     def get_sequence_data(self, data):
-        
+
         # data = {"sequence_id": "61986369442"}
         sequence_id = data.get("sequence_id")
-        
+
         try:
             self.logger.debug(f"DB lookup for sequence_id: {sequence_id}")
             sequence_id_query = (sequence_id,)
             self.cursor.execute("SELECT * FROM sequence_values WHERE sequence_id = ?", sequence_id_query)
             record = self.cursor.fetchall()
-            
+
             # send data to mqtt
             MQTTConnection.publish_message(
                 DataMessage("db_lookup", sequence_id, record)
             )
+            print(record)
             return record
-            
-        except sqlite3.Error as error:
-            self.logger.error("Failed to read data from sqlite table")
+
+        except sqlite3.Error as e:
+            self.logger.error("Failed to read data from sqlite table", e)
         except Exception as e:
             self.logger.error(e)
-        except:
-            self.logger.info("This is not the sequence_id you are looking for.")
 
     def close(self):
         try:

@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from logging import LogRecord
 import logging
+from typing import List
 
 
 class Message:
@@ -79,10 +80,11 @@ class StatusMessage(Message):
 
         return message_object
 
+
 class DataMessage(Message):
     type = "data"
 
-    def __init__(self, data_type: str, identifier: str, payload: str):
+    def __init__(self, data_type: str, identifier: str, payload: List[tuple]):
         super().__init__()
 
         self.type = data_type
@@ -101,24 +103,25 @@ class DataMessage(Message):
 
         return message_object
 
-class Command(Message):
-    type = "command"
 
-    def __init__(self, sensor_id, description, state):
-        super().__init__()
+# class Command(Message):
+#     type = "command"
 
-        self.sensor_id = sensor_id
-        self.description = description
-        self.state = state
+#     def __init__(self, sensor_id, description, state):
+#         super().__init__()
 
-    @property
-    def topic(self):
-        return f"vosekast/command/{self.sensor_id}"
+#         self.sensor_id = sensor_id
+#         self.description = description
+#         self.state = state
 
-    def get_message_object(self):
-        message_object = super().get_message_object()
-        message_object["sensor_id"] = self.sensor_id
-        message_object["description"] = self.description
-        message_object["state"] = self.state
+#     @property
+#     def topic(self):
+#         return f"vosekast/command/{self.sensor_id}"
 
-        return message_object
+#     def get_message_object(self):
+#         message_object = super().get_message_object()
+#         message_object["sensor_id"] = self.sensor_id
+#         message_object["description"] = self.description
+#         message_object["state"] = self.state
+
+#         return message_object

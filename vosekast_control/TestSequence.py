@@ -147,8 +147,9 @@ class TestSequence:
                     }
                     DBConnection.insert_datapoint(data)
 
-                except Exception:
-                    self.logger.warning("Error sending to db.")
+                except Exception as e:
+                    self.logger.error("Error sending to db.")
+                    self.logger.error(e)
 
                 self.logger.debug(
                     str(scale_actual)
