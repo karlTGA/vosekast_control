@@ -94,7 +94,7 @@ class TestSequence:
     async def write_loop(self):
         try:
             # get start time
-            time_sequence_t0 = time.time() * 1000
+            time_sequence_t0 = time.time()
             delta_time_sequence = 0
 
             # tare scale
@@ -121,8 +121,8 @@ class TestSequence:
                     )
                 if self.emulate:
                     # timeout
-                    time_sequence_t1 = time.time() * 1000
-                    delta_time_sequence = (time_sequence_t1 - time_sequence_t0) / 1000
+                    time_sequence_t1 = time.time()
+                    delta_time_sequence = time_sequence_t1 - time_sequence_t0
 
                     scale_actual = round(self.scale.scale_history[0], 5)
                 # if not emulate use scale value

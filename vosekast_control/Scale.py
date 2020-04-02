@@ -46,7 +46,7 @@ class Scale:
         self.thread_readscale = Thread()
         self.emulate = emulate
         self.is_running = False
-        self.timestamp = time.time() * 1000
+        self.timestamp = 0
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
@@ -224,15 +224,6 @@ class Scale:
             elif len(split_line) == 2:
                 split_line_formatted = split_line[1]
 
-                # if split_line[0] == b'-':
-                #    self.logger.warning("Negative weight. Discarding value.")
-                #    self.logger.debug("Input: " + str(split_line))
-                #    return
-                # if split_line[1] == b'kg':
-                #    self.logger.info("Invalid input.")
-                #    self.logger.debug("Input: " + str(split_line))
-                #    return
-
                 split_line_str = split_line_formatted.decode("utf-8")
                 new_value = float(split_line_str)
                 return new_value
@@ -255,10 +246,10 @@ class Scale:
 
     def add_new_value(self, new_value):
 
-        self.timestamp = time.time() * 1000
+        timestamp = time.time() * 1000
 
         # deque scale history
-        self.scale_history.appendleft(self.timestamp)
+        self.scale_history.appendleft(timestamp)
         self.scale_history.appendleft(new_value)
 
         # calculate volume flow
