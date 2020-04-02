@@ -9,7 +9,7 @@ import logging
 import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
-from vosekast_control.connectors import MQTTConnection
+from vosekast_control.connectors import MQTTConnection, DBConnection
 
 
 # GPIO Assignment
@@ -281,6 +281,7 @@ class Vosekast:
 
         self.logger.debug("Vosekast stopped.")
 
+    # all devices publish their state via mqtt
     def state_overview(self):
         for device in self.tanks + self.pumps + self.valves + self.level_sensors:
             device.publish_state()
@@ -290,6 +291,7 @@ class Vosekast:
         target = command.get("target")
         target_id = command.get("target_id")
         command_id = command.get("command")
+        data = command.get("data")
 
         if target == "valve":
             for valve in self.valves:
@@ -302,15 +304,14 @@ class Vosekast:
                         return
                     else:
                         self.logger.warning(
-                            f"receive unknown command {command_id} for \
+                            f"Received unknown command {command_id} for \
                             target_id {target_id}."
                         )
 
                     return
 
             self.logger.warning(
-                f"target_id {target_id} could not \
-                is unknown."
+                f"target_id {target_id} unknown."
             )
 
         # pumps
@@ -326,13 +327,15 @@ class Vosekast:
                         pump.toggle()
                     else:
                         self.logger.warning(
-                            f"receive unknown command {command_id} for \
+                            f"Received unknown command {command_id} for \
                             target_id {target_id}."
                         )
 
                     return
 
-            self.logger.warning(f"target_id {target_id} is unknown.")
+            self.logger.warning(
+                f"target_id {target_id} unknown."
+            )
 
         # tanks
         elif target == "tank":
@@ -346,13 +349,15 @@ class Vosekast:
 
                     else:
                         self.logger.warning(
-                            f"receive unknown command {command_id} for \
+                            f"Received unknown command {command_id} for \
                             target_id {target_id}."
                         )
 
                     return
 
-            self.logger.warning(f"target_id {target_id} could not be found.")
+            self.logger.warning(
+                f"target_id {target_id} unknown."
+            )
 
         # scales
         elif target == "scale":
@@ -370,13 +375,15 @@ class Vosekast:
 
                 else:
                     self.logger.warning(
-                        f"receive unknown command {command_id} for \
+                        f"Received unknown command {command_id} for \
                             target_id {target_id}."
                     )
 
                 return
 
-            self.logger.warning(f"target_id {target_id} could not be found.")
+            self.logger.warning(
+                f"target_id {target_id} unknown."
+            )
 
         # system
         elif target == "system":
@@ -397,22 +404,26 @@ class Vosekast:
                     self.testsequence.pause_sequence()
                 elif command_id == "continue_sequence":
                     await self.testsequence.continue_sequence()
-                elif command["command"] == "state_overview":
+                elif command_id == "state_overview":
                     self.state_overview()
+                elif command_id == "get_sequence_data":
+                    DBConnection.get_sequence_data(data)
 
                 else:
                     self.logger.warning(
-                        f"receive unknown command {command_id} for \
+                        f"Received unknown command {command_id} for \
                             target_id {target_id}."
                     )
 
                 return
 
-            self.logger.warning(f"target_id {target_id} is unknown.")
+            self.logger.warning(
+                f"target_id {target_id} unknown."
+            )
 
         # exception
         else:
-            self.logger.warning(f"command target {target} is unknown.")
+            self.logger.warning(f"command target {target} unknown.")
 
 
 class NoGPIOControllerError(Exception):

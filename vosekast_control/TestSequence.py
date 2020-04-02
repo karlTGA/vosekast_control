@@ -2,10 +2,7 @@ import logging
 import asyncio
 import random
 from vosekast_control.Log import LOGGER
-
-# import sqlite3
-# from sqlite3 import Error
-from datetime import datetime
+import time
 from vosekast_control.connectors import DBConnection
 
 
@@ -97,7 +94,7 @@ class TestSequence:
     async def write_loop(self):
         try:
             # get start time
-            time_sequence_t0 = datetime.now()
+            time_sequence_t0 = time.time()
             delta_time_sequence = 0
 
             # tare scale
@@ -124,9 +121,8 @@ class TestSequence:
                     )
                 if self.emulate:
                     # timeout
-                    time_sequence_t1 = datetime.now()
-                    time_sequence_passed = time_sequence_t1 - time_sequence_t0
-                    delta_time_sequence = time_sequence_passed.total_seconds()
+                    time_sequence_t1 = time.time()
+                    delta_time_sequence = time_sequence_t1 - time_sequence_t0
 
                     scale_actual = round(self.scale.scale_history[0], 5)
                 # if not emulate use scale value
@@ -147,8 +143,9 @@ class TestSequence:
                     }
                     DBConnection.insert_datapoint(data)
 
-                except Exception:
-                    self.logger.warning("Error sending to db.")
+                except Exception as e:
+                    self.logger.error("Error sending to db.")
+                    self.logger.error(e)
 
                 self.logger.debug(
                     str(scale_actual)

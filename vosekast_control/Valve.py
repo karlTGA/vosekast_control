@@ -1,7 +1,6 @@
 import logging
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
-
 from vosekast_control.connectors import MQTTConnection
 
 
@@ -38,7 +37,7 @@ class Valve:
         # init the gpio pin
         self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
-    # todo bounce
+    # todo fix bounce
     def close(self):
         """
         function to close the valve or switch

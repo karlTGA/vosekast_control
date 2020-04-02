@@ -2,6 +2,7 @@ import serial
 from collections import deque
 from threading import Thread
 from time import sleep
+import time
 import logging
 from vosekast_control.Log import LOGGER
 from random import uniform
@@ -9,7 +10,6 @@ from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import DBConnection
-from datetime import datetime
 from vosekast_control.connectors import MQTTConnection
 
 from typing import Deque
@@ -46,7 +46,6 @@ class Scale:
         self.thread_readscale = Thread()
         self.emulate = emulate
         self.is_running = False
-        self.timestamp = datetime.now()
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
@@ -71,7 +70,6 @@ class Scale:
             self.logger.info("Opening connection to scale.")
         else:
             self.logger.info("Emulating open_connection scale.")
-            # self.connection = True
 
     def close_connection(self):
         if not self.emulate:
@@ -93,10 +91,6 @@ class Scale:
 
             if new_value is not None:
                 self.add_new_value(new_value)
-                # self.timestamp = datetime.now()
-                # # deque scale history
-                # self.scale_history.appendleft(self.timestamp)
-                # self.scale_history.appendleft(new_value)
             else:
                 self.logger.warning("Reached loop with new value = None.")
 
@@ -197,11 +191,20 @@ class Scale:
 
         elif self.emulate:
             self.scale_input_buffer.appendleft(0)
+
             while self.is_running:
-                scale_input = 0.0 + uniform(0.0, 0.2)
-                self.scale_publish = True
+
+                if self.vosekast.state == self.vosekast.MEASURING:
+                    scale_input += uniform(0.4, 0.5)
+                    self.scale_publish = True
+                else:
+                    scale_input = 0.0 + uniform(0.0, 0.2)
+                    self.scale_publish = False
+
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(1)
+
+            scale_input = 0
 
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
@@ -219,15 +222,6 @@ class Scale:
 
             elif len(split_line) == 2:
                 split_line_formatted = split_line[1]
-
-                # if split_line[0] == b'-':
-                #    self.logger.warning("Negative weight. Discarding value.")
-                #    self.logger.debug("Input: " + str(split_line))
-                #    return
-                # if split_line[1] == b'kg':
-                #    self.logger.info("Invalid input.")
-                #    self.logger.debug("Input: " + str(split_line))
-                #    return
 
                 split_line_str = split_line_formatted.decode("utf-8")
                 new_value = float(split_line_str)
@@ -251,9 +245,10 @@ class Scale:
 
     def add_new_value(self, new_value):
 
-        self.timestamp = datetime.now()
+        timestamp = time.time() * 1000
+
         # deque scale history
-        self.scale_history.appendleft(self.timestamp)
+        self.scale_history.appendleft(timestamp)
         self.scale_history.appendleft(new_value)
 
         # calculate volume flow
@@ -265,10 +260,9 @@ class Scale:
                 delta_weight = abs(delta)
 
                 duration = self.scale_history[1] - self.scale_history[3]
-                abs_duration = abs(duration)
-                delta_time = abs_duration.total_seconds()
+                delta_time = abs(duration)
 
-                weight_per_time = delta_weight / delta_time
+                weight_per_time = (delta_weight / delta_time) * 1000
 
                 # density of water at normal pressure:
                 # 10°C: 0.999702
@@ -286,7 +280,6 @@ class Scale:
 
         # publish via mqtt
         # new_value = weight measured by scale
-        # volume_flow = calculated volume flow
 
         if not self.scale_publish:
             return
@@ -294,9 +287,6 @@ class Scale:
             MQTTConnection.publish_message(
                 StatusMessage("scale", self.name, f"{new_value} Kg")
             )
-            # if volume_flow is not None:
-            #     self.mqtt.publish_message(StatusMessage(
-            #         "scale", self.name, f"{volume_flow} L/s"))
 
             if len(self.last_values) == 10:
                 # calculate square mean error
@@ -320,7 +310,7 @@ class Scale:
             flow_average = round(volume_flow_average, 5)
             return flow_average
         else:
-            return
+            return 0
 
     def get_stable_value(self):
         if self.stable:

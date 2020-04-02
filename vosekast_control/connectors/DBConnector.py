@@ -2,6 +2,8 @@ import sqlite3
 from sqlite3 import Error
 import logging
 from vosekast_control.Log import LOGGER
+from vosekast_control.utils.Msg import DataMessage
+from vosekast_control.connectors import MQTTConnection
 
 
 class DBConnector:
@@ -13,6 +15,7 @@ class DBConnector:
     def connect(self):
         try:
             self._db_connection = sqlite3.connect("sequence_values.db")
+            self.cursor = self._db_connection.cursor()
             self.logger.info("Established DB connection.")
         except Error as e:
             self.logger.warning(e)
@@ -21,15 +24,15 @@ class DBConnector:
 
         self._db_connection.execute(
             """CREATE TABLE IF NOT EXISTS sequence_values (
-            timestamp real,
+            timestamp integer,
             scale_value real,
             flow_current real,
             flow_average real,
             pump_constant_tank_state real,
             pump_measuring_tank_state real,
-            measuring_drain_valve_state integer,
-            measuring_tank_switch_state integer,
-            sequence_id real
+            measuring_drain_valve_state text,
+            measuring_tank_switch_state text,
+            sequence_id text
             )"""
         )
         self._db_connection.commit()
@@ -54,12 +57,37 @@ class DBConnector:
         except Exception as e:
             self.logger.error(e)
 
-    # todo
-    def read(self):
-        pass
+    # todo read
+    def read(self, data):
+        # https://pynative.com/python-sqlite-select-from-table/
+        data = data.get("data")
+        self.cursor.execute("SELECT * FROM sequence_values WHERE data = ?", (data,))
+        record = self.cursor.fetchall()
+        return record
 
-    # (todo) find while loop that does not sleep
-    # probably fixed, needs testing
+    # get sequence_id data from db
+    def get_sequence_data(self, data):
+
+        # data = {"sequence_id": "61986369442"}
+        sequence_id = data.get("sequence_id")
+
+        try:
+            self.logger.debug(f"DB lookup for sequence_id: {sequence_id}")
+            sequence_id_query = (sequence_id,)
+            self.cursor.execute("SELECT * FROM sequence_values WHERE sequence_id = ?", sequence_id_query)
+            record = self.cursor.fetchall()
+
+            # send data to mqtt
+            MQTTConnection.publish_message(
+                DataMessage("db_lookup", sequence_id, record)
+            )
+            print(record)
+            return record
+
+        except sqlite3.Error as e:
+            self.logger.error("Failed to read data from sqlite table", e)
+        except Exception as e:
+            self.logger.error(e)
 
     def close(self):
         try:
