@@ -46,7 +46,6 @@ class Scale:
         self.thread_readscale = Thread()
         self.emulate = emulate
         self.is_running = False
-        self.timestamp = 0
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
