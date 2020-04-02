@@ -84,7 +84,7 @@ class StatusMessage(Message):
 class DataMessage(Message):
     type = "data"
 
-    def __init__(self, data_type: str, identifier: str, payload: List[tuple]):
+    def __init__(self, data_type: str, identifier: str, payload: List[tuple[int, float, float, float, str, str, str, str, str]]):
         super().__init__()
 
         self.type = data_type

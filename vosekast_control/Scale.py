@@ -10,7 +10,6 @@ from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import DBConnection
-from datetime import datetime
 from vosekast_control.connectors import MQTTConnection
 
 from typing import Deque
@@ -47,7 +46,7 @@ class Scale:
         self.thread_readscale = Thread()
         self.emulate = emulate
         self.is_running = False
-        self.timestamp = time.time()*1000
+        self.timestamp = time.time() * 1000
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
@@ -195,7 +194,7 @@ class Scale:
             self.scale_input_buffer.appendleft(0)
 
             while self.is_running:
-                
+
                 if self.vosekast.state == self.vosekast.MEASURING:
                     scale_input += uniform(0.2, 0.3)
                     self.scale_publish = True
@@ -205,7 +204,7 @@ class Scale:
 
                 self.scale_input_buffer.appendleft(scale_input)
                 sleep(1)
-            
+
             scale_input = 0
 
     def read_value_from_scale(self):
@@ -256,7 +255,7 @@ class Scale:
 
     def add_new_value(self, new_value):
 
-        self.timestamp = time.time()*1000
+        self.timestamp = time.time() * 1000
 
         # deque scale history
         self.scale_history.appendleft(self.timestamp)
@@ -273,7 +272,7 @@ class Scale:
                 duration = self.scale_history[1] - self.scale_history[3]
                 delta_time = abs(duration)
 
-                weight_per_time = (delta_weight / delta_time)*1000
+                weight_per_time = (delta_weight / delta_time) * 1000
 
                 # density of water at normal pressure:
                 # 10°C: 0.999702

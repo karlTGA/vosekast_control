@@ -30,8 +30,8 @@ class DBConnector:
             flow_average real,
             pump_constant_tank_state real,
             pump_measuring_tank_state real,
-            measuring_drain_valve_state integer,
-            measuring_tank_switch_state integer,
+            measuring_drain_valve_state text,
+            measuring_tank_switch_state text,
             sequence_id text
             )"""
         )

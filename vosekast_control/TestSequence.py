@@ -2,9 +2,6 @@ import logging
 import asyncio
 import random
 from vosekast_control.Log import LOGGER
-
-# import sqlite3
-# from sqlite3 import Error
 from datetime import datetime
 from vosekast_control.connectors import DBConnection
 
