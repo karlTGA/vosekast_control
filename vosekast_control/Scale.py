@@ -196,7 +196,7 @@ class Scale:
             while self.is_running:
 
                 if self.vosekast.state == self.vosekast.MEASURING:
-                    scale_input += uniform(0.2, 0.3)
+                    scale_input += uniform(0.4, 0.5)
                     self.scale_publish = True
                 else:
                     scale_input = 0.0 + uniform(0.0, 0.2)
