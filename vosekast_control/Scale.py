@@ -130,19 +130,21 @@ class Scale:
                 f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n"
             )
             + str(
-                f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n"
+                f"measuring_tank_ready: {str(self.vosekast.valves[MEASURING_DRAIN_VALVE].is_closed and not self.vosekast.tanks[MEASURING_TANK].is_filled)}\n"
             )
             + str(
-                f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n"
+                f"constant_pump_running: {str(self.vosekast.pumps[PUMP_CONSTANT_TANK].is_running)}\n"
             )
             + str(
-                f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n"
+                f"measuring_drain_valve.is_closed: {str(self.vosekast.valves[MEASURING_DRAIN_VALVE].is_closed)}\n"
             )
             + str(
-                f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n"
+                f"measuring_tank.is_filled: {str(self.vosekast.tanks[MEASURING_TANK].is_filled)}\n"
             )
             + str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n")
-            + str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
+            + str(
+                f"measuring_tank state: {str(self.vosekast.tanks[MEASURING_TANK].state)}\n"
+            )
             + str(f"db connection established: {str(DBConnection.isConnected)}")
         )
         if not self.emulate:

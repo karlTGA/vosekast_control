@@ -4,6 +4,14 @@ import random
 from vosekast_control.Log import LOGGER
 import time
 from vosekast_control.connectors import DBConnection
+from vosekast_control.utils.Constants import (
+    MEASURING_TANK,
+    MEASURING_DRAIN_VALVE,
+    PUMP_CONSTANT_TANK,
+    PUMP_MEASURING_TANK,
+    MEASURING_TANK_SWITCH,
+    CONSTANT_TANK,
+)
 
 
 class TestSequence:
@@ -50,14 +58,14 @@ class TestSequence:
 
                 # only fill if not already full
                 if (
-                    not self.vosekast.constant_tank.state
-                    == self.vosekast.constant_tank.FILLED
+                    not self.vosekast.tanks[CONSTANT_TANK].state
+                    == self.vosekast.tanks[CONSTANT_TANK].FILLED
                 ):
-                    self.vosekast.constant_tank.state = (
-                        self.vosekast.constant_tank.IS_FILLING
-                    )
+                    self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
+                        CONSTANT_TANK
+                    ].IS_FILLING
                     # await constant_tank full
-                    await self.vosekast.constant_tank.fill()
+                    await self.vosekast.tanks[CONSTANT_TANK].fill()
                 else:
                     self.vosekast.prepare_measuring()
 
@@ -72,6 +80,7 @@ class TestSequence:
                 elif self.state == self.STOPPED or self.state == self.PAUSED:
                     return
 
+                self.logger.debug("Vosekast ready to measure.")
                 # turn on measuring pump, start measuring
                 await self.start_measuring()
 
@@ -86,7 +95,9 @@ class TestSequence:
                 self.logger.error("Error, aborting test sequence.")
 
                 await self.stop_sequence()
-                self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED
+                self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
+                    CONSTANT_TANK
+                ].STOPPED
                 self.vosekast.state = self.vosekast.RUNNING
         else:
             self.logger.info("Already measuring.")
@@ -109,16 +120,16 @@ class TestSequence:
             # send values to db
             while (
                 self.state == self.MEASURING
-                and not self.vosekast.measuring_tank.is_filled
+                and not self.vosekast.tanks[MEASURING_TANK].is_filled
             ):
                 # get flow average
                 flow_average = self.scale.flow_average()
 
                 # emulate measuring_tank filled
                 if self.emulate and delta_time_sequence >= 30:
-                    self.vosekast.measuring_tank.state = (
-                        self.vosekast.measuring_tank.FILLED
-                    )
+                    self.vosekast.tanks[MEASURING_TANK].state = self.vosekast.tanks[
+                        MEASURING_TANK
+                    ].FILLED
                 if self.emulate:
                     # timeout
                     time_sequence_t1 = time.time()
@@ -135,10 +146,16 @@ class TestSequence:
                         "scale_value": scale_actual,
                         "flow_current": self.scale.flow_history[0],
                         "flow_average": flow_average,
-                        "pump_constant_tank_state": self.vosekast.pump_constant_tank.state,
+                        "pump_constant_tank_state": self.vosekast.pumps[
+                            PUMP_CONSTANT_TANK
+                        ].state,
                         "pump_measuring_tank_state": self.vosekast.pump_measuring_tank.state,
-                        "measuring_drain_valve_state": self.vosekast.measuring_drain_valve.state,
-                        "measuring_tank_switch_state": self.vosekast.measuring_tank_switch.state,
+                        "measuring_drain_valve_state": self.vosekast.valves[
+                            MEASURING_DRAIN_VALVE
+                        ].state,
+                        "measuring_tank_switch_state": self.vosekast.valves[
+                            MEASURING_TANK_SWITCH
+                        ].state,
                         "sequence_id": sequence_id,
                     }
                     DBConnection.insert_datapoint(data)
@@ -156,9 +173,9 @@ class TestSequence:
                 await asyncio.sleep(1)
 
             # interrupt if measuring_tank full
-            if self.vosekast.measuring_tank.is_filled:
-                self.vosekast.measuring_tank_switch.close()
-                self.vosekast.measuring_tank.drain_tank()
+            if self.vosekast.tanks[MEASURING_TANK].is_filled:
+                self.vosekast.valves[MEASURING_TANK_SWITCH].close()
+                self.vosekast.tanks[MEASURING_TANK].drain_tank()
                 self.state = self.STOPPED
                 self.logger.debug(
                     "Draining measuring tank, opening Measuring Tank bypass."
@@ -170,19 +187,19 @@ class TestSequence:
 
     async def start_measuring(self):
         try:
-            self.vosekast.measuring_tank.prepare_to_fill()
-            self.vosekast.measuring_tank_switch.close()
-            self.vosekast.pump_measuring_tank.start()
+            self.vosekast.tanks[MEASURING_TANK].prepare_to_fill()
+            self.vosekast.valves[MEASURING_TANK_SWITCH].close()
+            self.vosekast.pumps[PUMP_MEASURING_TANK].start()
             self.logger.debug("Measuring Pump spin up. Please wait.")
 
             await asyncio.sleep(2)
 
-            self.vosekast.measuring_tank_switch.open()
+            self.vosekast.valves[MEASURING_TANK_SWITCH].open()
             self.logger.debug("Measuring started.")
 
         except Exception:
             self.logger.debug("Measuring aborted.")
-            self.vosekast.pump_measuring_tank.stop()
+            self.vosekast.pumps[PUMP_MEASURING_TANK].stop()
             self.vosekast.state = self.vosekast.RUNNING
 
     async def stop_sequence(self):
@@ -192,7 +209,7 @@ class TestSequence:
             or self.state == self.WAITING
         ):
             self.state = self.STOPPED
-            self.vosekast.measuring_tank_switch.close()
+            self.vosekast.valves[MEASURING_TANK_SWITCH].close()
             self.logger.debug("Stopped test sequence")
             self.vosekast.state = self.vosekast.RUNNING
 
@@ -205,10 +222,12 @@ class TestSequence:
             self.state = self.PAUSED
 
             # set fill countdown to False
-            self.vosekast.constant_tank.state = self.vosekast.constant_tank.PAUSED
+            self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
+                CONSTANT_TANK
+            ].PAUSED
 
             # switch to measuring_tank bypass
-            self.vosekast.measuring_tank_switch.close()
+            self.vosekast.valves[MEASURING_TANK_SWITCH].close()
 
             self.logger.info("Paused. Measuring Tank bypass open.")
 
@@ -229,9 +248,11 @@ class TestSequence:
             self.state = self.MEASURING
 
             # set fill countdown to True
-            self.vosekast.constant_tank.state = self.vosekast.constant_tank.IS_FILLING
+            self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
+                CONSTANT_TANK
+            ].IS_FILLING
 
-            self.vosekast.measuring_tank_switch.open()
+            self.vosekast.valves[MEASURING_TANK_SWITCH].open()
             self.logger.info("Continuing. Measuring Tank is being filled.")
             await self.write_loop()
         elif self.state == self.WAITING or self.state == self.MEASURING:

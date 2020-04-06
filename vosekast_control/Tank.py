@@ -110,7 +110,8 @@ class Tank:
                     await asyncio.sleep(1)
 
                 self.logger.info(
-                    "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
+                    "Measuring Tank state: "
+                    + str(self.vosekast.tanks[MEASURING_TANK].state)
                 )
                 self.logger.info(
                     "Constant Tank state: " + str(self.vosekast.constant_tank.state)
