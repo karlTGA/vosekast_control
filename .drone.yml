@@ -26,17 +26,30 @@ steps:
 
   - name: Typescript Linting
     image: node
+    volumes:
+      - name: cache_yarn
+        path: /drone/src/frontend/node_modules
     commands:
       - cd frontend
       - yarn eslint . --ext .js,.jsx,.ts,.tsx
 
   - name: Python Linting
     image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
     commands:
       - /root/.poetry/bin/poetry run flake8 vosekast_control
 
   - name: Python Testing
     image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
     commands:
       - /root/.poetry/bin/poetry run pytest test
 
