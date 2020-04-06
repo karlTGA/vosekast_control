@@ -4,7 +4,7 @@ import {
   VosekastStore,
   PumpState,
   ValveState,
-  TankState
+  TankState,
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
@@ -76,7 +76,7 @@ class MQTTConnector {
       type: "command",
       target,
       target_id: targetId, // eslint-disable-line @typescript-eslint/camelcase
-      command
+      command,
     });
   };
 
@@ -86,7 +86,7 @@ class MQTTConnector {
 
   handleConnect = () => {
     if (this.client != null) {
-      MQTTStore.update(s => {
+      MQTTStore.update((s) => {
         s.isConnected = true;
         s.connectionError = undefined;
         s.mqttInterrupted = false;
@@ -125,13 +125,13 @@ class MQTTConnector {
   };
 
   handleDissconnect = () => {
-    MQTTStore.update(s => {
+    MQTTStore.update((s) => {
       s.isConnected = false;
     });
   };
 
   handleError = (error: Error) => {
-    MQTTStore.update(s => {
+    MQTTStore.update((s) => {
       s.connectionError = error;
     });
 
@@ -140,7 +140,7 @@ class MQTTConnector {
   };
 
   handleOffline = () => {
-    MQTTStore.update(s => {
+    MQTTStore.update((s) => {
       s.mqttInterrupted = true;
     });
 
@@ -150,14 +150,14 @@ class MQTTConnector {
   handleStatusMessage = (message: StatusMessage) => {
     switch (message.device_type) {
       case "scale": {
-        VosekastStore.update(s => {
+        VosekastStore.update((s) => {
           s.scaleState.value = message.new_state;
         });
         break;
       }
       case "system": {
         if (message.device_id === "health" && message.new_state === "OK") {
-          VosekastStore.update(s => {
+          VosekastStore.update((s) => {
             s.isHealthy = message.new_state === "OK";
             s.lastHealthUpdate = moment();
           });
@@ -167,9 +167,9 @@ class MQTTConnector {
       case "pump": {
         const {
           device_id: pumpId,
-          new_state: pumpState
+          new_state: pumpState,
         } = message as PumpStatusMessage;
-        VosekastStore.update(s => {
+        VosekastStore.update((s) => {
           s.pumpStates.set(pumpId, pumpState);
         });
         break;
@@ -177,9 +177,9 @@ class MQTTConnector {
       case "valve": {
         const {
           device_id: valveId,
-          new_state: valveState
+          new_state: valveState,
         } = message as ValveStatusMessage;
-        VosekastStore.update(s => {
+        VosekastStore.update((s) => {
           s.valveStates.set(valveId, valveState);
         });
         break;
@@ -187,9 +187,9 @@ class MQTTConnector {
       case "tank": {
         const {
           device_id: tankId,
-          new_state: tankState
+          new_state: tankState,
         } = message as TankStatusMessage;
-        VosekastStore.update(s => {
+        VosekastStore.update((s) => {
           s.tankStates.set(tankId, tankState);
         });
         break;
@@ -221,5 +221,5 @@ class MQTTConnector {
 }
 
 // export singleton for reusing of the connection
-const MQTTConnection = new MQTTConnector("ws://localhost:9001");
+const MQTTConnection = new MQTTConnector("ws://localhost:8083/mqtt");
 export default MQTTConnection;
