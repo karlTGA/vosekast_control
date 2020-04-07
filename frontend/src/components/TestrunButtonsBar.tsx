@@ -6,8 +6,29 @@ import {
   BorderOutlined,
 } from "@ant-design/icons";
 import { TestrunInfos } from "../Store";
+import MQTTConnection from "../utils/MQTTConnection";
 
-export default function SequenceButtonsBar({
+function startRun() {
+  MQTTConnection.publishCommand("system", "testrun_controller", "start_run");
+}
+
+function stopRun() {
+  MQTTConnection.publishCommand(
+    "system",
+    "testrun_controller",
+    "stop_current_run"
+  );
+}
+
+function pauseRun() {
+  MQTTConnection.publishCommand(
+    "system",
+    "testrun_controller",
+    "pause_current_run"
+  );
+}
+
+export default function TestrunButtonsBar({
   testrun,
 }: {
   testrun?: TestrunInfos;
@@ -19,15 +40,15 @@ export default function SequenceButtonsBar({
           ? `Current Testrun: ${testrun.id}`
           : "No testrun running."}
       </div>
-      <Button>
+      <Button onClick={startRun}>
         <CaretRightOutlined />
         Start
       </Button>
-      <Button>
+      <Button onClick={stopRun}>
         <BorderOutlined />
         Stop
       </Button>
-      <Button>
+      <Button onClick={pauseRun}>
         <PauseOutlined />
         Pause
       </Button>
