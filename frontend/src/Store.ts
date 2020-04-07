@@ -29,6 +29,15 @@ export interface ScaleState {
   value: string;
 }
 
+export interface TestrunInfos {
+  id: string;
+  startedAt: number;
+  createdAt: number;
+  state: string;
+  emulated: boolean;
+  results?: object;
+}
+
 export interface MQTTState {
   isConnected: boolean;
   connectionError?: Error;
@@ -44,6 +53,7 @@ export interface VosekastState {
   valveStates: Map<string, ValveState>;
   tankStates: Map<string, TankState>;
   scaleState: ScaleState;
+  testruns: Map<string, TestrunInfos>;
 }
 
 export const MQTTStore = new Store<MQTTState>({
@@ -62,6 +72,7 @@ export const VosekastStore = new Store<VosekastState>({
   scaleState: {
     value: "",
   },
+  testruns: new Map(),
 });
 
 // reaction that set health state of vosekast negativ if no health message was reported for a long time

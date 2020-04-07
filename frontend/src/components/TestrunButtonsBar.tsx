@@ -5,11 +5,20 @@ import {
   PauseOutlined,
   BorderOutlined,
 } from "@ant-design/icons";
+import { TestrunInfos } from "../Store";
 
-export default function SequenceButtonsBar() {
+export default function SequenceButtonsBar({
+  testrun,
+}: {
+  testrun?: TestrunInfos;
+}) {
   return (
     <div className="sequence-buttons-bar">
-      <div className="current-sequence-info">{`Current Sequence: 123456678`}</div>
+      <div className="current-sequence-info">
+        {testrun != null
+          ? `Current Testrun: ${testrun.id}`
+          : "No testrun running."}
+      </div>
       <Button>
         <CaretRightOutlined />
         Start

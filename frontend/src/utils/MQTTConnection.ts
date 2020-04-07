@@ -9,8 +9,10 @@ import {
 import { message } from "antd";
 import moment from "moment";
 
-type MessageTypes = "status" | "log" | "message" | "command";
+type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
+type InfoSystems = "testrun_controller";
+type DataSources = "test_results";
 
 interface Message {
   type: MessageTypes;
@@ -36,6 +38,24 @@ interface LogMessage extends Message {
   sensor_id: "Pump" | "Valve";
   message: string;
   level: "INFO" | "DEBUG" | "WARNING" | "ERROR";
+}
+
+interface InfoMessage extends Message {
+  type: "info";
+  system: InfoSystems;
+  payload: {
+    id: string;
+    startedAt: number;
+    createdAt: number;
+    state: string;
+    emulated: boolean;
+  };
+}
+
+interface DataMessage extends Message {
+  type: "data";
+  id?: DataSources;
+  payload?: Array<Object>;
 }
 
 interface PumpStatusMessage extends StatusMessage {
@@ -109,6 +129,12 @@ class MQTTConnector {
         break;
       case "log":
         this.handleLogMessage(message as LogMessage);
+        break;
+      case "info":
+        this.handleInfoMessage(message as InfoMessage);
+        break;
+      case "data":
+        this.handleDataMessage(message as DataMessage);
         break;
       case "message":
         break;
@@ -198,6 +224,30 @@ class MQTTConnector {
         console.log(`Receive unknown message: ${JSON.stringify(message)}`);
       }
     }
+  };
+
+  handleInfoMessage = (message: InfoMessage) => {
+    const run_id = message.payload.id;
+
+    VosekastStore.update((s) => {
+      s.testruns.set(run_id, message.payload);
+    });
+  };
+
+  handleDataMessage = (message: DataMessage) => {
+    const run_id = message.id;
+    const data = message.payload;
+    if (run_id == null || message.payload == null) {
+      console.warn("Got data message with invalid format!");
+      return;
+    }
+    VosekastStore.update((s) => {
+      const testrun = s.testruns.get(run_id);
+
+      if (testrun == null) return;
+      testrun.results = data;
+      s.testruns.set(run_id, testrun);
+    });
   };
 
   handleLogMessage = (message: LogMessage) => {

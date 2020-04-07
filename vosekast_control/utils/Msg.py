@@ -96,8 +96,8 @@ class InfoMessage(Message):
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object["system"] = self.system
-        message_object["info"] = json.dumps(self.info)
+        message_object["id"] = self.system
+        message_object["payload"] = self.info
 
         return message_object
 
@@ -118,7 +118,6 @@ class DataMessage(Message):
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object["type"] = self.type
         message_object["id"] = self.id
         message_object["payload"] = self.payload
 

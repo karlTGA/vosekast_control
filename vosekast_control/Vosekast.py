@@ -419,9 +419,13 @@ class Vosekast:
             self.state_overview()
         elif command_id == "get_test_results":
             run_id = data.get("run_id")
+            if run_id is None:
+                self.logger.warn("Got test result request without run id.")
+                return
+
             data = self.testrun_controller.get_testresults(run_id=data.get("run_id"))
             MQTTConnection.publish_message(DataMessage("test_results", run_id, data))
-        elif command_id == "get_current_run":
+        elif command_id == "get_current_run_infos":
             infos = self.testrun_controller.get_current_run_infos()
             MQTTConnection.publish_message(InfoMessage("testrun_controller", infos))
         else:

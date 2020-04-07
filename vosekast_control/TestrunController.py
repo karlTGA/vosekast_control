@@ -178,7 +178,8 @@ class TestrunController:
             self.logger.info("Sequence has not yet been started.")
 
     def get_current_run_infos(self):
-        return self.current_run.get_infos()
+        if self.current_run is not None:
+            return self.current_run.get_infos()
 
     def get_testresults(self, run_id: Optional[str] = None):
         if run_id is None:
