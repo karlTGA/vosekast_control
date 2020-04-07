@@ -3,7 +3,7 @@ from vosekast_control.Tank import Tank
 from vosekast_control.LevelSensor import LevelSensor
 from vosekast_control.Valve import Valve
 from vosekast_control.Scale import Scale
-from vosekast_control.TestSequence import TestSequence
+from vosekast_control.TestrunController import TestrunController
 
 from typing import Dict
 import logging
@@ -70,12 +70,11 @@ class Vosekast:
             self._init_level_sensors()
             self._init_pumps()
             self._init_tanks()
+            self.scale = Scale(
+                name=SCALE_MEASURING, vosekast=self, emulate=self.emulate
+            )
 
-            # scale
-            self.scale = Scale(SCALE_MEASURING, self, emulate=self.emulate)
-
-            # testsequence
-            self.testsequence = TestSequence(self, emulate=self.emulate)
+            self.testrun_controller = TestrunController(vosekast=self)
 
             # change state if ok
             self._state = self.INITED
@@ -229,7 +228,7 @@ class Vosekast:
 
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
 
-    async def empty(self):
+    async def empty_tanks(self):
         self._state = self.EMPTYING
         self.logger.warning(
             "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow."
@@ -246,7 +245,7 @@ class Vosekast:
 
     async def shutdown(self):
 
-        self.clean()
+        await self.clean()
         self.logger.info("Shutting down.")
 
         await MQTTConnection.disconnect()
@@ -254,8 +253,8 @@ class Vosekast:
 
         self._app_control.shutdown()
 
-    def clean(self):
-        self.testsequence.state = self.testsequence.STOPPED
+    async def clean(self):
+        await self.testrun_controller.clean()
         self.tanks[MEASURING_TANK].drain_tank()
         self.logger.debug("Draining measuring tank.")
 
@@ -287,7 +286,7 @@ class Vosekast:
         if self.emulate:
             self.logger.info("Starting sequence in 7s.")
             await asyncio.sleep(7)
-            await self.testsequence.start_sequence()
+            await self.testrun_controller.start_run()
 
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)
@@ -405,25 +404,22 @@ class Vosekast:
     async def handle_system_command(self, command_id: str, data: Dict[str, str]):
         if command_id == "shutdown":
             await self.shutdown()
-        elif command_id == "clean":
-            self.clean()
         elif command_id == "prepare_measuring":
             self.prepare_measuring()
-        elif command_id == "start_sequence":
-            await self.testsequence.start_sequence()
-        elif command_id == "stop_sequence":
-            await self.testsequence.stop_sequence()
+        elif command_id == "start_run":
+            await self.testrun_controller.start_run()
+        elif command_id == "stop_current_run":
+            await self.testrun_controller.stop_run()
+        elif command_id == "pause_current_run":
+            self.testrun_controller.pause_run()
         elif command_id == "empty_tanks":
-            await self.empty()
-        elif command_id == "pause_sequence":
-            self.testsequence.pause_sequence()
-        elif command_id == "continue_sequence":
-            await self.testsequence.continue_sequence()
+            await self.empty_tanks()
         elif command_id == "state_overview":
             self.state_overview()
-        elif command_id == "get_sequence_data":
-            DBConnection.get_sequence_data(data)
-
+        elif command_id == "get_test_results":
+            self.testrun_controller.get_testresults(run_id=data.get("run_id"))
+        elif command_id == "get_current_sequnce":
+            self.testrun_controller.get_current_run_infos()
         else:
             self.logger.warning(
                 f"Received unknown command {command_id} for \

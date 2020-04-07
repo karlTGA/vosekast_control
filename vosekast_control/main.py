@@ -43,7 +43,7 @@ async def main(emulate=False):
 
     finally:
         app_control.shutdown()
-        vosekast.clean()
+        await vosekast.clean()
         DBConnection.close()
         GPIO.cleanup()
 
