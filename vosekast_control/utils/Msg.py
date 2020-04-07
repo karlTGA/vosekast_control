@@ -81,6 +81,27 @@ class StatusMessage(Message):
         return message_object
 
 
+class InfoMessage(Message):
+    type = "info"
+
+    def __init__(self, system: str, info: object):
+        super().__init__()
+
+        self.system = system  # could be 'testrun_controlle', 'testrun'
+        self.info = info  # the new info as object
+
+    @property
+    def topic(self):
+        return f"vosekast/info/{self.system}"
+
+    def get_message_object(self):
+        message_object = super().get_message_object()
+        message_object["system"] = self.system
+        message_object["info"] = json.dumps(self.info)
+
+        return message_object
+
+
 class DataMessage(Message):
     type = "data"
 

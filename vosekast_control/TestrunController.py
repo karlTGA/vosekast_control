@@ -11,6 +11,7 @@ from typing import Optional
 from vosekast_control.connectors.MQTTConnector import MQTTConnection
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.Testrun import Testrun
+from vosekast_control.connectors import DBConnection
 
 
 class TestrunController:
@@ -177,10 +178,13 @@ class TestrunController:
             self.logger.info("Sequence has not yet been started.")
 
     def get_current_run_infos(self):
-        pass
+        return self.current_run.get_infos()
 
     def get_testresults(self, run_id: Optional[str] = None):
-        pass
+        if run_id is None:
+            run_id = self.current_run.id
+
+        return DBConnection.get_run_data(run_id=run_id)
 
     async def clean(self):
         await self.stop_current_run()

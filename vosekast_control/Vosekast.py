@@ -10,7 +10,8 @@ import logging
 import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
-from vosekast_control.connectors import MQTTConnection, DBConnection
+from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import InfoMessage, DataMessage
 from vosekast_control.utils.Constants import (
     SCALE_MEASURING,
     MEASURING_DRAIN_VALVE,
@@ -417,9 +418,12 @@ class Vosekast:
         elif command_id == "state_overview":
             self.state_overview()
         elif command_id == "get_test_results":
-            self.testrun_controller.get_testresults(run_id=data.get("run_id"))
-        elif command_id == "get_current_sequnce":
-            self.testrun_controller.get_current_run_infos()
+            run_id = data.get("run_id")
+            data = self.testrun_controller.get_testresults(run_id=data.get("run_id"))
+            MQTTConnection.publish_message(DataMessage("test_results", run_id, data))
+        elif command_id == "get_current_run":
+            infos = self.testrun_controller.get_current_run_infos()
+            MQTTConnection.publish_message(InfoMessage("testrun_controller", infos))
         else:
             self.logger.warning(
                 f"Received unknown command {command_id} for \

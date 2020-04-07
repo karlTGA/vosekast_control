@@ -23,14 +23,14 @@ class Testrun:
     started_at: int
     ended_at: int
     emulate: bool
-    run_id: str
+    id: str
 
     def __init__(self, vosekast, options={}):
         self.created_at = time()
         self.started_at = None
         self.ended_at = None
         self.emulate = options.get("emulate", False)
-        self.run_id = str(random.randint(10000000000, 100000000000))
+        self.id = str(random.randint(10000000000, 100000000000))
         self.vosekast = vosekast
         self.scale = vosekast.scale
         self.logger = logging.getLogger(LOGGER)
@@ -111,10 +111,19 @@ class Testrun:
             "measuring_tank_switch_state": self.vosekast.valves[
                 MEASURING_TANK_SWITCH
             ].state,
-            "sequence_id": self.run_id,
+            "run_id": self.id,
         }
         DBConnection.insert_datapoint(data)
 
         self.logger.debug(
             f"{current_scale_value} kg, flow rate (average) {flow_average} L/s"
         )
+
+    def get_infos(self):
+        return {
+            "id": self.id,
+            "startedAt": self.started_at,
+            "createdAt": self.created_at,
+            "state": self.state,
+            "emulate": self.emulate,
+        }
