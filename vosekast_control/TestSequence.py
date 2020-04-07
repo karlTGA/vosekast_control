@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import random
+import traceback
 from vosekast_control.Log import LOGGER
 import time
 from vosekast_control.connectors import DBConnection
@@ -73,6 +74,7 @@ class TestSequence:
                     return
 
                 # turn on measuring pump, start measuring
+                self.scale.tare()
                 await self.start_measuring()
 
                 self.vosekast.state = self.vosekast.MEASURING
@@ -84,7 +86,8 @@ class TestSequence:
             # TankFillingTimeout
             except Exception:
                 self.logger.error("Error, aborting test sequence.")
-
+                traceback.print_exc()
+                # raise
                 await self.stop_sequence()
                 self.vosekast.constant_tank.state = self.vosekast.constant_tank.STOPPED
                 self.vosekast.state = self.vosekast.RUNNING
@@ -96,12 +99,6 @@ class TestSequence:
             # get start time
             time_sequence_t0 = time.time()
             delta_time_sequence = 0
-
-            # tare scale
-            if abs(self.scale.scale_history[0]) < 0.15:
-                scale_nulled = self.scale.scale_history[0]
-            else:
-                scale_nulled = 0
 
             # generate sequence_id
             sequence_id = random.randint(10000000000, 100000000000)
@@ -124,15 +121,12 @@ class TestSequence:
                     time_sequence_t1 = time.time()
                     delta_time_sequence = time_sequence_t1 - time_sequence_t0
 
-                    scale_actual = round(self.scale.scale_history[0], 5)
-                # if not emulate use scale value
-                else:
-                    scale_actual = round(self.scale.scale_history[0] - scale_nulled, 5)
+                scale_current = round(self.scale.scale_history[0], 5)
 
                 try:
                     data = {
                         "timestamp": self.scale.scale_history[1],
-                        "scale_value": scale_actual,
+                        "scale_value": scale_current,
                         "flow_current": self.scale.flow_history[0],
                         "flow_average": flow_average,
                         "pump_constant_tank_state": self.vosekast.pump_constant_tank.state,
@@ -146,9 +140,10 @@ class TestSequence:
                 except Exception as e:
                     self.logger.error("Error sending to db.")
                     self.logger.error(e)
+                    traceback.print_exc()
 
                 self.logger.debug(
-                    str(scale_actual)
+                    str(scale_current)
                     + " kg, flow rate (average) "
                     + str(flow_average)
                     + " L/s"
@@ -164,8 +159,10 @@ class TestSequence:
                     "Draining measuring tank, opening Measuring Tank bypass."
                 )
 
-        except Exception:
-            self.logger.warning("Write loop killed, stopping sequence.")
+        except Exception as e:
+            self.logger.error("Write loop killed, stopping sequence.")
+            self.logger.error(e)
+            traceback.print_exc()
             await self.stop_sequence()
 
     async def start_measuring(self):
@@ -180,8 +177,10 @@ class TestSequence:
             self.vosekast.measuring_tank_switch.open()
             self.logger.debug("Measuring started.")
 
-        except Exception:
+        except Exception as e:
             self.logger.debug("Measuring aborted.")
+            self.logger.debug(e)
+            traceback.print_exc()
             self.vosekast.pump_measuring_tank.stop()
             self.vosekast.state = self.vosekast.RUNNING
 

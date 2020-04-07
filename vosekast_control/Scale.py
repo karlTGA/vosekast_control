@@ -4,6 +4,7 @@ from threading import Thread
 from time import sleep
 import time
 import logging
+import traceback
 from vosekast_control.Log import LOGGER
 from random import uniform
 from itertools import islice
@@ -56,9 +57,13 @@ class Scale:
         self.flow_history = deque([], maxlen=100)
         self.scale_input_buffer: Deque[float] = deque([], maxlen=10)
         self.flow_history_average = deque([], maxlen=5)
+        self.scale_start_value = 0
 
     def open_connection(self):
-        if not self.emulate:
+        if self.emulate:
+            self.logger.info("Emulating open_connection scale.")
+
+        else:
             ser = serial.Serial()
             ser.port = self.port
             ser.baudrate = self.baudrate
@@ -68,15 +73,13 @@ class Scale:
             self.connection = ser
             self.connection.open()
             self.logger.info("Opening connection to scale.")
-        else:
-            self.logger.info("Emulating open_connection scale.")
 
     def close_connection(self):
-        if not self.emulate:
+        if self.emulate:
+            self.logger.info("Emulating close_connection scale.")
+        else:
             self.connection.close()
             self.logger.info("Closing connection to scale.")
-        else:
-            self.logger.info("Emulating close_connection scale.")
 
     def loop(self):
         self.logger.debug("Start measuring loop.")
@@ -89,8 +92,10 @@ class Scale:
         while self.is_running:
             new_value = self.read_value_from_scale()
 
+            new_value_tare = new_value - self.scale_start_value
+
             if new_value is not None:
-                self.add_new_value(new_value)
+                self.add_new_value(new_value_tare)
             else:
                 self.logger.warning("Reached loop with new value = None.")
 
@@ -120,6 +125,9 @@ class Scale:
 
     # diagnostics
     def print_diagnostics(self):
+        if not self.emulate:
+            self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
+
         self.logger.info(
             "Diagnostics:"
             + str(f"self.threads: {str(self.threads)}\n")
@@ -143,10 +151,9 @@ class Scale:
             )
             + str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n")
             + str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
+            + str(f"scale_start_value [kg]: {str(self.scale_start_value)}\n")
             + str(f"db connection established: {str(DBConnection.isConnected)}")
         )
-        if not self.emulate:
-            self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
 
     def stop_measurement_thread(self):
         self.is_running = False
@@ -155,11 +162,15 @@ class Scale:
         if self.threads_started:
             self.thread_loop.join()
             self.thread_readscale.join()
+
         try:
             self.threads.remove(self.thread_loop)
             self.threads.remove(self.thread_readscale)
         except Exception:
-            pass
+            self.logger.error("Error while trying to stop measurement threads.")
+            traceback.print_exc()
+            # raise
+
         self.logger.debug("Stopped measurement thread.")
         self.threads_started = False
 
@@ -206,6 +217,16 @@ class Scale:
 
             scale_input = 0
 
+    def tare(self):
+        # tare scale
+        if abs(self.scale_history[0]) >= 0.15:
+            self.logger.info(f"Scale value {str(self.scale_history[0])} seems rather high. Please check.")
+
+        if not self.emulate:
+            self.scale_start_value = self.read_value_from_scale()
+        else:
+            self.scale_start_value = 0
+
     def read_value_from_scale(self):
         if self.connection is not None and len(self.scale_history) > 0:
 
@@ -234,8 +255,8 @@ class Scale:
             return 0.00
 
         elif self.emulate:
-            split_line = self.scale_input_buffer[0]
-            return split_line
+            new_value = self.scale_input_buffer[0]
+            return new_value
 
         else:
             self.logger.debug(self.connection.is_open)

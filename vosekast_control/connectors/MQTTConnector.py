@@ -5,6 +5,7 @@ from vosekast_control.utils.Msg import StatusMessage
 import logging
 import asyncio
 import os
+import traceback
 
 
 def noop(*args, **kwargs):
@@ -43,6 +44,7 @@ class MQTTConnector:
         except ConnectionRefusedError:
             await self.connection_refused()
         except Exception:
+            traceback.print_exc()
             raise
 
     async def connection_refused(self):

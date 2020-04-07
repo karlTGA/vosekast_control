@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import logging
+import traceback
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import DataMessage
 from vosekast_control.connectors import MQTTConnection
@@ -21,6 +22,8 @@ class DBConnector:
             self.logger.warning(e)
         except Exception:
             self.logger.info("Failed to establish DB connection.")
+            traceback.print_exc()
+            # raise
 
         self._db_connection.execute(
             """CREATE TABLE IF NOT EXISTS sequence_values (
@@ -42,7 +45,7 @@ class DBConnector:
         try:
             # values = {
             #     'timestamp': 0000,
-            #     'scale_actual': 0000,
+            #     'scale_current': 0000,
             #     'flow_current': 0000,
             #     'flow_average': 0000}
 
@@ -56,6 +59,8 @@ class DBConnector:
 
         except Exception as e:
             self.logger.error(e)
+            traceback.print_exc()
+            # raise
 
     # todo read
     def read(self, data):
@@ -88,12 +93,16 @@ class DBConnector:
             self.logger.error("Failed to read data from sqlite table", e)
         except Exception as e:
             self.logger.error(e)
+            traceback.print_exc()
+            # raise
 
     def close(self):
         try:
             self._db_connection.close()
             self.logger.info("DB connection closed.")
         except Exception:
+            traceback.print_exc()
+            # raise
             return
 
     # workaround to show if connected
@@ -111,6 +120,8 @@ class DBConnector:
             self.logger.warning(e)
             return False
         except Exception:
+            traceback.print_exc()
+            # raise
             return False
 
 
