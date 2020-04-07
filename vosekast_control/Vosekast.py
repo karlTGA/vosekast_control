@@ -410,9 +410,9 @@ class Vosekast:
         elif command_id == "start_run":
             await self.testrun_controller.start_run()
         elif command_id == "stop_current_run":
-            await self.testrun_controller.stop_run()
+            await self.testrun_controller.stop_current_run()
         elif command_id == "pause_current_run":
-            self.testrun_controller.pause_run()
+            self.testrun_controller.pause_current_run()
         elif command_id == "empty_tanks":
             await self.empty_tanks()
         elif command_id == "state_overview":
@@ -426,8 +426,7 @@ class Vosekast:
             data = self.testrun_controller.get_testresults(run_id=data.get("run_id"))
             MQTTConnection.publish_message(DataMessage("test_results", run_id, data))
         elif command_id == "get_current_run_infos":
-            infos = self.testrun_controller.get_current_run_infos()
-            MQTTConnection.publish_message(InfoMessage("testrun_controller", infos))
+            self.testrun_controller.publish_current_run_infos()
         else:
             self.logger.warning(
                 f"Received unknown command {command_id} for \

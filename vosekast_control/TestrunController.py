@@ -43,6 +43,7 @@ class TestrunController:
         try:
             self.logger.info("Initialising test run.")
             self.current_run = Testrun(vosekast=self.vosekast)
+            self.current_run.publish_infos()
 
             # change state
             self.state = self.WAITING
@@ -129,6 +130,8 @@ class TestrunController:
             self.vosekast.valves[MEASURING_TANK_SWITCH].close()
             self.logger.debug("Stopped test sequence")
             self.vosekast.state = self.vosekast.RUNNING
+            self.current_run.stop()
+            del self.current_run
 
             await self.vosekast.clean()
         else:
@@ -177,9 +180,9 @@ class TestrunController:
         else:
             self.logger.info("Sequence has not yet been started.")
 
-    def get_current_run_infos(self):
+    def publish_current_run_infos(self):
         if self.current_run is not None:
-            return self.current_run.get_infos()
+            self.current_run.publish_infos()
 
     def get_testresults(self, run_id: Optional[str] = None):
         if run_id is None:
@@ -192,7 +195,12 @@ class TestrunController:
 
     def publish_state(self):
         MQTTConnection.publish_message(
-            StatusMessage("system", "testrun_controller", self.state)
+            StatusMessage(
+                "system",
+                "testrun_controller",
+                self.state,
+                properties={"run_id": self.current_run.id},
+            )
         )
 
     @property

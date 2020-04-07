@@ -11,6 +11,8 @@ from vosekast_control.utils.Constants import (
 )
 from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.Log import LOGGER
+from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import InfoMessage
 
 
 class Testrun:
@@ -36,6 +38,7 @@ class Testrun:
         self.logger = logging.getLogger(LOGGER)
         self.scale_nulled = 0
         self.state = self.INITED
+        self.publish_infos()
 
     async def _make_run(self):
         self.started_at = time()
@@ -47,6 +50,7 @@ class Testrun:
                 self.scale_nulled = self.scale.scale_history[0]
 
             self.state = self.MEASURING
+            self.publish_infos()
 
             # send values to db
             while (
@@ -81,9 +85,16 @@ class Testrun:
 
     def pause(self):
         self.state = self.PAUSED
+        self.publish_infos()
 
     def stop(self):
         self.state = self.STOPPED
+        self.publish_infos()
+
+    def publish_infos(self):
+        MQTTConnection.publish_message(
+            InfoMessage("testrun_controller", self.get_infos())
+        )
 
     def _get_current_scale_value(self) -> float:
         if self.emulate:

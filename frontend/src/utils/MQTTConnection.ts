@@ -5,6 +5,7 @@ import {
   PumpState,
   ValveState,
   TankState,
+  TestrunInfos,
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
@@ -31,6 +32,7 @@ interface StatusMessage extends Message {
   device_type: "scale" | "system" | "pump" | "valve" | "tank";
   device_id: string;
   new_state: string;
+  run_id?: string;
 }
 
 interface LogMessage extends Message {
@@ -186,6 +188,20 @@ class MQTTConnector {
           VosekastStore.update((s) => {
             s.isHealthy = message.new_state === "OK";
             s.lastHealthUpdate = moment();
+          });
+        }
+
+        if (message.device_id === "testrun_controller") {
+          VosekastStore.update((s) => {
+            const runId = message.run_id;
+            if (runId == null) return;
+            const testrun = s.testruns.get(runId);
+            if (testrun == null) return;
+
+            s.testruns.set(runId, {
+              state: message.new_state,
+              ...testrun,
+            });
           });
         }
         break;

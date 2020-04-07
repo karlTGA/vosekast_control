@@ -40,15 +40,27 @@ export default function TestrunButtonsBar({
           ? `Current Testrun: ${testrun.id}`
           : "No testrun running."}
       </div>
-      <Button onClick={startRun}>
+      <Button
+        onClick={startRun}
+        disabled={
+          testrun != null &&
+          (testrun.state === "MEASURING" || testrun.state === "WAITING")
+        }
+      >
         <CaretRightOutlined />
         Start
       </Button>
-      <Button onClick={stopRun}>
+      <Button
+        onClick={stopRun}
+        disabled={testrun == null || testrun.state === "PAUSED"}
+      >
         <BorderOutlined />
         Stop
       </Button>
-      <Button onClick={pauseRun}>
+      <Button
+        onClick={pauseRun}
+        disabled={testrun == null || testrun.state === "STOPPED"}
+      >
         <PauseOutlined />
         Pause
       </Button>
