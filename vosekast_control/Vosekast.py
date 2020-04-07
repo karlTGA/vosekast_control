@@ -11,7 +11,7 @@ import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
-from vosekast_control.utils.Msg import InfoMessage, DataMessage
+from vosekast_control.utils.Msg import DataMessage
 from vosekast_control.utils.Constants import (
     SCALE_MEASURING,
     MEASURING_DRAIN_VALVE,

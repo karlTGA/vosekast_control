@@ -2,8 +2,6 @@ import sqlite3
 from sqlite3 import Error
 import logging
 from vosekast_control.Log import LOGGER
-from vosekast_control.utils.Msg import DataMessage
-from vosekast_control.connectors import MQTTConnection
 
 
 class DBConnector:
