@@ -5,7 +5,6 @@ import {
   PumpState,
   ValveState,
   TankState,
-  TestrunInfos,
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
@@ -57,7 +56,7 @@ interface InfoMessage extends Message {
 interface DataMessage extends Message {
   type: "data";
   id?: DataSources;
-  payload?: Array<Object>;
+  payload?: Array<Array<string>>;
 }
 
 interface PumpStatusMessage extends StatusMessage {
@@ -243,26 +242,26 @@ class MQTTConnector {
   };
 
   handleInfoMessage = (message: InfoMessage) => {
-    const run_id = message.payload.id;
+    const runId = message.payload.id;
 
     VosekastStore.update((s) => {
-      s.testruns.set(run_id, message.payload);
+      s.testruns.set(runId, message.payload);
     });
   };
 
   handleDataMessage = (message: DataMessage) => {
-    const run_id = message.id;
+    const runId = message.id;
     const data = message.payload;
-    if (run_id == null || message.payload == null) {
+    if (runId == null || message.payload == null) {
       console.warn("Got data message with invalid format!");
       return;
     }
     VosekastStore.update((s) => {
-      const testrun = s.testruns.get(run_id);
+      const testrun = s.testruns.get(runId);
 
       if (testrun == null) return;
       testrun.results = data;
-      s.testruns.set(run_id, testrun);
+      s.testruns.set(runId, testrun);
     });
   };
 
