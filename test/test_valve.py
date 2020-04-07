@@ -3,49 +3,45 @@ from unittest.mock import MagicMock
 import pytest
 
 
-class TestPump:
+class TestValve:
     @pytest.fixture
-    def pump(self):
+    def valve(self):
         vosekast = MagicMock()
         gpio_controller = MagicMock()
-        control_pin = 12
+        control_pin = 13
+        valve_type = Valve.TWO_WAY
+        regulation = Valve.BINARY
 
-        pump = Pump(vosekast, "test_pump", control_pin, gpio_controller)
+        valve = Valve(vosekast, "test_valve", control_pin, valve_type, regulation, gpio_controller)
 
-        return pump
+        return valve
 
-    def test_init(self, pump: Pump):
-        assert isinstance(pump, Pump)
-        assert pump.state == pump.UNKNOWN
+    def test_init(self, valve: Valve):
+        assert isinstance(valve, Valve)
+        assert valve.state == valve.UNKNOWN
 
-    def test_start(self, pump: Pump):
-        pump.start()
+    def test_open(self, valve: Valve):
+        valve.open()
 
-        assert pump.state == pump.RUNNING
+        assert valve.state == valve.OPEN
 
-    def test_stop(self, pump: Pump):
-        pump.stop()
+    def test_close(self, valve: Valve):
+        valve.close()
 
-        assert pump.state == pump.STOPPED
+        assert valve.state == valve.CLOSED
 
-    def test_toggle(self, pump: Pump):
-        pump.start()
-        pump.toggle()
+    def test_is_open(self, valve: Valve):
+        valve.close()
+        assert not valve.is_open
 
-        assert pump.state == pump.STOPPED
+    def test_is_closed(self, valve: Valve):
+        valve.open()
+        assert not valve.is_closed
 
-    def test_is_stopped(self, pump: Pump):
-        pump.start()
-        assert not pump.is_stopped
+    def test_state(self, valve: Valve):
+        valve.state = valve.OPEN
+        assert valve.state == valve.OPEN
 
-    def test_is_running(self, pump: Pump):
-        pump.start()
-        assert pump.is_running
-
-    def test_state(self, pump: Pump):
-        pump.state = pump.RUNNING
-        assert pump.state == pump.RUNNING
-
-    def test_publish_state(self, pump: Pump):
-        pump.publish_state()
+    def test_publish_state(self, valve: Valve):
+        valve.publish_state()
 
