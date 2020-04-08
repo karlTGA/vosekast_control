@@ -13,7 +13,16 @@ class TestTank:
         overflow_sensor = MagicMock()
         drain_valve = MagicMock()
         source_pump = MagicMock()
-        tank = Tank("test_tank", 100, level_sensor, drain_sensor, overflow_sensor, drain_valve, source_pump, vosekast=self)
+        tank = Tank(
+            "test_tank",
+            100,
+            level_sensor,
+            drain_sensor,
+            overflow_sensor,
+            drain_valve,
+            source_pump,
+            vosekast=self,
+        )
 
         self.level_sensor = level_sensor
         self.drain_sensor = drain_sensor
@@ -36,16 +45,16 @@ class TestTank:
     def test_prepare_to_fill(self, tank: Tank):
         tank.prepare_to_fill()
 
-        assert self.drain_valve.state == self.drain_valve.CLOSED
+        assert self.drain_valve.close.called
 
     # todo what to check for?
-    @pytest.fixture(scope='session')
+    @pytest.fixture(scope="session")
     async def test_fill(self, tank: Tank):
         await tank.fill()
         assert not tank.state == tank.STOPPED
 
-    #_on_draining
-    #_on_full
+    # _on_draining
+    # _on_full
 
     def test_state(self, tank: Tank):
         tank.state = tank.EMPTY
@@ -53,4 +62,3 @@ class TestTank:
 
     def test_publish_state(self, tank: Tank):
         tank.publish_state()
-
