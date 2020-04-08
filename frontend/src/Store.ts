@@ -22,11 +22,20 @@ export type Commands =
   | "prepare_to_fill"
   | "shutdown"
   | "clean"
-  | "start_sequence"
-  | "stop_sequence";
+  | "start_run"
+  | "stop_current_run";
 
 export interface ScaleState {
   value: string;
+}
+
+export interface TestrunInfos {
+  id: string;
+  startedAt: number;
+  createdAt: number;
+  state: string;
+  emulated: boolean;
+  results?: object;
 }
 
 export interface MQTTState {
@@ -44,12 +53,13 @@ export interface VosekastState {
   valveStates: Map<string, ValveState>;
   tankStates: Map<string, TankState>;
   scaleState: ScaleState;
+  testruns: Map<string, TestrunInfos>;
 }
 
 export const MQTTStore = new Store<MQTTState>({
   isConnected: false,
   mqttInterrupted: false,
-  connectionError: undefined
+  connectionError: undefined,
 });
 
 export const VosekastStore = new Store<VosekastState>({
@@ -60,16 +70,17 @@ export const VosekastStore = new Store<VosekastState>({
   valveStates: new Map(),
   tankStates: new Map(),
   scaleState: {
-    value: ""
-  }
+    value: "",
+  },
+  testruns: new Map(),
 });
 
 // reaction that set health state of vosekast negativ if no health message was reported for a long time
 VosekastStore.createReaction(
-  s => s.lastHealthUpdate,
-  healthUpdatedAt => {
+  (s) => s.lastHealthUpdate,
+  (healthUpdatedAt) => {
     setTimeout(() => {
-      VosekastStore.update(s => {
+      VosekastStore.update((s) => {
         if (s.lastHealthUpdate === healthUpdatedAt) {
           s.isHealthy = false;
         }
@@ -79,7 +90,7 @@ VosekastStore.createReaction(
 );
 
 VosekastStore.createReaction(
-  s => s.isHealthy,
+  (s) => s.isHealthy,
   (isHealthy, draft, original, lastIsHealthy) => {
     if (isHealthy !== lastIsHealthy) {
       console.log(
@@ -90,7 +101,7 @@ VosekastStore.createReaction(
 );
 
 MQTTStore.createReaction(
-  s => s.isConnected,
+  (s) => s.isConnected,
   (isConnected, draft, original, lastIsConnected) => {
     if (isConnected !== lastIsConnected) {
       console.log(

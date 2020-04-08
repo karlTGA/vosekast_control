@@ -1,0 +1,31 @@
+# PUMP IDS
+PUMP_CONSTANT_TANK = "pump_constant_tank"
+PUMP_MEASURING_TANK = "pump_measuring_tank"
+
+# VALVE IDS
+MEASURING_DRAIN_VALVE = "measuring_drain_valve"
+MEASURING_TANK_SWITCH = "measuring_tank_switch"
+
+# TANK IDS
+STOCK_TANK = "stock_tank"
+CONSTANT_TANK = "constant_tank"
+MEASURING_TANK = "measuring_tank"
+
+# LEVEL SENSOR IDS
+LEVEL_MEASURING_TOP = "level_measuring_top"
+LEVEL_MEASURING_BOTTOM = "level_measuring_bottom"
+LEVEL_CONSTANT_TOP = "level_constant_top"
+LEVEL_CONSTANT_BOTTOM = "level_constant_bottom"
+
+# SCALE ID
+SCALE_MEASURING = "scale_measuring"
+
+# GPIO Assignment
+PIN_PUMP_CONSTANT = 17
+PIN_PUMP_MEASURING = 27
+PIN_VALVE_MEASURING_SWITCH = 22
+PIN_VALVE_MEASURING_DRAIN = 18
+PIN_LEVEL_MEASURING_HIGH = 24
+PIN_LEVEL_MEASURING_LOW = 25
+PIN_LEVEL_CONSTANT_LOW = 5
+PIN_LEVEL_CONSTANT_HIGH = 6

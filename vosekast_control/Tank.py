@@ -5,6 +5,7 @@ from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Constants import MEASURING_TANK, CONSTANT_TANK
 
 
 class TankFillingTimeout(Exception):
@@ -110,16 +111,19 @@ class Tank:
                     await asyncio.sleep(1)
 
                 self.logger.info(
-                    "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
+                    "Measuring Tank state: "
+                    + str(self.vosekast.tanks[MEASURING_TANK].state)
                 )
                 self.logger.info(
-                    "Constant Tank state: " + str(self.vosekast.constant_tank.state)
+                    "Constant Tank state: "
+                    + str(self.vosekast.tanks[CONSTANT_TANK].state)
                 )
                 return
             except Exception:
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
-                return
+                raise
+
         elif self._state == self.FILLED:
             self.logger.info("{} already filled. Continuing.".format(self.name))
         else:

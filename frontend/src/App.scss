@@ -95,4 +95,33 @@
       opacity: 0.5;
     }
   }
+
+  .content-overview {
+    .sequence-buttons-bar {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 0px 10px;
+      border-bottom: solid 1px lightgray;
+
+      .current-sequence-info {
+        margin: 7px;
+        background: white;
+        height: 32px;
+        text-align: center;
+        border: solid 1px #d9d9d9;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+        padding: 4px 15px;
+      }
+
+      button {
+        margin: 7px 5px;
+
+        span {
+          margin: 0px 3px;
+        }
+      }
+    }
+  }
 }

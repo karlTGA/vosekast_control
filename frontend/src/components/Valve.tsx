@@ -2,7 +2,7 @@ import React from "react";
 import { Tag } from "antd";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
-import { CommandButton } from "./CommandButtonsBar";
+import { CommandButton } from "./CommandButton";
 import MQTTConnection from "../utils/MQTTConnection";
 
 interface ValveActionProps {
@@ -11,7 +11,7 @@ interface ValveActionProps {
 }
 
 export function ValveTag({ valveId, title }: ValveActionProps) {
-  const valveState = useStoreState(VosekastStore, s =>
+  const valveState = useStoreState(VosekastStore, (s) =>
     s.valveStates.get(valveId)
   );
 
@@ -23,7 +23,7 @@ export function ValveTag({ valveId, title }: ValveActionProps) {
 }
 
 export function ValveButton({ valveId, title }: ValveActionProps) {
-  const valveState = useStoreState(VosekastStore, s =>
+  const valveState = useStoreState(VosekastStore, (s) =>
     s.valveStates.get(valveId)
   );
   const isActive = valveState === "OPEN";
