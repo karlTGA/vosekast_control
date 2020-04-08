@@ -60,18 +60,19 @@ class Tank:
             self.drain_sensor.add_callback(self._low_position_changed)
 
     def drain_tank(self):
-        if self.drain_valve is not None:
-            self.drain_valve.open()
-            self._state = self.IS_DRAINING
-        else:
+        if self.drain_valve is None:
             self.logger.warning("No valve to drain the tank {}".format(self.name))
+            return
+
+        self.drain_valve.open()
+        self._state = self.IS_DRAINING  
 
     def prepare_to_fill(self):
-        if self.drain_valve is not None:
-            self.drain_valve.close()
-        else:
+        if self.drain_valve is None:
             self.logger.debug("No drain valve on the {}".format(self.name))
             return
+
+        self.drain_valve.close()    
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
     async def _up_state_changed(self, pin, alert):
@@ -81,10 +82,16 @@ class Tank:
             self._on_draining()
 
     async def fill(self):
-        if not self._state == self.FILLED:
+        if self._state == self.FILLED:
+            self.logger.info("{} already filled. Continuing.".format(self.name))
+            return
+
+        elif not self._state == self.FILLED:
             try:
+
                 # get time
                 time_filling_t0 = datetime.now()
+
                 # close valves, start pump
                 self.vosekast.prepare_measuring()
                 self._state = self.IS_FILLING
@@ -120,12 +127,6 @@ class Tank:
                 self._state = self.STOPPED
                 self.logger.warning("Filling {} aborted.".format(self.name))
                 return
-        elif self._state == self.FILLED:
-            self.logger.info("{} already filled. Continuing.".format(self.name))
-        else:
-            self.logger.warning(
-                "Something bad happened while filling {}.".format(self.name)
-            )
 
     def _on_draining(self):
         """
