@@ -38,11 +38,11 @@ class TestTank:
 
         assert self.drain_valve.state == self.drain_valve.CLOSED
 
-    # todo howto async?
     # todo what to check for?
+    @pytest.fixture(scope='session')
     async def test_fill(self, tank: Tank):
         await tank.fill()
-        assert not tank.is_open
+        assert not tank.state == tank.STOPPED
 
     #_on_draining
     #_on_full
