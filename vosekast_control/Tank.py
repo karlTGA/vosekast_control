@@ -86,47 +86,44 @@ class Tank:
             self.logger.info("{} already filled. Continuing.".format(self.name))
             return
 
-        elif not self._state == self.FILLED:
-            try:
+        try:
+            # get time
+            time_filling_t0 = datetime.now()
 
-                # get time
-                time_filling_t0 = datetime.now()
+            # close valves, start pump
+            self.vosekast.prepare_measuring()
+            self._state = self.IS_FILLING
 
-                # close valves, start pump
-                self.vosekast.prepare_measuring()
-                self._state = self.IS_FILLING
+            # check if constant_tank full
+            while not self._state == self.FILLED and self._state == self.IS_FILLING:
+                time_filling_t1 = datetime.now()
+                time_filling_passed = time_filling_t1 - time_filling_t0
+                delta_time_filling = time_filling_passed.total_seconds()
 
-                # check if constant_tank full
-                while not self._state == self.FILLED and self._state == self.IS_FILLING:
-                    time_filling_t1 = datetime.now()
-                    time_filling_passed = time_filling_t1 - time_filling_t0
-                    delta_time_filling = time_filling_passed.total_seconds()
-
-                    # if filling takes longer than 90s
-                    if delta_time_filling >= 10 and self.emulate:
-                        self._state = self.FILLED
-                    if delta_time_filling >= 75 and not self.emulate:
-                        self.logger.error(
-                            "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
-                        )
-                        raise TankFillingTimeout("Tank Filling Timeout.")
-
-                    self.logger.debug(
-                        str(delta_time_filling) + "s < time allotted (75s)"
+                # if filling takes longer than 90s
+                if delta_time_filling >= 10 and self.emulate:
+                    self._state = self.FILLED
+                elif delta_time_filling >= 75 and not self.emulate:
+                    self.logger.error(
+                        "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
                     )
-                    await asyncio.sleep(1)
+                    raise TankFillingTimeout("Tank Filling Timeout.")
 
-                self.logger.info(
-                    "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
+                self.logger.debug(
+                    str(delta_time_filling) + "s < time allotted (75s)"
                 )
-                self.logger.info(
-                    "Constant Tank state: " + str(self.vosekast.constant_tank.state)
-                )
-                return
-            except Exception:
-                self._state = self.STOPPED
-                self.logger.warning("Filling {} aborted.".format(self.name))
-                return
+                await asyncio.sleep(1)
+
+            # self.logger.info(
+            #     "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
+            # )
+            # self.logger.info(
+            #     "Constant Tank state: " + str(self.vosekast.constant_tank.state)
+            # )
+
+        except Exception:
+            self._state = self.STOPPED
+            self.logger.warning("Filling {} aborted.".format(self.name))
 
     def _on_draining(self):
         """

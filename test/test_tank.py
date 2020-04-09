@@ -29,6 +29,7 @@ class TestTank:
         self.overflow_sensor = overflow_sensor
         self.drain_valve = drain_valve
         self.source_pump = source_pump
+        self.vosekast = vosekast
 
         return tank
 
@@ -41,21 +42,35 @@ class TestTank:
 
         assert tank.state == tank.IS_DRAINING
 
-    # todo what to check for?
     def test_prepare_to_fill(self, tank: Tank):
         tank.prepare_to_fill()
 
         assert self.drain_valve.close.called
 
-    # todo what to check for?
     @pytest.fixture(scope="session")
+    #@pytest.mark.asyncio produces warnings
     async def test_fill(self, tank: Tank):
         await tank.fill()
-        assert not tank.state == tank.STOPPED
+        assert self.vosekast.prepare_measuring.called
+        assert datetime.now.called
+        assert self.logger.called
 
-    # _on_draining
-    # _on_full
+    def test__on_draining(self, tank: Tank):
+        tank._on_draining()
+        assert tank.state == tank.IS_DRAINING
 
+    def test__on_full(self, tank: Tank):
+        tank._on_full()
+        assert tank.state == tank.FILLED
+
+    def test__handle_drained(self, tank: Tank):
+        tank._handle_drained()
+        assert tank.state == tank.DRAINED
+
+    def test__handle_filling(self, tank: Tank):
+        tank._handle_filling()
+        assert tank.state == tank.IS_FILLING
+ 
     def test_state(self, tank: Tank):
         tank.state = tank.EMPTY
         assert tank.state == tank.EMPTY
