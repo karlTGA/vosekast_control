@@ -47,8 +47,8 @@ class TestTank:
 
         assert self.drain_valve.close.called
 
-    @pytest.fixture(scope="session")
-    #@pytest.mark.asyncio produces warnings
+    
+    @pytest.mark.asyncio
     async def test_fill(self, tank: Tank):
         await tank.fill()
         assert self.vosekast.prepare_measuring.called

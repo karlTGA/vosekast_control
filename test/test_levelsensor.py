@@ -14,11 +14,9 @@ class TestLevelSensor:
         control_pin = 13
         levelsensor_type = bool
         regulation = LevelSensor.HIGH
-        extra_callback_function = MagicMock()
 
         levelsensor = LevelSensor("test_levelsensor", control_pin, levelsensor_type, regulation, gpio_controller)
         
-        self.extra_callback_function = extra_callback_function
         self._gpio_controller = gpio_controller
 
         return levelsensor
@@ -31,7 +29,7 @@ class TestLevelSensor:
     def test_add_callback(self, levelsensor: LevelSensor):
         levelsensor.add_callback(self.test_callback_function())
 
-        assert self.extra_callback_function.called
+        assert self._gpio_controller.add_event_callback.called
 
     def test_callback_function(self):
         pass
@@ -43,10 +41,9 @@ class TestLevelSensor:
         assert self._gpio_controller.add_event_detect.called
 
     def test_state(self, levelsensor: LevelSensor):
+        levelsensor.state()
+
         assert self._gpio_controller.input.called
 
     def test_publish_state(self, levelsensor: LevelSensor):
         levelsensor.publish_state()
-
-        assert MQTTConnection.publish_message.called
-
