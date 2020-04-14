@@ -1,7 +1,6 @@
 import logging
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
-
 from vosekast_control.connectors import MQTTConnection
 
 

@@ -2,14 +2,11 @@ from vosekast_control.LevelSensor import LevelSensor
 from unittest.mock import MagicMock
 import pytest
 import asyncio
-import json
-
 
 
 class TestLevelSensor:
     @pytest.fixture
     def levelsensor(self):
-        vosekast = MagicMock()
         gpio_controller = MagicMock()
         control_pin = 13
         levelsensor_type = bool
