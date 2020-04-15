@@ -40,7 +40,6 @@ class Scale:
         self.bytesize = bytesize
         self.timeout = timeout
         self.connection = None
-        self.last_values = deque([], 10)
         self.threads_started = False
         self.thread_readscale = Thread()
         self.emulate = emulate
@@ -78,28 +77,6 @@ class Scale:
         else:
             self.connection.close()
             self.logger.info("Closing connection to scale.")
-
-    # def loop(self):
-    #     self.logger.debug("Start measuring loop.")
-
-        # check if already running
-        # if not self.is_running:
-        #     self.open_connection()
-        #     self.start_measurement_thread()
-
-        # while self.is_running:
-            # new_value = self.handle_value_from_scale()
-
-            # new_value_tare = new_value - self.scale_start_value
-
-            # if new_value is not None:
-            #     self.add_new_value(new_value_tare)
-            # else:
-            #     self.logger.warning("Reached loop with new value = None.")
-
-            # sleep(1)
-
-        # self.logger.info("Stopped measuring with scale.")
 
     def start(self):
         self.open_connection()
