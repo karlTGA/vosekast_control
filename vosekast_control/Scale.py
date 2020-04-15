@@ -42,7 +42,6 @@ class Scale:
         self.timeout = timeout
         self.connection = None
         self.last_values = deque([], 10)
-        #self.thread_loop = Thread()
         self.threads_started = False
         self.thread_readscale = Thread()
         self.emulate = emulate
@@ -55,7 +54,7 @@ class Scale:
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
-        self.scale_input_buffer: Deque[float] = deque([], maxlen=10)
+        self.scale_input_buffer: Deque[float] = deque([], maxlen=50)
         self.flow_history_average = deque([], maxlen=5)
         self.scale_start_value = 0
 
@@ -90,7 +89,7 @@ class Scale:
         #     self.start_measurement_thread()
 
         # while self.is_running:
-            # new_value = self.read_value_from_scale()
+            # new_value = self.handle_value_from_scale()
 
             # new_value_tare = new_value - self.scale_start_value
 
@@ -114,57 +113,20 @@ class Scale:
             self.logger.info("Threads alive.")
             return
         else:
-            #self.thread_loop = Thread(target=self.loop)
-            #self.threads.append(self.thread_loop)
             self.thread_readscale = Thread(target=self._scale_input_buffer)
             self.threads.append(self.thread_readscale)
             self.logger.debug("Starting Thread readscale.")
             self.thread_readscale.start()
-            #self.thread_loop.start()
             self.threads_started = True
-
-    # diagnostics
-    # def print_diagnostics(self):
-    #     if not self.emulate:
-    #         self.logger.info("self.connection.is_open: " + str(self.connection.is_open))
-
-    #     self.logger.info(
-    #         "Diagnostics:"
-    #         + str(f"self.threads: {str(self.threads)}\n")
-    #         + str(f"Thread loop alive: {str(self.thread_loop.is_alive())}\n")
-    #         + str(f"Thread readscale alive: {str(self.thread_readscale.is_alive())}\n")
-    #         + str(f"self.is_running: {str(self.is_running)}\n")
-    #         + str(
-    #             f"constant_tank_ready: {str(self.vosekast.constant_tank.is_filled)}\n"
-    #         )
-    #         + str(
-    #             f"measuring_tank_ready: {str(self.vosekast.measuring_drain_valve.is_closed and not self.vosekast.measuring_tank.is_filled)}\n"
-    #         )
-    #         + str(
-    #             f"constant_pump_running: {str(self.vosekast.pump_constant_tank.is_running)}\n"
-    #         )
-    #         + str(
-    #             f"measuring_drain_valve.is_closed: {str(self.vosekast.measuring_drain_valve.is_closed)}\n"
-    #         )
-    #         + str(
-    #             f"measuring_tank.is_filled: {str(self.vosekast.measuring_tank.is_filled)}\n"
-    #         )
-    #         + str(f"constant_tank state: {str(self.vosekast.constant_tank.state)}\n")
-    #         + str(f"measuring_tank state: {str(self.vosekast.measuring_tank.state)}\n")
-    #         + str(f"scale_start_value [kg]: {str(self.scale_start_value)}\n")
-    #         + str(f"db connection established: {str(DBConnection.isConnected)}")
-    #     )
 
     def stop_measurement_thread(self):
         self.is_running = False
 
         # terminate threads
         if self.threads_started:
-            #self.thread_loop.join()
             self.thread_readscale.join()
 
         try:
-            #self.threads.remove(self.thread_loop)
             self.threads.remove(self.thread_readscale)
         except Exception:
             self.logger.error("Error while trying to stop measurement threads.")
@@ -173,89 +135,73 @@ class Scale:
 
         self.logger.debug("Stopped measurement thread.")
         self.threads_started = False
-
+    
+    # get value from scale (in own thread)
     def _scale_input_buffer(self):
-        if self.connection is not None and not self.emulate and self.connection.is_open:
-            runs = 0
-            self.scale_input_buffer.appendleft(0)
+        
+        # clear scale_input
+        scale_input = 0
 
-            if not self.is_running:
-                self.open_connection()
-                self.start_measurement_thread()
+        if not self.is_running:
+            self.open_connection()
+            self.start_measurement_thread()
+            sleep(1)
 
-            while self.is_running:
+        runs = 0
+        self.scale_input_buffer.appendleft(0)
 
+        while self.is_running:
+
+            # get raw input from serial connection
+            if not self.emulate and self.vosekast.state == self.vosekast.MEASURING:
                 scale_input = self.connection.readline()
+                self.scale_publish = True
+            elif not self.emulate:
+                scale_input = self.connection.readline()
+                self.scale_publish = False
+            # generate random values if self.emulate
+            elif self.emulate and self.vosekast.state == self.vosekast.MEASURING:
+                scale_input += uniform(0.022, 0.028)
+                self.scale_publish = True
+            elif self.emulate:
+                scale_input = 0.0
+                self.scale_publish = False
 
-                # send only every "n"th value to add_new_value
-                if runs == 10 and scale_input is not None:
-                    tared_value = scale_input - self.scale_start_value
-                    self.add_new_value(tared_value)
-                    runs = 0
+            # send only every "n"th value to add_new_value
+            if runs == 20 and scale_input is not None:
+                tared_value = scale_input - self.scale_start_value
+                self.add_new_value(tared_value)
+                runs = 0
 
-                elif scale_input is None:
+            # handling of weird output from scale, needed if NOT self.emulate
+            if type(scale_input) != float:
+                if scale_input is None:
                     self.logger.warning("Reached loop with new value = None.")
-
-                # handling of weird output from scale
-                if len(scale_input) == 0:
+                elif len(scale_input) == 0:
                     #write dummy value to deque
-                    scale_input = self.scale_input_buffer[0]
+                    scale_input = 0
 
                     self.logger.warning(
                         "Cannot read from scale. Did you remember to turn on the scale?"
                     )
                     sleep(5)
-                    self.scale_publish = False
-
                 elif len(scale_input) != 16:
                     #write dummy value to deque
-                    scale_input = self.scale_input_buffer[0]
+                    scale_input = 0
 
                     self.logger.info(
                         "readline() read less than 16 char. Reusing last value."
                     )
-                    self.scale_publish = False
 
-                else:
-                    self.scale_publish = True
+            self.scale_input_buffer.appendleft(scale_input)
 
-                self.scale_input_buffer.appendleft(scale_input)
-
-                runs += 1
-                sleep(0.05)
-        
-        elif self.emulate:
-            self.scale_input_buffer.appendleft(0)
-
-            while self.is_running:
-
-                if self.vosekast.state == self.vosekast.MEASURING:
-                    scale_input += uniform(0.4, 0.5)
-                    self.scale_publish = True
-                else:
-                    scale_input = 0.0 + uniform(0.0, 0.1)
-                    self.scale_publish = False
-
-                self.scale_input_buffer.appendleft(scale_input)
-                self.add_new_value(scale_input)
-                sleep(1)
-
-            scale_input = 0
+            runs += 1
+            sleep(0.05)
 
         self.logger.info("Scale stopped measuring.")
 
-    def tare(self):
-        # tare scale, get initial value from scale
-        if abs(self.scale_history[0]) >= 0.15:
-            self.logger.info(f"Scale value {str(self.scale_history[0])} seems rather high. Please check.")
-
-        if not self.emulate:
-            self.scale_start_value = self.read_value_from_scale()
-        else:
-            self.scale_start_value = 0
-
-    def read_value_from_scale(self):
-        if self.connection is not None and len(self.scale_history) > 0:
+    def handle_value_from_scale(self, scale_input):
+        if len(self.scale_history) > 0 and not self.emulate:
 
             line = self.scale_input_buffer[0]
 
@@ -278,10 +224,7 @@ class Scale:
                 self.logger.warning("Scale output too short.")
                 self.logger.debug("split_line: " + str(split_line))
 
-        elif self.connection is not None:
-            return 0.00
-
-        elif self.emulate:
+        elif len(self.scale_history) > 0 and self.emulate:
             new_value = self.scale_input_buffer[0]
             return new_value
 
@@ -290,6 +233,14 @@ class Scale:
             self.logger.debug(self.connection)
             self.open_connection()
             self.logger.info("Initialising connection to scale. Please retry.")
+    
+    # tare scale, get initial value from scale
+    def tare(self):
+
+        if not self.emulate:
+            self.scale_start_value = self.handle_value_from_scale()
+        else:
+            self.scale_start_value = 0
 
     def add_new_value(self, new_value):
 
