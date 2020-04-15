@@ -194,14 +194,15 @@ class TestrunController:
         await self.stop_current_run()
 
     def publish_state(self):
-        MQTTConnection.publish_message(
-            StatusMessage(
-                "system",
-                "testrun_controller",
-                self.state,
-                properties={"run_id": self.current_run.id},
+        if self.current_run is not None:
+            MQTTConnection.publish_message(
+                StatusMessage(
+                    "system",
+                    "testrun_controller",
+                    self.state,
+                    properties={"run_id": self.current_run.id},
+                )
             )
-        )
 
     @property
     def state(self):
