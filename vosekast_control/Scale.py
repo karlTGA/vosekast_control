@@ -3,14 +3,13 @@ from collections import deque
 from threading import Thread
 from time import sleep
 import time
+from datetime import datetime
 import logging
 import traceback
 from vosekast_control.Log import LOGGER
 from random import uniform
-from itertools import islice
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
-from vosekast_control.connectors import DBConnection
 from vosekast_control.connectors import MQTTConnection
 
 from typing import Deque
@@ -54,7 +53,7 @@ class Scale:
         self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
-        self.scale_input_buffer: Deque[float] = deque([], maxlen=50)
+        self.scale_input_buffer: Deque[float] = deque([], 10)
         self.flow_history_average = deque([], maxlen=5)
         self.scale_start_value = 0
 
@@ -143,10 +142,10 @@ class Scale:
 
         self.logger.debug("Stopped measurement thread.")
         self.threads_started = False
-    
+
     # get value from scale (in own thread)
     def _scale_input_buffer(self):
-        
+
         # clear scale_input
         scale_input = 0
 
@@ -195,9 +194,9 @@ class Scale:
 
         # handling of weird output from scale, needed if NOT self.emulate
         if not self.emulate:
-            
+
             if len(scale_input) == 0:
-                #write dummy value to deque
+                # write dummy value to deque
                 scale_input = 0
 
                 self.logger.warning(
@@ -205,7 +204,7 @@ class Scale:
                 )
                 return
             elif len(scale_input) != 16:
-                #write dummy value to deque
+                # write dummy value to deque
                 scale_input = 0
 
                 self.logger.info(
@@ -228,10 +227,11 @@ class Scale:
             new_value = scale_input
 
         self.tare(new_value)
-    
+
     def tare(self, new_value):
         tared_value = new_value - self.scale_start_value
         self.add_new_value(tared_value)
+        self.publish_values(tared_value)
 
     def add_new_value(self, tared_value):
 
@@ -268,8 +268,8 @@ class Scale:
             except ZeroDivisionError:
                 self.logger.warning("Division by zero.")
 
-        # publish via mqtt
-        # new_value = weight measured by scale
+    # publish via mqtt
+    def publish_values(self, tared_value):
 
         if not self.scale_publish:
             return
@@ -278,33 +278,14 @@ class Scale:
                 StatusMessage("scale", self.name, f"{tared_value} Kg")
             )
 
-        if len(self.last_values) == 10:
-            # calculate square mean error
-            diffs = 0
-            for value in list(islice(self.last_values, 0, 9)):
-                diffs += abs(value - tared_value)
-
-            mean_diff = diffs / len(self.last_values)
-
-            if mean_diff < 0.1:
-                self.stable = True
-                self.state = self.RUNNING
-                return
-
-        self.stable = False
-        self.state = self.PAUSED
-
     def flow_average(self):
         volume_flow_average = mean(self.flow_history_average)
         flow_average = round(volume_flow_average, 5)
         return flow_average
 
-    def get_stable_value(self):
-        if self.stable:
-            return self.last_values[-1]
-        else:
-            self.logger.warning("No stable value. Scale varies until now.")
-            return 0
-
-# todo function that returns weight
-# todo make slimmer
+    # get most current scale value
+    # please note that this value has not been tared, or parsed by methods above
+    def get_current_value(self):
+        timestamp = datetime.now()
+        current_value = self.scale_input_buffer[0]
+        MQTTConnection.publish_message(StatusMessage("scale", self.name, f"{current_value} Kg at {timestamp}"))
