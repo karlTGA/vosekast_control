@@ -119,6 +119,14 @@ class Scale:
             self.thread_readscale.start()
             self.threads_started = True
 
+    # get initial value from scale
+    def tare_start_value(self):
+
+        if not self.emulate:
+            self.scale_start_value = self.handle_value_from_scale()
+        else:
+            self.scale_start_value = 0
+
     def stop_measurement_thread(self):
         self.is_running = False
 
@@ -169,29 +177,11 @@ class Scale:
 
             # send only every "n"th value to add_new_value
             if runs == 20 and scale_input is not None:
-                tared_value = scale_input - self.scale_start_value
-                self.add_new_value(tared_value)
+                self.handle_value_from_scale(scale_input)
                 runs = 0
-
-            # handling of weird output from scale, needed if NOT self.emulate
-            if type(scale_input) != float:
-                if scale_input is None:
-                    self.logger.warning("Reached loop with new value = None.")
-                elif len(scale_input) == 0:
-                    #write dummy value to deque
-                    scale_input = 0
-
-                    self.logger.warning(
-                        "Cannot read from scale. Did you remember to turn on the scale?"
-                    )
-                    sleep(5)
-                elif len(scale_input) != 16:
-                    #write dummy value to deque
-                    scale_input = 0
-
-                    self.logger.info(
-                        "readline() read less than 16 char. Reusing last value."
-                    )
+            elif runs == 20 and scale_input is None:
+                self.logger.warning("Reached loop with new value = None.")
+                runs = 0
 
             self.scale_input_buffer.appendleft(scale_input)
 
@@ -200,55 +190,56 @@ class Scale:
 
         self.logger.info("Scale stopped measuring.")
 
+    # serial connection sometimes produces inconsistent readouts
     def handle_value_from_scale(self, scale_input):
-        if len(self.scale_history) > 0 and not self.emulate:
 
-            line = self.scale_input_buffer[0]
+        # handling of weird output from scale, needed if NOT self.emulate
+        if not self.emulate:
+            
+            if len(scale_input) == 0:
+                #write dummy value to deque
+                scale_input = 0
 
-            split_line = line.split()
+                self.logger.warning(
+                    "Cannot read from scale. Did you remember to turn on the scale?"
+                )
+                return
+            elif len(scale_input) != 16:
+                #write dummy value to deque
+                scale_input = 0
 
-            if len(split_line) == 3:
-                split_line_formatted = split_line[1]
-
-                split_line_str = split_line_formatted.decode("utf-8")
-                new_value = float(split_line_str)
-                return new_value
-
-            elif len(split_line) == 2:
-                split_line_formatted = split_line[1]
-
-                split_line_str = split_line_formatted.decode("utf-8")
-                new_value = float(split_line_str)
-                return new_value
+                self.logger.info(
+                    "readline() read less than 16 char."
+                )
+                return
             else:
+                split_line = scale_input.split()
+
+            if len(split_line) == 1:
                 self.logger.warning("Scale output too short.")
                 self.logger.debug("split_line: " + str(split_line))
+                return
+            else:
+                split_line_formatted = split_line[1]
+                split_line_str = split_line_formatted.decode("utf-8")
+                new_value = float(split_line_str)
 
-        elif len(self.scale_history) > 0 and self.emulate:
-            new_value = self.scale_input_buffer[0]
-            return new_value
+        elif self.emulate:
+            new_value = scale_input
 
-        else:
-            self.logger.debug(self.connection.is_open)
-            self.logger.debug(self.connection)
-            self.open_connection()
-            self.logger.info("Initialising connection to scale. Please retry.")
+        self.tare(new_value)
     
-    # tare scale, get initial value from scale
-    def tare(self):
+    def tare(self, new_value):
+        tared_value = new_value - self.scale_start_value
+        self.add_new_value(tared_value)
 
-        if not self.emulate:
-            self.scale_start_value = self.handle_value_from_scale()
-        else:
-            self.scale_start_value = 0
-
-    def add_new_value(self, new_value):
+    def add_new_value(self, tared_value):
 
         timestamp = time.time() * 1000
 
         # deque scale history
         self.scale_history.appendleft(timestamp)
-        self.scale_history.appendleft(new_value)
+        self.scale_history.appendleft(tared_value)
 
         # calculate volume flow
         if len(self.scale_history) > 2:
@@ -284,32 +275,29 @@ class Scale:
             return
         else:
             MQTTConnection.publish_message(
-                StatusMessage("scale", self.name, f"{new_value} Kg")
+                StatusMessage("scale", self.name, f"{tared_value} Kg")
             )
 
-            if len(self.last_values) == 10:
-                # calculate square mean error
-                diffs = 0
-                for value in list(islice(self.last_values, 0, 9)):
-                    diffs += abs(value - new_value)
+        if len(self.last_values) == 10:
+            # calculate square mean error
+            diffs = 0
+            for value in list(islice(self.last_values, 0, 9)):
+                diffs += abs(value - tared_value)
 
-                mean_diff = diffs / len(self.last_values)
+            mean_diff = diffs / len(self.last_values)
 
-                if mean_diff < 0.1:
-                    self.stable = True
-                    self.state = self.RUNNING
-                    return
+            if mean_diff < 0.1:
+                self.stable = True
+                self.state = self.RUNNING
+                return
 
-            self.stable = False
-            self.state = self.PAUSED
+        self.stable = False
+        self.state = self.PAUSED
 
     def flow_average(self):
-        if len(self.flow_history_average) == 5:
-            volume_flow_average = mean(self.flow_history_average)
-            flow_average = round(volume_flow_average, 5)
-            return flow_average
-        else:
-            return 0
+        volume_flow_average = mean(self.flow_history_average)
+        flow_average = round(volume_flow_average, 5)
+        return flow_average
 
     def get_stable_value(self):
         if self.stable:
@@ -320,4 +308,3 @@ class Scale:
 
 # todo function that returns weight
 # todo make slimmer
-# todo only one thread

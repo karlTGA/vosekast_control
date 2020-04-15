@@ -74,7 +74,7 @@ class TestSequence:
                     return
 
                 # turn on measuring pump, start measuring
-                self.scale.tare()
+                self.scale.tare_start_value()
                 await self.start_measuring()
 
                 self.vosekast.state = self.vosekast.MEASURING
