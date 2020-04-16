@@ -43,7 +43,7 @@ class Scale:
         self.threads_started = False
         self.thread_readscale = Thread()
         self.emulate = emulate
-        self.is_running = False
+        self._state = self.UNKNOWN
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
@@ -83,7 +83,7 @@ class Scale:
         self.start_measurement_thread()
 
     def start_measurement_thread(self):
-        self.is_running = True
+        self._state = self.RUNNING
 
         if self.thread_readscale.is_alive():
             self.logger.info("Threads alive.")
@@ -105,7 +105,7 @@ class Scale:
             self.scale_start_value = 0
 
     def stop_measurement_thread(self):
-        self.is_running = False
+        self._state = self.STOPPED
 
         # terminate threads
         if self.threads_started:
@@ -127,7 +127,7 @@ class Scale:
         # clear scale_input
         scale_input = 0
 
-        if not self.is_running:
+        if not self._state == self.RUNNING:
             self.open_connection()
             self.start_measurement_thread()
             sleep(1)
@@ -135,7 +135,7 @@ class Scale:
         runs = 0
         self.scale_input_buffer.appendleft(0)
 
-        while self.is_running:
+        while self._state == self.RUNNING:
 
             # get raw input from serial connection
             if not self.emulate and self.vosekast.state == self.vosekast.MEASURING:

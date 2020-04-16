@@ -40,7 +40,7 @@ class TestSequence:
                 self.state = self.WAITING
 
                 # check if already running
-                if not self.scale.is_running:
+                if not self.scale.state == self.scale.RUNNING:
                     self.scale.start()
                     self.logger.info(
                         "Initialising scale connection & measurement thread. Please wait."
