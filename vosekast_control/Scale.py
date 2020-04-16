@@ -133,19 +133,23 @@ class Scale:
         while self._state == self.RUNNING:
 
             # get raw input from serial connection
-            if not self.emulate and self.vosekast.state == self.vosekast.MEASURING:
-                scale_input = self.connection.readline()
-                self.scale_publish = True
-            elif not self.emulate:
-                scale_input = self.connection.readline()
-                self.scale_publish = False
+            if not self.emulate:
+                if self.vosekast.state == self.vosekast.MEASURING:
+                    scale_input = self.connection.readline()
+                    self.scale_publish = True
+                else:
+                    scale_input = self.connection.readline()
+                    self.scale_publish = False
             # generate random values if self.emulate
-            elif self.emulate and self.vosekast.state == self.vosekast.MEASURING:
-                scale_input += uniform(0.022, 0.028)
-                self.scale_publish = True
-            elif self.emulate:
-                scale_input = 0.0
-                self.scale_publish = False
+            if self.emulate:
+                if self.vosekast.state == self.vosekast.MEASURING and self.vosekast.testsequence.state == self.vosekast.testsequence.MEASURING:
+                    scale_input += uniform(0.022, 0.028)
+                    self.scale_publish = True
+                elif self.vosekast.state == self.vosekast.MEASURING:
+                    self.scale_publish = True
+                else:
+                    scale_input = 0.0
+                    self.scale_publish = False
 
             # send only every "n"th value to add_new_value
             if runs == 20 and scale_input is not None:
