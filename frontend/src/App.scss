@@ -97,6 +97,11 @@
   }
 
   .content-overview {
+    .testrun_chart {
+      margin: 20px;
+      border: solid 1px lightgray;
+    }
+
     .sequence-buttons-bar {
       display: flex;
       flex-direction: row;

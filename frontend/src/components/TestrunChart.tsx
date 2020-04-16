@@ -10,6 +10,7 @@ import {
   styler,
   // @ts-ignore
 } from "react-timeseries-charts";
+import { Card } from "antd";
 
 export default function TestrunChart({
   testrun,
@@ -32,32 +33,36 @@ export default function TestrunChart({
   ]);
 
   return (
-    <Resizable>
-      <ChartContainer
-        // @ts-ignore
-        timeRange={series.range()}
-        showGrid={true}
-      >
-        <ChartRow height="500">
-          <YAxis
-            id="scale_value"
-            label="Scale"
-            // @ts-ignore
-            min={series.min("scale_value")}
-            max={series.max("scale_value")}
-            width="60"
-            format=".2f"
-          />
-          <Charts>
-            <LineChart
-              axis="scale_value"
-              series={series}
-              columns={["scale_value", "flow_value"]}
-              style={style}
+    <Card title="Results" className="testrun_chart">
+      <Resizable>
+        <ChartContainer
+          // @ts-ignore
+          timeRange={series.range()}
+          showGrid={true}
+          format="%H:%m:%S"
+        >
+          <ChartRow height="500">
+            <YAxis
+              id="scale_value"
+              label="Scale Value in kg"
+              // @ts-ignore
+              min={series.min("scale_value")}
+              max={series.max("scale_value")}
+              width="60"
+              format=".2f"
+              showGrid
             />
-          </Charts>
-        </ChartRow>
-      </ChartContainer>
-    </Resizable>
+            <Charts>
+              <LineChart
+                axis="scale_value"
+                series={series}
+                columns={["scale_value", "flow_value"]}
+                style={style}
+              />
+            </Charts>
+          </ChartRow>
+        </ChartContainer>
+      </Resizable>
+    </Card>
   );
 }
