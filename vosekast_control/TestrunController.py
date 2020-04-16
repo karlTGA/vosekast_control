@@ -42,7 +42,7 @@ class TestrunController:
 
         try:
             self.logger.info("Initialising test run.")
-            self.current_run = Testrun(vosekast=self.vosekast)
+            self.current_run = Testrun(vosekast=self.vosekast, options={"emulate":self.emulate})
             self.current_run.publish_infos()
 
             # change state

@@ -53,7 +53,8 @@ class Testrun:
                 and not self.vosekast.tanks[MEASURING_TANK].is_filled
             ):
                 # emulate measuring_tank filled
-                if self.emulate and time() - self.started_at <= 30:
+                delta_time = time() - self.started_at
+                if self.emulate and delta_time >= 30:
                     self.vosekast.tanks[MEASURING_TANK].state = self.vosekast.tanks[
                         MEASURING_TANK
                     ].FILLED

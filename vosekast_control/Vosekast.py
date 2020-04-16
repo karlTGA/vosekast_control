@@ -75,7 +75,7 @@ class Vosekast:
                 name=SCALE_MEASURING, vosekast=self, emulate=self.emulate
             )
 
-            self.testrun_controller = TestrunController(vosekast=self)
+            self.testrun_controller = TestrunController(vosekast=self, options={"emulate":self.emulate})
 
             # change state if ok
             self._state = self.INITED
