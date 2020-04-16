@@ -47,14 +47,16 @@ class Scale:
         self.stable = False
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
-        self.state = self.UNKNOWN
         self.scale_publish = True
-        self.threads = []
         self.scale_history = deque([], maxlen=200)
         self.flow_history = deque([], maxlen=100)
         self.scale_input_buffer: Deque[float] = deque([], 10)
         self.flow_history_average = deque([], maxlen=5)
         self.scale_start_value = 0
+
+    def start(self):
+        self.open_connection()
+        self.start_measurement_thread()
 
     def open_connection(self):
         if self.emulate:
@@ -78,10 +80,6 @@ class Scale:
             self.connection.close()
             self.logger.info("Closing connection to scale.")
 
-    def start(self):
-        self.open_connection()
-        self.start_measurement_thread()
-
     def start_measurement_thread(self):
         self._state = self.RUNNING
 
@@ -90,7 +88,6 @@ class Scale:
             return
         else:
             self.thread_readscale = Thread(target=self._scale_input_buffer)
-            self.threads.append(self.thread_readscale)
             self.logger.debug("Starting Thread readscale.")
             self.thread_readscale.start()
             self.threads_started = True
@@ -109,22 +106,20 @@ class Scale:
 
         # terminate threads
         if self.threads_started:
-            self.thread_readscale.join()
+            try:
+                self.thread_readscale.join()
+                self.logger.debug("Stopped measurement thread.")
+                self.threads_started = False
 
-        try:
-            self.threads.remove(self.thread_readscale)
-        except Exception:
-            self.logger.error("Error while trying to stop measurement threads.")
-            traceback.print_exc()
-            # raise
+            except Exception:
+                self.logger.error("Error while trying to stop measurement threads.")
+                traceback.print_exc()
+                # raise
 
-        self.logger.debug("Stopped measurement thread.")
-        self.threads_started = False
-
-    # get value from scale (in own thread)
+    # get value from scale (in its own thread)
     def _scale_input_buffer(self):
 
-        # clear scale_input
+        # clear scale_input at start
         scale_input = 0
 
         if not self._state == self.RUNNING:
