@@ -114,17 +114,18 @@ class DataMessage(Message):
     def __init__(self, data_type: str, identifier: str, payload: List[tuple]):
         super().__init__()
 
-        self.type = data_type
+        self.data_type = data_type
         self.id = identifier
         self.payload = payload
 
     @property
     def topic(self):
-        return f"vosekast/data/{self.type}/{self.id}"
+        return f"vosekast/data/{self.id}"
 
     def get_message_object(self):
         message_object = super().get_message_object()
         message_object["id"] = self.id
+        message_object["dataType"] = self.data_type
         message_object["payload"] = self.payload
 
         return message_object

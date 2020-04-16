@@ -28,6 +28,10 @@ function pauseRun() {
   );
 }
 
+function shutdownVosekast() {
+  MQTTConnection.publishCommand("system", "main", "shutdown");
+}
+
 export default function TestrunButtonsBar({
   testrun,
 }: {
@@ -64,6 +68,7 @@ export default function TestrunButtonsBar({
         <PauseOutlined />
         Pause
       </Button>
+      <Button onClick={shutdownVosekast}>Shutdown</Button>
     </div>
   );
 }

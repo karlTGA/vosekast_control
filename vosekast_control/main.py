@@ -2,7 +2,6 @@
 
 import sys
 import os
-import traceback
 
 from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
@@ -38,9 +37,6 @@ async def main(emulate=False):
 
         await vosekast.run()
 
-    except Exception:
-        traceback.print_exc(file=sys.stdout)
-
     finally:
         app_control.shutdown()
         await vosekast.clean()
@@ -49,6 +45,7 @@ async def main(emulate=False):
 
         if emulate:
             print("system exit")
+            GPIO.ui.close()
             sys.exit(0)
         else:
             os.system("sudo shutdown -h now")

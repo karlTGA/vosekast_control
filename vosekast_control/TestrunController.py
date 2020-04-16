@@ -112,12 +112,14 @@ class TestrunController:
             await asyncio.sleep(2)
 
             self.vosekast.valves[MEASURING_TANK_SWITCH].open()
+            await self.current_run.start()
             self.logger.debug("Measuring started.")
 
         except Exception:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pumps[PUMP_MEASURING_TANK].stop()
             self.vosekast.state = self.vosekast.RUNNING
+            await self.stop_current_run()
             raise
 
     async def stop_current_run(self):
@@ -194,14 +196,15 @@ class TestrunController:
         await self.stop_current_run()
 
     def publish_state(self):
-        MQTTConnection.publish_message(
-            StatusMessage(
-                "system",
-                "testrun_controller",
-                self.state,
-                properties={"run_id": self.current_run.id},
+        if self.current_run is not None:
+            MQTTConnection.publish_message(
+                StatusMessage(
+                    "system",
+                    "testrun_controller",
+                    self.state,
+                    properties={"run_id": self.current_run.id},
+                )
             )
-        )
 
     @property
     def state(self):

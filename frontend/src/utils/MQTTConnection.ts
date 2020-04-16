@@ -8,6 +8,8 @@ import {
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
+// @ts-ignore
+import { TimeSeries, TimeEvent } from "pondjs";
 
 type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
@@ -52,11 +54,23 @@ interface InfoMessage extends Message {
     emulated: boolean;
   };
 }
+interface Datapoint {
+  timestamp: number;
+  scale_value: number;
+  flow_current: number;
+  flow_average: number;
+  pump_constant_tank_state: string;
+  pump_measuring_tank_state: string;
+  measuring_drain_valve_state: string;
+  measuring_tank_switch_state: string;
+  run_id: string;
+}
 
 interface DataMessage extends Message {
   type: "data";
+  dataType?: "test_result" | "test_results";
   id?: DataSources;
-  payload?: Array<Array<string>>;
+  payload?: Array<Datapoint> | Datapoint;
 }
 
 interface PumpStatusMessage extends StatusMessage {
@@ -114,6 +128,14 @@ class MQTTConnector {
       });
 
       this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+
+      // request state of devices and current testrun
+      this.publishCommand("system", "vosekast", "state_overview");
+      this.publishCommand(
+        "system",
+        "testrun_controller",
+        "get_current_run_infos"
+      );
     }
   };
 
@@ -252,17 +274,60 @@ class MQTTConnector {
   handleDataMessage = (message: DataMessage) => {
     const runId = message.id;
     const data = message.payload;
-    if (runId == null || message.payload == null) {
+    const dataType = message.dataType;
+
+    if (runId == null || data == null || dataType == null) {
       console.warn("Got data message with invalid format!");
       return;
     }
-    VosekastStore.update((s) => {
-      const testrun = s.testruns.get(runId);
 
-      if (testrun == null) return;
-      testrun.results = data;
-      s.testruns.set(runId, testrun);
-    });
+    switch (dataType) {
+      case "test_results":
+        VosekastStore.update((s) => {
+          const testrun = s.testruns.get(runId);
+          if (testrun == null) return;
+
+          testrun.results = new TimeSeries({
+            name: "sensor_data",
+            columns: ["time", "sensor", "status"],
+            points: data as any[],
+          });
+          s.testruns.set(runId, testrun);
+        });
+        break;
+
+      case "test_result":
+        VosekastStore.update((s) => {
+          const datapoint = data as Datapoint;
+          const testrun = s.testruns.get(runId);
+          if (testrun == null) return;
+
+          if (testrun.results == null) {
+            testrun.results = new TimeSeries({
+              name: "sensor_data",
+              columns: ["time", "scaleValue", "flowValue"],
+              points: [
+                [
+                  Math.round(datapoint.timestamp),
+                  datapoint.scale_value,
+                  datapoint.flow_current,
+                ],
+              ],
+            });
+          } else {
+            const collection = testrun.results.collection().addEvent(
+              new TimeEvent(Math.round(datapoint.timestamp), {
+                scaleValue: datapoint.scale_value,
+                flowValue: datapoint.flow_current,
+              })
+            );
+            testrun.results = testrun.results.setCollection(collection, true);
+          }
+
+          s.testruns.set(runId, testrun);
+        });
+        break;
+    }
   };
 
   handleLogMessage = (message: LogMessage) => {

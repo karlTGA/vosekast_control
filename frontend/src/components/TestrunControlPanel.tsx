@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import TestrunButtonsBar from "./TestrunButtonsBar";
 import TestrunChart from "./TestrunChart";
-import MQTTConnection from "../utils/MQTTConnection";
+import TestrunValues from "./TestrunValues";
 import { useStoreState } from "pullstate";
 import { VosekastStore } from "../Store";
 
@@ -10,18 +10,12 @@ export default function TestrunControlPanel() {
   const activeRun = Array.from(testruns.values()).find(
     (testrun) => testrun.state === "MEASURING"
   );
-  useEffect(() => {
-    MQTTConnection.publishCommand(
-      "system",
-      "testrun_controller",
-      "get_current_run_infos"
-    );
-  }, []);
 
   return (
     <>
       <TestrunButtonsBar testrun={activeRun} />
       <TestrunChart testrun={activeRun} />
+      <TestrunValues testrun={activeRun} />
     </>
   );
 }
