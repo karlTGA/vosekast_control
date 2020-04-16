@@ -36,7 +36,6 @@ class Testrun:
         self.vosekast = vosekast
         self.scale = vosekast.scale
         self.logger = logging.getLogger(LOGGER)
-        self.scale_nulled = 0
         self.state = self.INITED
         self.publish_infos()
 
@@ -44,10 +43,6 @@ class Testrun:
         self.started_at = time()
 
         try:
-            # tare scale
-            # todo: to tare the scale should a method of the scale
-            if abs(self.scale.scale_history[0]) < 0.15:
-                self.scale_nulled = self.scale.scale_history[0]
 
             self.state = self.MEASURING
             self.publish_infos()
@@ -97,10 +92,8 @@ class Testrun:
         )
 
     def _get_current_scale_value(self) -> float:
-        if self.emulate:
-            return round(self.scale.scale_history[0], 5)
         
-        return round(self.scale.scale_history[0] - self.scale_nulled, 5)
+        return round(self.scale.scale_history[0], 5)
 
     def _write_db_entry(self):
 
