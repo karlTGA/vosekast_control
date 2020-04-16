@@ -60,7 +60,6 @@ class DBConnector:
             traceback.print_exc()
             # raise
 
-    # todo read
     def read(self, data):
         # https://pynative.com/python-sqlite-select-from-table/
         data = data.get("data")

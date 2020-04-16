@@ -113,15 +113,9 @@ class Scale:
 
         # terminate threads
         if self.threads_started:
-            try:
-                self.thread_readscale.join()
-                self.logger.debug("Stopped measurement thread.")
-                self.threads_started = False
-
-            except Exception:
-                self.logger.error("Error while trying to stop measurement threads.")
-                traceback.print_exc()
-                # raise
+            self.thread_readscale.join()
+            self.logger.debug("Stopped measurement thread.")
+            self.threads_started = False
 
     # get value from scale (in its own thread)
     def _scale_input_buffer(self):
@@ -210,7 +204,7 @@ class Scale:
         elif self.emulate:
             new_value = scale_input
 
-        self.actual_value(new_value)
+        self.value(new_value)
 
         # for tare
         return new_value
@@ -219,14 +213,13 @@ class Scale:
     def actual_value(self):
         return self.tared_value
 
-    @actual_value.setter
-    def actual_value(self, new_value):
+    def value(self, new_value):
         self.tared_value = new_value - self._scale_start_value
+        self.add_new_value()
 
-    def add_new_value(self, tared_value):
-
+    def add_new_value(self):
         timestamp = time.time() * 1000
-
+        
         # deque scale history
         self.scale_history.appendleft(timestamp)
         self.scale_history.appendleft(self.actual_value)

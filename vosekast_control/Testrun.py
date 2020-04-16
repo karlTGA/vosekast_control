@@ -99,13 +99,11 @@ class Testrun:
     def _get_current_scale_value(self) -> float:
         if self.emulate:
             return round(self.scale.scale_history[0], 5)
-
+        
         return round(self.scale.scale_history[0] - self.scale_nulled, 5)
 
     def _write_db_entry(self):
-        # get the current value of the scale
-        # todo: emulated or not should not interesting for the run class. the scale should
-        # give a simple a value
+
         current_scale_value = self._get_current_scale_value()
         flow_average = self.scale.flow_average()
 
