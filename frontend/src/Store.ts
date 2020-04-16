@@ -1,5 +1,6 @@
 import { Store } from "pullstate";
 import moment from "moment";
+import { TimeSeries } from "pondjs";
 
 export type PumpState = "STOPPED" | "RUNNING" | "UNKNOWN";
 export type ValveState = "OPEN" | "CLOSED" | "UNKNOWN";
@@ -35,7 +36,7 @@ export interface TestrunInfos {
   createdAt: number;
   state: string;
   emulated: boolean;
-  results?: object;
+  results?: TimeSeries;
 }
 
 export interface MQTTState {

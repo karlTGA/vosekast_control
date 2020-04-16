@@ -12,7 +12,7 @@ from vosekast_control.utils.Constants import (
 from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.Log import LOGGER
 from vosekast_control.connectors import MQTTConnection
-from vosekast_control.utils.Msg import InfoMessage
+from vosekast_control.utils.Msg import InfoMessage, DataMessage
 
 
 class Testrun:
@@ -63,7 +63,7 @@ class Testrun:
                         MEASURING_TANK
                     ].FILLED
 
-                self._write_db_entry()
+                self._measure_value()
                 await asyncio.sleep(1)
 
             # interrupt if measuring_tank full
@@ -102,7 +102,12 @@ class Testrun:
 
         return round(self.scale.scale_history[0] - self.scale_nulled, 5)
 
-    def _write_db_entry(self):
+    def _publish_new_value(self, datapoint):
+        MQTTConnection.publish_message(
+            DataMessage(data_type="test_result", identifier=self.id, payload=datapoint)
+        )
+
+    def _measure_value(self):
         # get the current value of the scale
         # todo: emulated or not should not interesting for the run class. the scale should
         # give a simple a value
@@ -124,6 +129,7 @@ class Testrun:
             ].state,
             "run_id": self.id,
         }
+        self._publish_new_value(data)
         DBConnection.insert_datapoint(data)
 
         self.logger.debug(

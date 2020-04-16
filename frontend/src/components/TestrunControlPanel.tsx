@@ -22,6 +22,7 @@ export default function TestrunControlPanel() {
     <>
       <TestrunButtonsBar testrun={activeRun} />
       <TestrunChart testrun={activeRun} />
+      {/* TestrunValues */}
     </>
   );
 }
