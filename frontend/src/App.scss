@@ -9,6 +9,7 @@
 }
 
 .App {
+  font-family: "Open Sans", Arial, Helvetica, sans-serif;
   text-align: center;
   height: 100%;
 
@@ -125,6 +126,46 @@
 
         span {
           margin: 0px 3px;
+        }
+      }
+    }
+
+    .testrun_value_cards_container {
+      display: flex;
+      margin: 0 20px;
+
+      .testrun_value_card {
+        width: 300px;
+        height: 150px;
+        margin-right: 20px;
+        border: solid 1px lightgrey;
+
+        .ant-card-body {
+          display: flex;
+          flex-direction: row;
+
+          .testrun_value_card_icon {
+            width: 100px;
+            height: 100px;
+
+            img {
+              width: 100%;
+            }
+          }
+
+          .testrun_value_card_text {
+            text-align: left;
+            padding-left: 10px;
+            .testrun_value_card_title {
+              font-weight: bold;
+            }
+
+            .testrun_value_card_value {
+              padding-top: 10px;
+              padding-left: 20px;
+              font-size: xx-large;
+            }
+          }
         }
       }
     }
