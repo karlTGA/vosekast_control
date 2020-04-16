@@ -19,7 +19,7 @@ class Scale:
     # Scale states
     UNKNOWN = "UNKNOWN"
     RUNNING = "RUNNING"
-    PAUSED = "PAUSED"
+    IDLE = "IDLE"
     STOPPED = "STOPPED"
 
     def __init__(
@@ -99,7 +99,8 @@ class Scale:
     def tare_start_value(self):
 
         if not self.emulate:
-            self.scale_start_value = self.handle_value_from_scale()
+            current_value = self.get_current_value()
+            self.scale_start_value = self.handle_value_from_scale(current_value)
         else:
             self.scale_start_value = 0
 
@@ -205,6 +206,9 @@ class Scale:
 
         self.tare(new_value)
 
+        # for tare_start_value
+        return new_value
+
     def tare(self, new_value):
         tared_value = new_value - self.scale_start_value
         self.add_new_value(tared_value)
@@ -266,3 +270,15 @@ class Scale:
         timestamp = datetime.now()
         current_value = self.scale_input_buffer[0]
         MQTTConnection.publish_message(StatusMessage("scale", self.name, f"{current_value} Kg at {timestamp}"))
+
+        # for tare_start_value
+        return current_value
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
+        self.logger.debug(f"New Scale state is: {new_state}")

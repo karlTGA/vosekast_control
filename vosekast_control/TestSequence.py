@@ -116,6 +116,7 @@ class TestSequence:
                     self.vosekast.measuring_tank.state = (
                         self.vosekast.measuring_tank.FILLED
                     )
+                    self.vosekast.state = self.vosekast.RUNNING
                 if self.emulate:
                     # timeout
                     time_sequence_t1 = time.time()
