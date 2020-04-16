@@ -3,8 +3,6 @@ from sqlite3 import Error
 import logging
 import traceback
 from vosekast_control.Log import LOGGER
-from vosekast_control.utils.Msg import DataMessage
-from vosekast_control.connectors import MQTTConnection
 
 
 class DBConnector:
@@ -15,7 +13,7 @@ class DBConnector:
     # cursor unnecessary according to https://docs.python.org/3/library/sqlite3.html#using-shortcut-methods
     def connect(self):
         try:
-            self._db_connection = sqlite3.connect("sequence_values.db")
+            self._db_connection = sqlite3.connect("run_values.db")
             self.cursor = self._db_connection.cursor()
             self.logger.info("Established DB connection.")
         except Error as e:
@@ -26,7 +24,7 @@ class DBConnector:
             # raise
 
         self._db_connection.execute(
-            """CREATE TABLE IF NOT EXISTS sequence_values (
+            """CREATE TABLE IF NOT EXISTS run_values (
             timestamp integer,
             scale_value real,
             flow_current real,
@@ -35,7 +33,7 @@ class DBConnector:
             pump_measuring_tank_state real,
             measuring_drain_valve_state text,
             measuring_tank_switch_state text,
-            sequence_id text
+            run_id text
             )"""
         )
         self._db_connection.commit()
@@ -51,7 +49,7 @@ class DBConnector:
 
             # https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
             self._db_connection.execute(
-                "INSERT INTO sequence_values (timestamp,scale_value,flow_current,flow_average,pump_constant_tank_state,pump_measuring_tank_state,measuring_drain_valve_state,measuring_tank_switch_state,sequence_id) VALUES (:timestamp, :scale_value, :flow_current, :flow_average, :pump_constant_tank_state, :pump_measuring_tank_state, :measuring_drain_valve_state, :measuring_tank_switch_state, :sequence_id);",
+                "INSERT INTO run_values (timestamp,scale_value,flow_current,flow_average,pump_constant_tank_state,pump_measuring_tank_state,measuring_drain_valve_state,measuring_tank_switch_state,run_id) VALUES (:timestamp, :scale_value, :flow_current, :flow_average, :pump_constant_tank_state, :pump_measuring_tank_state, :measuring_drain_valve_state, :measuring_tank_switch_state, :run_id);",
                 data,
             )
 
@@ -66,44 +64,24 @@ class DBConnector:
     def read(self, data):
         # https://pynative.com/python-sqlite-select-from-table/
         data = data.get("data")
-        self.cursor.execute("SELECT * FROM sequence_values WHERE data = ?", (data,))
+        self.cursor.execute("SELECT * FROM run_values WHERE data = ?", (data,))
         record = self.cursor.fetchall()
         return record
 
     # get sequence_id data from db
-    def get_sequence_data(self, data):
-
-        # data = {"sequence_id": "61986369442"}
-        sequence_id = data.get("sequence_id")
-
+    def get_run_data(self, run_id: str):
         try:
-            self.logger.debug(f"DB lookup for sequence_id: {sequence_id}")
-            sequence_id_query = (sequence_id,)
-            self.cursor.execute("SELECT * FROM sequence_values WHERE sequence_id = ?", sequence_id_query)
-            record = self.cursor.fetchall()
-
-            # send data to mqtt
-            MQTTConnection.publish_message(
-                DataMessage("db_lookup", sequence_id, record)
-            )
-            print(record)
-            return record
+            self.logger.debug(f"DB lookup for run_id: {run_id}")
+            query = (run_id,)
+            self.cursor.execute("SELECT * FROM run_values WHERE run_id = ?", query)
+            return self.cursor.fetchall()
 
         except sqlite3.Error as e:
             self.logger.error("Failed to read data from sqlite table", e)
-        except Exception as e:
-            self.logger.error(e)
-            traceback.print_exc()
-            # raise
 
     def close(self):
-        try:
-            self._db_connection.close()
-            self.logger.info("DB connection closed.")
-        except Exception:
-            traceback.print_exc()
-            # raise
-            return
+        self._db_connection.close()
+        self.logger.info("DB connection closed.")
 
     # workaround to show if connected
     # https://stackoverflow.com/questions/1981392/how-to-tell-if-python-sqlite-database-connection-or-cursor-is-closed

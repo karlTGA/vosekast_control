@@ -42,7 +42,8 @@ async def main(emulate=False):
         traceback.print_exc(file=sys.stdout)
 
     finally:
-        vosekast.clean()
+        app_control.shutdown()
+        await vosekast.clean()
         DBConnection.close()
         GPIO.cleanup()
 

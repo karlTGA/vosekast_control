@@ -43,9 +43,6 @@ class MQTTConnector:
 
         except ConnectionRefusedError:
             await self.connection_refused()
-        except Exception:
-            traceback.print_exc()
-            raise
 
     async def connection_refused(self):
         self.logger.warning(

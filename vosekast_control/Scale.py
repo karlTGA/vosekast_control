@@ -11,6 +11,12 @@ from random import uniform
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Constants import (
+    CONSTANT_TANK,
+    PUMP_CONSTANT_TANK,
+    MEASURING_DRAIN_VALVE,
+    MEASURING_TANK,
+)
 
 from typing import Deque
 

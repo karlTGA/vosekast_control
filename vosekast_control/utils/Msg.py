@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from logging import LogRecord
 import logging
-from typing import List
+from typing import List, Dict
 
 
 class Message:
@@ -61,12 +61,15 @@ class LogMessage(Message):
 class StatusMessage(Message):
     type = "status"
 
-    def __init__(self, device_type: str, device_id: str, new_state: str):
+    def __init__(
+        self, device_type: str, device_id: str, new_state: str, properties: Dict = {}
+    ):
         super().__init__()
 
         self.device_type = device_type  # could be 'pump', 'scale' ...
         self.device_id = device_id  # for example measuring_tank_pump
         self.new_state = new_state  # use string with unit
+        self.properties = properties
 
     @property
     def topic(self):
@@ -77,6 +80,30 @@ class StatusMessage(Message):
         message_object["device_type"] = self.device_type
         message_object["device_id"] = self.device_id
         message_object["new_state"] = self.new_state
+
+        if "run_id" in self.properties:
+            message_object["run_id"] = self.properties["run_id"]
+
+        return message_object
+
+
+class InfoMessage(Message):
+    type = "info"
+
+    def __init__(self, system: str, info: object):
+        super().__init__()
+
+        self.system = system  # could be 'testrun_controlle', 'testrun'
+        self.info = info  # the new info as object
+
+    @property
+    def topic(self):
+        return f"vosekast/info/{self.system}"
+
+    def get_message_object(self):
+        message_object = super().get_message_object()
+        message_object["id"] = self.system
+        message_object["payload"] = self.info
 
         return message_object
 
@@ -97,7 +124,6 @@ class DataMessage(Message):
 
     def get_message_object(self):
         message_object = super().get_message_object()
-        message_object["type"] = self.type
         message_object["id"] = self.id
         message_object["payload"] = self.payload
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Layout } from "antd";
-import CommandButtonsBar from "../CommandButtonsBar";
+import DeviceButtonsBar from "../DeviceButtonsBar";
+import TestrunControlPanel from "../TestrunControlPanel";
 
 const { Sider, Content } = Layout;
 
@@ -8,9 +9,11 @@ const OverView = () => {
   return (
     <Layout>
       <Sider className="sider-overview">
-        <CommandButtonsBar />
+        <DeviceButtonsBar />
       </Sider>
-      <Content>Content</Content>
+      <Content className="content-overview">
+        <TestrunControlPanel />
+      </Content>
     </Layout>
   );
 };
