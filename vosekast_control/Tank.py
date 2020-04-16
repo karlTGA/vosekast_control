@@ -1,7 +1,6 @@
 import logging
 from vosekast_control.Log import LOGGER
 import asyncio
-import traceback
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 

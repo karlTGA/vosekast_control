@@ -58,7 +58,8 @@ class Scale:
         self.flow_history = deque([], maxlen=100)
         self.scale_input_buffer: Deque[float] = deque([], 10)
         self.flow_history_average = deque([], maxlen=5)
-        self.scale_start_value = 0
+        self._scale_start_value = 0
+        self.tared_value = 0
 
     def start(self):
         self.open_connection()
@@ -99,13 +100,13 @@ class Scale:
             self.threads_started = True
 
     # get initial value from scale
-    def tare_start_value(self):
+    def tare(self):
 
         if not self.emulate:
             current_value = self.get_current_value()
-            self.scale_start_value = self._handle_value_from_scale(current_value)
+            self._scale_start_value = self._handle_value_from_scale(current_value)
         else:
-            self.scale_start_value = 0
+            self._scale_start_value = 0
 
     def stop_measurement_thread(self):
         self._state = self.STOPPED
@@ -209,15 +210,18 @@ class Scale:
         elif self.emulate:
             new_value = scale_input
 
-        self.tare(new_value)
+        self.actual_value(new_value)
 
-        # for tare_start_value
+        # for tare
         return new_value
 
-    def tare(self, new_value):
-        tared_value = new_value - self.scale_start_value
-        self.add_new_value(tared_value)
-        self.publish_values(tared_value)
+    @property
+    def actual_value(self):
+        return self.tared_value
+
+    @actual_value.setter
+    def actual_value(self, new_value):
+        self.tared_value = new_value - self._scale_start_value
 
     def add_new_value(self, tared_value):
 
@@ -225,7 +229,7 @@ class Scale:
 
         # deque scale history
         self.scale_history.appendleft(timestamp)
-        self.scale_history.appendleft(tared_value)
+        self.scale_history.appendleft(self.actual_value)
 
         # calculate volume flow
         if len(self.scale_history) > 2:
@@ -255,13 +259,13 @@ class Scale:
                 self.logger.warning("Division by zero.")
 
     # publish via mqtt
-    def publish_values(self, tared_value):
+    def publish_values(self):
 
         if not self.scale_publish:
             return
         else:
             MQTTConnection.publish_message(
-                StatusMessage("scale", self.name, f"{tared_value} Kg")
+                StatusMessage("scale", self.name, f"{self.actual_value} Kg")
             )
 
     def flow_average(self):
@@ -276,7 +280,7 @@ class Scale:
         current_value = self.scale_input_buffer[0]
         MQTTConnection.publish_message(StatusMessage("scale", self.name, f"{current_value} Kg at {timestamp}"))
 
-        # for tare_start_value
+        # for tare
         return current_value
 
     @property

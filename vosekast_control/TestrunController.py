@@ -86,7 +86,9 @@ class TestrunController:
                 return
 
             self.logger.debug("Vosekast ready to measure.")
+
             # turn on measuring pump, start measuring
+            self.scale.tare()
             await self._start_measurement()
 
             self.vosekast.state = self.vosekast.MEASURING

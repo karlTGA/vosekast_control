@@ -5,7 +5,6 @@ from vosekast_control.utils.Msg import StatusMessage
 import logging
 import asyncio
 import os
-import traceback
 
 
 def noop(*args, **kwargs):
