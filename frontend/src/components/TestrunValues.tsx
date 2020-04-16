@@ -9,11 +9,11 @@ interface ValueProps {
 }
 
 const valueMapping: Record<string, ValueProps> = {
-  scale_value: {
+  scaleValue: {
     title: "Scale in kg",
     imagePath: "/img/icons/manufacturing/025-meter.svg",
   },
-  flow_value: {
+  flowValue: {
     title: "Flow in l/min",
     imagePath: "/img/icons/manufacturing/020-planning.svg",
   },
@@ -30,9 +30,9 @@ function TestrunValueCard({
   const value = Math.round(timeEvent.get(valueKey) * 1000) / 1000;
 
   return (
-    <Card className="testrun_value_card">
+    <Card className="testrun_value_card" key={valueKey}>
       <div className="testrun_value_card_icon">
-        <img src={valueProps.imagePath} />
+        <img src={valueProps.imagePath} alt={"valueKey"} />
       </div>
       <div className="testrun_value_card_text">
         <div className="testrun_value_card_title">{valueProps.title} </div>
@@ -53,10 +53,9 @@ export default function TestrunValues({
 
   return (
     <div className="testrun_value_cards_container">
-      {keys.map((key) => {
-        debugger;
-        return <TestrunValueCard valueKey={key} timeEvent={timeEvent} />;
-      })}
+      {keys.map((key) => (
+        <TestrunValueCard key={key} valueKey={key} timeEvent={timeEvent} />
+      ))}
     </div>
   );
 }

@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import TestrunButtonsBar from "./TestrunButtonsBar";
 import TestrunChart from "./TestrunChart";
 import TestrunValues from "./TestrunValues";
-import MQTTConnection from "../utils/MQTTConnection";
 import { useStoreState } from "pullstate";
 import { VosekastStore } from "../Store";
 

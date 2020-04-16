@@ -125,7 +125,7 @@ class DataMessage(Message):
     def get_message_object(self):
         message_object = super().get_message_object()
         message_object["id"] = self.id
-        message_object["data_type"] = self.data_type
+        message_object["dataType"] = self.data_type
         message_object["payload"] = self.payload
 
         return message_object

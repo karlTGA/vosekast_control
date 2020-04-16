@@ -21,13 +21,13 @@ export default function TestrunChart({
   const series = testrun.results;
   const style = styler([
     {
-      key: "scale_value",
-      color: "#a02c2c",
+      key: "scaleValue",
+      color: "red",
       width: 2,
     },
     {
-      key: "flow_value",
-      color: "#a02c2c",
+      key: "flowValue",
+      color: "blue",
       width: 2,
     },
   ]);
@@ -43,20 +43,20 @@ export default function TestrunChart({
         >
           <ChartRow height="500">
             <YAxis
-              id="scale_value"
+              id="scaleValue"
               label="Scale Value in kg"
               // @ts-ignore
-              min={series.min("scale_value")}
-              max={series.max("scale_value")}
+              min={series.min("scaleValue")}
+              max={series.max("scaleValue")}
               width="60"
               format=".2f"
               showGrid
             />
             <Charts>
               <LineChart
-                axis="scale_value"
+                axis="scaleValue"
                 series={series}
-                columns={["scale_value", "flow_value"]}
+                columns={["scaleValue", "flowValue"]}
                 style={style}
               />
             </Charts>

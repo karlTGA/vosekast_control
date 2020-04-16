@@ -68,7 +68,7 @@ interface Datapoint {
 
 interface DataMessage extends Message {
   type: "data";
-  data_type?: "test_result" | "test_results";
+  dataType?: "test_result" | "test_results";
   id?: DataSources;
   payload?: Array<Datapoint> | Datapoint;
 }
@@ -274,17 +274,16 @@ class MQTTConnector {
   handleDataMessage = (message: DataMessage) => {
     const runId = message.id;
     const data = message.payload;
-    const data_type = message.data_type;
+    const dataType = message.dataType;
 
-    if (runId == null || data == null || data_type == null) {
+    if (runId == null || data == null || dataType == null) {
       console.warn("Got data message with invalid format!");
       return;
     }
 
-    switch (data_type) {
+    switch (dataType) {
       case "test_results":
         VosekastStore.update((s) => {
-          const datapoints = data as Array<Datapoint>;
           const testrun = s.testruns.get(runId);
           if (testrun == null) return;
 
@@ -306,7 +305,7 @@ class MQTTConnector {
           if (testrun.results == null) {
             testrun.results = new TimeSeries({
               name: "sensor_data",
-              columns: ["time", "scale_value", "flow_value"],
+              columns: ["time", "scaleValue", "flowValue"],
               points: [
                 [
                   Math.round(datapoint.timestamp),
@@ -318,8 +317,8 @@ class MQTTConnector {
           } else {
             const collection = testrun.results.collection().addEvent(
               new TimeEvent(Math.round(datapoint.timestamp), {
-                scale_value: datapoint.scale_value,
-                flow_value: datapoint.flow_current,
+                scaleValue: datapoint.scale_value,
+                flowValue: datapoint.flow_current,
               })
             );
             testrun.results = testrun.results.setCollection(collection, true);
