@@ -11,13 +11,6 @@ export default function TestrunControlPanel() {
   const activeRun = Array.from(testruns.values()).find(
     (testrun) => testrun.state === "MEASURING"
   );
-  useEffect(() => {
-    MQTTConnection.publishCommand(
-      "system",
-      "testrun_controller",
-      "get_current_run_infos"
-    );
-  }, []);
 
   return (
     <>

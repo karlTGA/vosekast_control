@@ -128,6 +128,14 @@ class MQTTConnector {
       });
 
       this.client.subscribe("vosekast/#", { qos: 0 }, this.handleSubscription);
+
+      // request state of devices and current testrun
+      this.publishCommand("system", "vosekast", "state_overview");
+      this.publishCommand(
+        "system",
+        "testrun_controller",
+        "get_current_run_infos"
+      );
     }
   };
 

@@ -6,6 +6,7 @@ from vosekast_control.Scale import Scale
 from vosekast_control.TestrunController import TestrunController
 
 from typing import Dict
+import itertools
 import logging
 import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
@@ -296,11 +297,11 @@ class Vosekast:
 
     # all devices publish their state via mqtt
     def state_overview(self):
-        for device in (
-            self.tanks.values()
-            + self.pumps.values()
-            + self.valves.values()
-            + self.level_sensors.values()
+        for device in itertools.chain(
+            self.tanks.values(),
+            self.pumps.values(),
+            self.valves.values(),
+            self.level_sensors.values(),
         ):
             device.publish_state()
 
