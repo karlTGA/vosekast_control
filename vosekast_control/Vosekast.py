@@ -394,8 +394,8 @@ class Vosekast:
             scale.start_measurement_thread()
         elif command_id == "stop_measurement_thread":
             scale.stop_measurement_thread()
-        elif command_id == "print_diagnostics":
-            scale.print_diagnostics()
+        elif command_id == "get_current_value":
+            scale.get_current_value()
         else:
             self.logger.warning(
                 f"Received unknown command {command_id} for \

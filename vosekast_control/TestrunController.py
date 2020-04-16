@@ -50,7 +50,7 @@ class TestrunController:
 
             # check if already running
             # remove the scale start. Scale should running. Testsequenze can test that, not more.
-            if not self.scale.is_running:
+            if not self.scale.state == self.scale.RUNNING:
                 self.scale.start()
                 self.logger.info(
                     "Initialising scale connection & measurement thread. Please wait."

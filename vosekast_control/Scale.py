@@ -148,7 +148,7 @@ class Scale:
                     self.scale_publish = False
             # generate random values if self.emulate
             if self.emulate:
-                if self.vosekast.state == self.vosekast.MEASURING and self.vosekast.testsequence.state == self.vosekast.testsequence.MEASURING:
+                if self.vosekast.state == self.vosekast.MEASURING and self.vosekast.testrun_controller.state == self.vosekast.testrun_controller.MEASURING:
                     scale_input += uniform(0.022, 0.028)
                     self.scale_publish = True
                 elif self.vosekast.state == self.vosekast.MEASURING:
