@@ -92,7 +92,6 @@ class Testrun:
         )
 
     def _get_current_scale_value(self) -> float:
-        
         return round(self.scale.scale_history[0]["scale_actual_value"], 5)
 
     def _write_db_entry(self):

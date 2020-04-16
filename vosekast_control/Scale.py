@@ -5,18 +5,11 @@ from time import sleep
 import time
 from datetime import datetime
 import logging
-import traceback
 from vosekast_control.Log import LOGGER
 from random import uniform
 from statistics import mean
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
-from vosekast_control.utils.Constants import (
-    CONSTANT_TANK,
-    PUMP_CONSTANT_TANK,
-    MEASURING_DRAIN_VALVE,
-    MEASURING_TANK,
-)
 
 from typing import Deque
 
@@ -219,7 +212,7 @@ class Scale:
 
     def add_new_value(self):
         timestamp = time.time() * 1000
-        
+
         # add timestamp and actual_value to deque scale_history
         scale_data = {
             "timestamp": timestamp,
@@ -231,7 +224,6 @@ class Scale:
         if len(self.scale_history) > 2:
 
             try:
-                # todo dictionary: value, timestamp
                 weight = self.scale_history[0]["scale_actual_value"] - self.scale_history[1]["scale_actual_value"]
                 delta_weight = abs(weight)
 
