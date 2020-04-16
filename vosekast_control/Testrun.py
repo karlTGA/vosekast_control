@@ -93,7 +93,7 @@ class Testrun:
 
     def _get_current_scale_value(self) -> float:
         
-        return round(self.scale.scale_history[0], 5)
+        return round(self.scale.scale_history[0]["scale_actual_value"], 5)
 
     def _write_db_entry(self):
 
@@ -101,7 +101,7 @@ class Testrun:
         flow_average = self.scale.flow_average()
 
         data = {
-            "timestamp": self.scale.scale_history[1],
+            "timestamp": self.scale.scale_history[0]["timestamp"],
             "scale_value": current_scale_value,
             "flow_current": self.scale.flow_history[0],
             "flow_average": flow_average,

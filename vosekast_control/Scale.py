@@ -54,10 +54,10 @@ class Scale:
         self.logger = logging.getLogger(LOGGER)
         self.vosekast = vosekast
         self.scale_publish = True
-        self.scale_history = deque([], maxlen=200)
-        self.flow_history = deque([], maxlen=100)
+        self.scale_history: Deque[dict] = deque([], maxlen=100)
+        self.flow_history: Deque[float] = deque([], maxlen=100)
         self.scale_input_buffer: Deque[float] = deque([], 10)
-        self.flow_history_average = deque([], maxlen=5)
+        self.flow_history_average: Deque[float] = deque([], maxlen=5)
         self._scale_start_value = 0
         self.tared_value = 0
 
@@ -220,19 +220,22 @@ class Scale:
     def add_new_value(self):
         timestamp = time.time() * 1000
         
-        # deque scale history
-        self.scale_history.appendleft(timestamp)
-        self.scale_history.appendleft(self.actual_value)
+        # add timestamp and actual_value to deque scale_history
+        scale_data = {
+            "timestamp": timestamp,
+            "scale_actual_value": self.actual_value,
+        }
+        self.scale_history.appendleft(scale_data)
 
         # calculate volume flow
         if len(self.scale_history) > 2:
 
             try:
                 # todo dictionary: value, timestamp
-                delta = self.scale_history[0] - self.scale_history[2]
-                delta_weight = abs(delta)
+                weight = self.scale_history[0]["scale_actual_value"] - self.scale_history[1]["scale_actual_value"]
+                delta_weight = abs(weight)
 
-                duration = self.scale_history[1] - self.scale_history[3]
+                duration = self.scale_history[0]["timestamp"] - self.scale_history[1]["timestamp"]
                 delta_time = abs(duration)
 
                 weight_per_time = (delta_weight / delta_time) * 1000
