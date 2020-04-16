@@ -97,7 +97,7 @@ class Scale:
 
         if not self.emulate:
             current_value = self.get_current_value()
-            self.scale_start_value = self.handle_value_from_scale(current_value)
+            self.scale_start_value = self._handle_value_from_scale(current_value)
         else:
             self.scale_start_value = 0
 
@@ -153,7 +153,7 @@ class Scale:
 
             # send only every "n"th value to add_new_value
             if runs == 20 and scale_input is not None:
-                self.handle_value_from_scale(scale_input)
+                self._handle_value_from_scale(scale_input)
                 runs = 0
             elif runs == 20 and scale_input is None:
                 self.logger.warning("Reached loop with new value = None.")
@@ -167,7 +167,7 @@ class Scale:
         self.logger.info("Scale stopped measuring.")
 
     # serial connection sometimes produces inconsistent readouts
-    def handle_value_from_scale(self, scale_input):
+    def _handle_value_from_scale(self, scale_input):
 
         # handling of weird output from scale, needed if NOT self.emulate
         if not self.emulate:
