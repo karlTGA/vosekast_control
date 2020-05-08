@@ -1,6 +1,5 @@
 import logging
 from vosekast_control.Log import LOGGER
-import asyncio
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
@@ -120,12 +119,12 @@ class Tank:
                 )
                 return
 
-            except Exception as err:
-                self._state = self.STOPPED
-                self.logger.warning("Filling {} aborted.".format(self.name))
-                raise
+        except Exception:
+            self._state = self.STOPPED
+            self.logger.warning("Filling {} aborted.".format(self.name))
+            raise
 
-        elif self._state == self.FILLED:
+        if self._state == self.FILLED:
             self.logger.info("{} already filled. Continuing.".format(self.name))
         else:
             self.logger.warning(

@@ -1,7 +1,6 @@
 from vosekast_control.Tank import Tank
 from unittest.mock import MagicMock
 import pytest
-from datetime import datetime
 
 
 class TestTank:
@@ -21,15 +20,8 @@ class TestTank:
             overflow_sensor,
             drain_valve,
             source_pump,
-            vosekast=self,
+            vosekast=vosekast,
         )
-
-        self.level_sensor = level_sensor
-        self.drain_sensor = drain_sensor
-        self.overflow_sensor = overflow_sensor
-        self.drain_valve = drain_valve
-        self.source_pump = source_pump
-        self.vosekast = vosekast
 
         return tank
 
@@ -45,14 +37,12 @@ class TestTank:
     def test_prepare_to_fill(self, tank: Tank):
         tank.prepare_to_fill()
 
-        assert self.drain_valve.close.called
+        assert tank.drain_valve.close.called
 
     @pytest.mark.asyncio
     async def test_fill(self, tank: Tank):
         await tank.fill()
-        assert self.vosekast.prepare_measuring.called
-        assert datetime.now.called
-        assert self.logger.called
+        assert tank.vosekast.prepare_measuring.called
 
     def test__on_draining(self, tank: Tank):
         tank._on_draining()
