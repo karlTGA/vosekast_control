@@ -1,6 +1,5 @@
 import logging
 from vosekast_control.Log import LOGGER
-import asyncio
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
@@ -61,18 +60,19 @@ class Tank:
             self.drain_sensor.add_callback(self._low_position_changed)
 
     def drain_tank(self):
-        if self.drain_valve is not None:
-            self.drain_valve.open()
-            self._state = self.IS_DRAINING
-        else:
+        if self.drain_valve is None:
             self.logger.warning("No valve to drain the tank {}".format(self.name))
+            return
+
+        self.drain_valve.open()
+        self._state = self.IS_DRAINING
 
     def prepare_to_fill(self):
-        if self.drain_valve is not None:
-            self.drain_valve.close()
-        else:
+        if self.drain_valve is None:
             self.logger.debug("No drain valve on the {}".format(self.name))
             return
+
+        self.drain_valve.close()
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
     async def _up_state_changed(self, pin, alert):
@@ -82,33 +82,32 @@ class Tank:
             self._on_draining()
 
     async def fill(self):
-        if not self._state == self.FILLED:
-            try:
-                # get time
-                time_filling_t0 = datetime.now()
-                # close valves, start pump
-                self.vosekast.prepare_measuring()
-                self._state = self.IS_FILLING
+        if self._state == self.FILLED:
+            self.logger.info("{} already filled. Continuing.".format(self.name))
+            return
 
-                # check if constant_tank full
-                while not self._state == self.FILLED and self._state == self.IS_FILLING:
-                    time_filling_t1 = datetime.now()
-                    time_filling_passed = time_filling_t1 - time_filling_t0
-                    delta_time_filling = time_filling_passed.total_seconds()
+        try:
+            # get time
+            time_filling_t0 = datetime.now()
 
-                    # if filling takes longer than 90s
-                    if delta_time_filling >= 10 and self.emulate:
-                        self._state = self.FILLED
-                    if delta_time_filling >= 75 and not self.emulate:
-                        self.logger.error(
-                            "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
-                        )
-                        raise TankFillingTimeout("Tank Filling Timeout.")
+            # close valves, start pump
+            self.vosekast.prepare_measuring()
+            self._state = self.IS_FILLING
 
-                    self.logger.debug(
-                        str(delta_time_filling) + "s < time allotted (75s)"
+            # check if constant_tank full
+            while not self._state == self.FILLED and self._state == self.IS_FILLING:
+                time_filling_t1 = datetime.now()
+                time_filling_passed = time_filling_t1 - time_filling_t0
+                delta_time_filling = time_filling_passed.total_seconds()
+
+                # if filling takes longer than 90s
+                if delta_time_filling >= 10 and self.emulate:
+                    self._state = self.FILLED
+                elif delta_time_filling >= 75 and not self.emulate:
+                    self.logger.error(
+                        "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
                     )
-                    await asyncio.sleep(1)
+                    raise TankFillingTimeout("Tank Filling Timeout.")
 
                 self.logger.info(
                     "Measuring Tank state: "
@@ -119,12 +118,13 @@ class Tank:
                     + str(self.vosekast.tanks[CONSTANT_TANK].state)
                 )
                 return
-            except Exception:
-                self._state = self.STOPPED
-                self.logger.warning("Filling {} aborted.".format(self.name))
-                raise
 
-        elif self._state == self.FILLED:
+        except Exception:
+            self._state = self.STOPPED
+            self.logger.warning("Filling {} aborted.".format(self.name))
+            raise
+
+        if self._state == self.FILLED:
             self.logger.info("{} already filled. Continuing.".format(self.name))
         else:
             self.logger.warning(

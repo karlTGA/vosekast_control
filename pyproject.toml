@@ -13,16 +13,19 @@ uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
 "RPi.GPIO" = {version = "^0.7.0", markers = "platform_machine == 'armv7l'" }
 rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "platform_machine != 'armv7l'"}
 pendulum = "^2.0.5"
+pytest-asyncio = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
 rope = "^0.16.0"
 black = {version = "^19.10b0", allow-prereleases = true}
 flake8 = "^3.7.9"
+pytest = "^5.4.1"
 
 [tool.poetry.scripts]
 dev = 'vosekast_control.scripts:dev'
 dev_backend = 'vosekast_control.scripts:dev_backend'
 dev_frontend = 'vosekast_control.scripts:dev_frontend'
+test = 'vosekast_control.scripts:test'
 
 [build-system]
 requires = ["poetry>=0.12"]

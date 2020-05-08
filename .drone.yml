@@ -4,16 +4,64 @@ type: docker
 name: default
 
 steps:
-  - name: Typescript Linting
+  - name: build_yarn
     image: node
+    volumes:
+      - name: cache_yarn
+        path: /drone/src/frontend/node_modules
     commands:
       - cd frontend
       - yarn install
+
+  - name: build_poetry
+    image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
+    commands:
+      - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+      - /root/.poetry/bin/poetry install
+
+  - name: Typescript Linting
+    image: node
+    volumes:
+      - name: cache_yarn
+        path: /drone/src/frontend/node_modules
+    commands:
+      - cd frontend
       - yarn eslint . --ext .js,.jsx,.ts,.tsx
 
   - name: Python Linting
     image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
     commands:
-      - curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-      - /root/.poetry/bin/poetry install
       - /root/.poetry/bin/poetry run flake8 vosekast_control
+
+  - name: Python Testing
+    image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
+    commands:
+      - /root/.poetry/bin/poetry run pytest test
+
+volumes:
+  - name: cache_yarn
+    host:
+      path: /tmp/drone/cache/node_modules
+
+  - name: cache_poetry
+    host:
+      path: /tmp/drone/cache/pypoetry
+
+  - name: poetry_bin
+    host:
+      path: /tmp/drone/cache/poetry_bin

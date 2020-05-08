@@ -35,3 +35,8 @@ def dev_backend():
 def dev_frontend():
     print("Start the frontend standalone:")
     frontend()
+
+
+def test():
+    print("Run test:")
+    subprocess.call("pytest ./test", shell=True)
