@@ -5,6 +5,7 @@ from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Constants import MEASURING_TANK, CONSTANT_TANK
 
 
 class TankFillingTimeout(Exception):
@@ -65,14 +66,14 @@ class Tank:
             return
 
         self.drain_valve.open()
-        self._state = self.IS_DRAINING  
+        self._state = self.IS_DRAINING
 
     def prepare_to_fill(self):
         if self.drain_valve is None:
             self.logger.debug("No drain valve on the {}".format(self.name))
             return
 
-        self.drain_valve.close()    
+        self.drain_valve.close()
         self.logger.info("Ready to fill the tank {}".format(self.name))
 
     async def _up_state_changed(self, pin, alert):
@@ -109,21 +110,27 @@ class Tank:
                     )
                     raise TankFillingTimeout("Tank Filling Timeout.")
 
-                self.logger.debug(
-                    str(delta_time_filling) + "s < time allotted (75s)"
+                self.logger.info(
+                    "Measuring Tank state: "
+                    + str(self.vosekast.tanks[MEASURING_TANK].state)
                 )
-                await asyncio.sleep(1)
+                self.logger.info(
+                    "Constant Tank state: "
+                    + str(self.vosekast.tanks[CONSTANT_TANK].state)
+                )
+                return
 
-            # self.logger.info(
-            #     "Measuring Tank state: " + str(self.vosekast.measuring_tank.state)
-            # )
-            # self.logger.info(
-            #     "Constant Tank state: " + str(self.vosekast.constant_tank.state)
-            # )
+            except Exception as err:
+                self._state = self.STOPPED
+                self.logger.warning("Filling {} aborted.".format(self.name))
+                raise
 
-        except Exception:
-            self._state = self.STOPPED
-            self.logger.warning("Filling {} aborted.".format(self.name))
+        elif self._state == self.FILLED:
+            self.logger.info("{} already filled. Continuing.".format(self.name))
+        else:
+            self.logger.warning(
+                "Something bad happened while filling {}.".format(self.name)
+            )
 
     def _on_draining(self):
         """

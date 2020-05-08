@@ -9,10 +9,10 @@ module.exports = {
     "plugin:react/recommended",
     "prettier",
     "prettier/react",
-    "prettier/@typescript-eslint"
+    "prettier/@typescript-eslint",
   ],
   env: {
-    browser: true
+    browser: true,
   },
   rules: {
     "linebreak-style": "off",
@@ -20,6 +20,7 @@ module.exports = {
     "require-jsdoc": 0,
     "valid-jsdoc": 0,
     "no-invalid-this": 0,
+    "@typescript-eslint/ban-ts-ignore": 1,
     "@typescript-eslint/camelcase": 1,
     "@typescript-eslint/no-unused-vars": ["error", { args: "none" }],
     "@typescript-eslint/no-empty-function": 1,
@@ -28,14 +29,14 @@ module.exports = {
     "@typescript-eslint/ban-types": 1,
     "@typescript-eslint/no-inferrable-types": [
       "warn",
-      { ignoreParameters: true, ignoreProperties: true }
+      { ignoreParameters: true, ignoreProperties: true },
     ],
     "@typescript-eslint/explicit-function-return-type": 0,
-    eqeqeq: ["error", "smart"]
+    eqeqeq: ["error", "smart"],
   },
   settings: {
     react: {
-      version: "16.13"
-    }
-  }
+      version: "16.13",
+    },
+  },
 };

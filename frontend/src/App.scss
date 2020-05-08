@@ -9,6 +9,7 @@
 }
 
 .App {
+  font-family: "Open Sans", Arial, Helvetica, sans-serif;
   text-align: center;
   height: 100%;
 
@@ -93,6 +94,80 @@
 
     .device-command-button.device-deactivated img {
       opacity: 0.5;
+    }
+  }
+
+  .content-overview {
+    .testrun_chart {
+      margin: 20px;
+      border: solid 1px lightgray;
+    }
+
+    .sequence-buttons-bar {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 0px 10px;
+      border-bottom: solid 1px lightgray;
+
+      .current-sequence-info {
+        margin: 7px;
+        background: white;
+        height: 32px;
+        text-align: center;
+        border: solid 1px #d9d9d9;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+        padding: 4px 15px;
+      }
+
+      button {
+        margin: 7px 5px;
+
+        span {
+          margin: 0px 3px;
+        }
+      }
+    }
+
+    .testrun_value_cards_container {
+      display: flex;
+      margin: 0 20px;
+
+      .testrun_value_card {
+        width: 300px;
+        height: 150px;
+        margin-right: 20px;
+        border: solid 1px lightgrey;
+
+        .ant-card-body {
+          display: flex;
+          flex-direction: row;
+
+          .testrun_value_card_icon {
+            width: 100px;
+            height: 100px;
+
+            img {
+              width: 100%;
+            }
+          }
+
+          .testrun_value_card_text {
+            text-align: left;
+            padding-left: 10px;
+            .testrun_value_card_title {
+              font-weight: bold;
+            }
+
+            .testrun_value_card_value {
+              padding-top: 10px;
+              padding-left: 20px;
+              font-size: xx-large;
+            }
+          }
+        }
+      }
     }
   }
 }

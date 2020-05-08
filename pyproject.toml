@@ -8,7 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">=3.7"
 pyserial = "^3.4"
-gmqtt = "^0.6.2"
+gmqtt = "^0.6.3"
 uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
 "RPi.GPIO" = {version = "^0.7.0", markers = "platform_machine == 'armv7l'" }
 rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "platform_machine != 'armv7l'"}

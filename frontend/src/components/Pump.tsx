@@ -2,7 +2,7 @@ import React from "react";
 import { Tag } from "antd";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
-import { CommandButton } from "./CommandButtonsBar";
+import { CommandButton } from "./CommandButton";
 import MQTTConnection from "../utils/MQTTConnection";
 
 interface PumpActionProps {
@@ -11,7 +11,9 @@ interface PumpActionProps {
 }
 
 export function PumpTag({ pumpId, title }: PumpActionProps) {
-  const pumpState = useStoreState(VosekastStore, s => s.pumpStates.get(pumpId));
+  const pumpState = useStoreState(VosekastStore, (s) =>
+    s.pumpStates.get(pumpId)
+  );
 
   return (
     <Tag>
@@ -21,7 +23,9 @@ export function PumpTag({ pumpId, title }: PumpActionProps) {
 }
 
 export function PumpButton({ pumpId, title }: PumpActionProps) {
-  const pumpState = useStoreState(VosekastStore, s => s.pumpStates.get(pumpId));
+  const pumpState = useStoreState(VosekastStore, (s) =>
+    s.pumpStates.get(pumpId)
+  );
   const isActive = pumpState === "RUNNING";
 
   function handlePumpToggle() {

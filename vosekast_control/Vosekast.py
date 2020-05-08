@@ -3,47 +3,53 @@ from vosekast_control.Tank import Tank
 from vosekast_control.LevelSensor import LevelSensor
 from vosekast_control.Valve import Valve
 from vosekast_control.Scale import Scale
-from vosekast_control.TestSequence import TestSequence
+from vosekast_control.TestrunController import TestrunController
 
+from typing import Dict
+import itertools
 import logging
 import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
-from vosekast_control.connectors import MQTTConnection, DBConnection
-
-
-# GPIO Assignment
-PIN_PUMP_CONSTANT = 17
-PIN_PUMP_MEASURING = 27
-PIN_VALVE_MEASURING_SWITCH = 22
-PIN_VALVE_MEASURING_DRAIN = 18
-PIN_LEVEL_MEASURING_HIGH = 24
-PIN_LEVEL_MEASURING_LOW = 25
-PIN_LEVEL_CONSTANT_LOW = 5
-PIN_LEVEL_CONSTANT_HIGH = 6
-
-# PUMP IDS
-CONSTANT_PUMP = "CONSTANT_PUMP"
-MEASURING_PUMP = "MEASURING_PUMP"
-
-# VALVE IDS
-MEASURING_TANK_VALVE = "MEASURING_TANK_VALVE"
-MEASURING_TANK_SWITCH = "MEASURING_TANK_SWITCH"
-
-# TANK IDS
-STOCK_TANK = "STOCK_TANK"
-CONSTANT_TANK = "CONSTANT_TANK"
-MEASURING_TANK = "MEASURING_TANK"
+from vosekast_control.connectors import MQTTConnection
+from vosekast_control.utils.Msg import DataMessage
+from vosekast_control.utils.Constants import (
+    SCALE_MEASURING,
+    MEASURING_DRAIN_VALVE,
+    PIN_VALVE_MEASURING_SWITCH,
+    PIN_VALVE_MEASURING_DRAIN,
+    MEASURING_TANK_SWITCH,
+    LEVEL_MEASURING_TOP,
+    LEVEL_MEASURING_BOTTOM,
+    LEVEL_CONSTANT_TOP,
+    LEVEL_CONSTANT_BOTTOM,
+    PIN_LEVEL_MEASURING_HIGH,
+    PIN_LEVEL_MEASURING_LOW,
+    PIN_LEVEL_CONSTANT_HIGH,
+    PIN_LEVEL_CONSTANT_LOW,
+    PUMP_CONSTANT_TANK,
+    PUMP_MEASURING_TANK,
+    PIN_PUMP_CONSTANT,
+    PIN_PUMP_MEASURING,
+    CONSTANT_TANK,
+    STOCK_TANK,
+    MEASURING_TANK,
+)
 
 
 class Vosekast:
-
     # Vosekast States
     INITED = "INITED"
     RUNNING = "RUNNING"
     MEASURING = "MEASURING"
     PREPARING_MEASUREMENT = "PREPARING_MEASUREMENT"
     EMPTYING = "EMPTYING"
+
+    valves: Dict[str, Valve]
+    tanks: Dict[str, Tank]
+    pumps: Dict[str, Pump]
+    level_sensors: Dict[str, LevelSensor]
+    scale: Scale
 
     def __init__(self, app_control, gpio_controller, emulate=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,111 +67,16 @@ class Vosekast:
             # define how the pins are numbered on the board
             self._gpio_controller.setmode(self._gpio_controller.BCM)
 
-            # valves
-            self.measuring_drain_valve = Valve(
-                self,
-                "measuring_drain_valve",
-                PIN_VALVE_MEASURING_DRAIN,
-                Valve.TWO_WAY,
-                Valve.BINARY,
-                self._gpio_controller,
-            )
-            self.measuring_tank_switch = Valve(
-                self,
-                "measuring_tank_switch",
-                PIN_VALVE_MEASURING_SWITCH,
-                Valve.SWITCH,
-                Valve.BINARY,
-                self._gpio_controller,
-            )
-            self.valves = [self.measuring_drain_valve, self.measuring_tank_switch]
-
-            # throttle
-            # self.volume_flow_throttle = Valve('VOLUME_FLOW_THROTTLE', PIN, Valve.SWITCH, Valve.BINARY, self._gpio_controller)
-
-            # level_sensors
-            self.level_measuring_high = LevelSensor(
-                "LEVEL_MEASURING_UP",
-                PIN_LEVEL_MEASURING_HIGH,
-                bool,
-                LevelSensor.HIGH,
-                self._gpio_controller,
-            )
-            self.level_measuring_low = LevelSensor(
-                "LEVEL_MEASURING_LOW",
-                PIN_LEVEL_MEASURING_LOW,
-                bool,
-                LevelSensor.LOW,
-                self._gpio_controller,
-            )
-            self.level_constant_low = LevelSensor(
-                "LEVEL_CONSTANT_LOW",
-                PIN_LEVEL_CONSTANT_LOW,
-                bool,
-                LevelSensor.LOW,
-                self._gpio_controller,
-            )
-            self.level_constant_high = LevelSensor(
-                "LEVEL_CONSTANT_HIGH",
-                PIN_LEVEL_CONSTANT_HIGH,
-                bool,
-                LevelSensor.HIGH,
-                self._gpio_controller,
-            )
-            self.level_sensors = [
-                self.level_measuring_high,
-                self.level_measuring_low,
-                self.level_constant_high,
-                self.level_constant_low,
-            ]
-
-            # pumps
-            self.pump_constant_tank = Pump(
-                self, "pump_constant_tank", PIN_PUMP_CONSTANT, self._gpio_controller,
-            )
-            self.pump_measuring_tank = Pump(
-                self, "pump_measuring_tank", PIN_PUMP_MEASURING, self._gpio_controller,
-            )
-            self.pumps = [self.pump_measuring_tank, self.pump_constant_tank]
-
-            # tanks
-            self.stock_tank = Tank(
-                "stock_tank", 200, None, None, None, None, None, vosekast=self
+            # init devices
+            self._init_valves()
+            self._init_level_sensors()
+            self._init_pumps()
+            self._init_tanks()
+            self.scale = Scale(
+                name=SCALE_MEASURING, vosekast=self, emulate=self.emulate
             )
 
-            self.constant_tank = Tank(
-                "constant_tank",
-                100,
-                None,
-                self.level_constant_low,
-                self.level_constant_high,
-                None,
-                self.pump_constant_tank,
-                vosekast=self,
-                protect_overflow=False,
-                emulate=self.emulate,
-            )
-
-            self.measuring_tank = Tank(
-                "measuring_tank",
-                100,
-                None,
-                self.level_measuring_low,
-                self.level_measuring_high,
-                self.measuring_drain_valve,
-                self.pump_measuring_tank,
-                vosekast=self,
-                protect_draining=False,
-                emulate=self.emulate,
-            )
-
-            self.tanks = [self.stock_tank, self.constant_tank, self.measuring_tank]
-
-            # scale
-            self.scale = Scale("measuring_scale", self, emulate=self.emulate)
-
-            # testsequence
-            self.testsequence = TestSequence(self, emulate=self.emulate)
+            self.testrun_controller = TestrunController(vosekast=self)
 
             # change state if ok
             self._state = self.INITED
@@ -175,6 +86,112 @@ class Vosekast:
                 "You have to add a gpio controller to control or simulate the components."
             )
 
+    def _init_valves(self):
+        measuring_drain_valve = Valve(
+            self,
+            MEASURING_DRAIN_VALVE,
+            PIN_VALVE_MEASURING_DRAIN,
+            Valve.TWO_WAY,
+            Valve.BINARY,
+            self._gpio_controller,
+        )
+        measuring_tank_switch = Valve(
+            self,
+            MEASURING_TANK_SWITCH,
+            PIN_VALVE_MEASURING_SWITCH,
+            Valve.SWITCH,
+            Valve.BINARY,
+            self._gpio_controller,
+        )
+        self.valves = {
+            MEASURING_DRAIN_VALVE: measuring_drain_valve,
+            MEASURING_TANK_SWITCH: measuring_tank_switch,
+        }
+
+    def _init_level_sensors(self):
+        level_measuring_top = LevelSensor(
+            LEVEL_MEASURING_TOP,
+            PIN_LEVEL_MEASURING_HIGH,
+            bool,
+            LevelSensor.HIGH,
+            self._gpio_controller,
+        )
+        level_measuring_bottom = LevelSensor(
+            LEVEL_MEASURING_BOTTOM,
+            PIN_LEVEL_MEASURING_LOW,
+            bool,
+            LevelSensor.LOW,
+            self._gpio_controller,
+        )
+        level_constant_top = LevelSensor(
+            LEVEL_CONSTANT_TOP,
+            PIN_LEVEL_CONSTANT_HIGH,
+            bool,
+            LevelSensor.HIGH,
+            self._gpio_controller,
+        )
+        level_constant_bottom = LevelSensor(
+            LEVEL_CONSTANT_BOTTOM,
+            PIN_LEVEL_CONSTANT_LOW,
+            bool,
+            LevelSensor.LOW,
+            self._gpio_controller,
+        )
+
+        self.level_sensors = {
+            LEVEL_MEASURING_TOP: level_measuring_top,
+            LEVEL_MEASURING_BOTTOM: level_measuring_bottom,
+            LEVEL_CONSTANT_TOP: level_constant_top,
+            LEVEL_CONSTANT_BOTTOM: level_constant_bottom,
+        }
+
+    def _init_pumps(self):
+        pump_constant_tank = Pump(
+            self, PUMP_CONSTANT_TANK, PIN_PUMP_CONSTANT, self._gpio_controller,
+        )
+        pump_measuring_tank = Pump(
+            self, PUMP_MEASURING_TANK, PIN_PUMP_MEASURING, self._gpio_controller,
+        )
+        self.pumps = {
+            PUMP_CONSTANT_TANK: pump_constant_tank,
+            PUMP_MEASURING_TANK: pump_measuring_tank,
+        }
+
+    def _init_tanks(self):
+        stock_tank = Tank(STOCK_TANK, 200, None, None, None, None, None, vosekast=self)
+
+        constant_tank = Tank(
+            CONSTANT_TANK,
+            100,
+            None,
+            self.level_sensors[LEVEL_CONSTANT_BOTTOM],
+            self.level_sensors[LEVEL_CONSTANT_TOP],
+            None,
+            self.pumps[PUMP_CONSTANT_TANK],
+            vosekast=self,
+            protect_overflow=False,
+            emulate=self.emulate,
+        )
+
+        measuring_tank = Tank(
+            MEASURING_TANK,
+            100,
+            None,
+            self.level_sensors[LEVEL_MEASURING_BOTTOM],
+            self.level_sensors[LEVEL_MEASURING_TOP],
+            self.valves[MEASURING_DRAIN_VALVE],
+            self.pumps[PUMP_MEASURING_TANK],
+            vosekast=self,
+            protect_draining=False,
+            emulate=self.emulate,
+        )
+
+        self.tanks = {
+            STOCK_TANK: stock_tank,
+            CONSTANT_TANK: constant_tank,
+            MEASURING_TANK: measuring_tank,
+        }
+
     def prepare_measuring(self):
         """
         before we can measure we have to prepare the station
@@ -182,10 +199,10 @@ class Vosekast:
         """
         # close MDV,
         # fill the constant tank
-        self.measuring_drain_valve.close()
-        self.constant_tank.prepare_to_fill()
-        self.pump_constant_tank.start()
-        self.pump_measuring_tank.stop()
+        self.valves[MEASURING_DRAIN_VALVE].close()
+        self.tanks[CONSTANT_TANK].prepare_to_fill()
+        self.pumps[PUMP_CONSTANT_TANK].start()
+        self.pumps[PUMP_MEASURING_TANK].stop()
         self._state = self.PREPARING_MEASUREMENT
 
     @property
@@ -204,36 +221,33 @@ class Vosekast:
         :return: measuring ready
         """
 
-        constant_tank_ready = self.constant_tank.is_filled
-
+        constant_tank_ready = self.tanks[CONSTANT_TANK].is_filled
         measuring_tank_ready = (
-            self.measuring_drain_valve.is_closed and not self.measuring_tank.is_filled
+            self.valves[MEASURING_DRAIN_VALVE].is_closed
+            and not self.tanks[MEASURING_TANK].is_filled
         )
-        constant_pump_running = self.pump_constant_tank.is_running
-
-        if constant_tank_ready and measuring_tank_ready and constant_pump_running:
-            self.logger.info("Ready to start measuring.")
+        constant_pump_running = self.pumps[PUMP_CONSTANT_TANK].is_running
 
         return constant_tank_ready and measuring_tank_ready and constant_pump_running
 
-    async def empty(self):
+    async def empty_tanks(self):
         self._state = self.EMPTYING
         self.logger.warning(
             "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow."
         )
-        self.pump_measuring_tank.start()
-        self.pump_constant_tank.stop()
-        self.measuring_tank_switch.close()
-        self.measuring_drain_valve.open()
+        self.pumps[PUMP_MEASURING_TANK].start()
+        self.pumps[PUMP_CONSTANT_TANK].stop()
+        self.valves[MEASURING_TANK_SWITCH].close()
+        self.valves[MEASURING_DRAIN_VALVE].open()
 
         while self._state == self.EMPTYING:
             await asyncio.sleep(1)
 
-        self.pump_measuring_tank.stop()
+        self.pumps[PUMP_MEASURING_TANK].stop()
 
     async def shutdown(self):
 
-        self.clean()
+        await self.clean()
         self.logger.info("Shutting down.")
 
         await MQTTConnection.disconnect()
@@ -241,17 +255,17 @@ class Vosekast:
 
         self._app_control.shutdown()
 
-    def clean(self):
-        self.testsequence.state = self.testsequence.STOPPED
-        self.measuring_tank.drain_tank()
+    async def clean(self):
+        await self.testrun_controller.clean()
+        self.tanks[MEASURING_TANK].drain_tank()
         self.logger.debug("Draining measuring tank.")
 
         # set fill countdown to False
-        for tank in self.tanks:
+        for tank in self.tanks.values():
             tank.state = "STOPPED"
 
         # shutdown pumps
-        for pump in self.pumps:
+        for pump in self.pumps.values():
             pump.stop()
 
         self.logger.debug("All pumps switched off.")
@@ -274,7 +288,7 @@ class Vosekast:
         if self.emulate:
             self.logger.info("Starting sequence in 7s.")
             await asyncio.sleep(7)
-            await self.testsequence.start_sequence()
+            await self.testrun_controller.start_run()
 
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)
@@ -283,7 +297,12 @@ class Vosekast:
 
     # all devices publish their state via mqtt
     def state_overview(self):
-        for device in self.tanks + self.pumps + self.valves + self.level_sensors:
+        for device in itertools.chain(
+            self.tanks.values(),
+            self.pumps.values(),
+            self.valves.values(),
+            self.level_sensors.values(),
+        ):
             device.publish_state()
 
     # handle incoming mqtt commands
@@ -294,136 +313,126 @@ class Vosekast:
         data = command.get("data")
 
         if target == "valve":
-            for valve in self.valves:
-                if valve.name == target_id:
-                    if command_id == "close":
-                        valve.close()
-                        return
-                    elif command_id == "open":
-                        valve.open()
-                        return
-                    else:
-                        self.logger.warning(
-                            f"Received unknown command {command_id} for \
-                            target_id {target_id}."
-                        )
-
-                    return
-
-            self.logger.warning(
-                f"target_id {target_id} unknown."
-            )
-
-        # pumps
+            self.handle_valve_command(target_id, command_id)
         elif target == "pump":
-            for pump in self.pumps:
-                target_id = target_id
-                if pump.name == target_id:
-                    if command_id == "start":
-                        pump.start()
-                    elif command_id == "stop":
-                        pump.stop()
-                    elif command_id == "toggle":
-                        pump.toggle()
-                    else:
-                        self.logger.warning(
-                            f"Received unknown command {command_id} for \
-                            target_id {target_id}."
-                        )
-
-                    return
-
-            self.logger.warning(
-                f"target_id {target_id} unknown."
-            )
-
-        # tanks
+            self.handle_pump_command(target_id, command_id)
         elif target == "tank":
-            for tank in self.tanks:
-                target_id = target_id
-                if tank.name == target_id:
-                    if command_id == "drain_tank":
-                        tank.drain_tank()
-                    elif command_id == "prepare_to_fill":
-                        tank.prepare_to_fill()
-
-                    else:
-                        self.logger.warning(
-                            f"Received unknown command {command_id} for \
-                            target_id {target_id}."
-                        )
-
-                    return
-
-            self.logger.warning(
-                f"target_id {target_id} unknown."
-            )
-
-        # scales
+            self.handle_tank_command(target_id, command_id)
         elif target == "scale":
-            if target_id == "measuring_scale":
-                if command_id == "open_connection":
-                    self.scale.open_connection()
-                elif command_id == "close_connection":
-                    self.scale.close_connection()
-                elif command_id == "start_measurement_thread":
-                    self.scale.start_measurement_thread()
-                elif command_id == "stop_measurement_thread":
-                    self.scale.stop_measurement_thread()
-                elif command_id == "print_diagnostics":
-                    self.scale.print_diagnostics()
-
-                else:
-                    self.logger.warning(
-                        f"Received unknown command {command_id} for \
-                            target_id {target_id}."
-                    )
-
-                return
-
-            self.logger.warning(
-                f"target_id {target_id} unknown."
-            )
-
-        # system
+            self.handle_scale_command(command_id)
         elif target == "system":
-            if target_id == "system":
-                if command_id == "shutdown":
-                    await self.shutdown()
-                elif command_id == "clean":
-                    self.clean()
-                elif command_id == "prepare_measuring":
-                    self.prepare_measuring()
-                elif command_id == "start_sequence":
-                    await self.testsequence.start_sequence()
-                elif command_id == "stop_sequence":
-                    await self.testsequence.stop_sequence()
-                elif command_id == "empty_tanks":
-                    await self.empty()
-                elif command_id == "pause_sequence":
-                    self.testsequence.pause_sequence()
-                elif command_id == "continue_sequence":
-                    await self.testsequence.continue_sequence()
-                elif command_id == "state_overview":
-                    self.state_overview()
-                elif command_id == "get_sequence_data":
-                    DBConnection.get_sequence_data(data)
-
-                else:
-                    self.logger.warning(
-                        f"Received unknown command {command_id} for \
-                            target_id {target_id}."
-                    )
-
-                return
-
-            self.logger.warning(
-                f"target_id {target_id} unknown."
-            )
-
-        # exception
+            await self.handle_system_command(command_id, data)
         else:
             self.logger.warning(f"command target {target} unknown.")
+
+    def handle_valve_commands(self, valve_id: str, command_id: str):
+        valve = self.valves.get(valve_id)
+
+        if valve is None:
+            self.logger.warning(f"target_id {valve_id} unknown.")
+            return
+
+        if command_id == "close":
+            self.valve.close()
+            return
+        elif command_id == "open":
+            self.valve.open()
+            return
+        else:
+            self.logger.warning(
+                f"Received unknown command {command_id} for \
+                target_id {valve_id}."
+            )
+
+        return
+
+    def handle_pump_command(self, pump_id: str, command_id: str):
+        pump = self.pumps.get(pump_id)
+
+        if pump is None:
+            self.logger.warning(f"Pump with id {pump_id} unknown.")
+            return
+
+        if command_id == "start":
+            pump.start()
+        elif command_id == "stop":
+            pump.stop()
+        elif command_id == "toggle":
+            pump.toggle()
+        else:
+            self.logger.warning(
+                f"Received unknown command {command_id} for \
+                target_id {pump_id}."
+            )
+
+    def handle_tank_command(self, tank_id: str, command_id: str):
+        tank = self.tanks.get(tank_id)
+
+        if tank is None:
+            self.logger.warning(f"Tank with id {tank_id} unknown.")
+
+        if command_id == "drain_tank":
+            tank.drain_tank()
+        elif command_id == "prepare_to_fill":
+            tank.prepare_to_fill()
+        else:
+            self.logger.warning(
+                f"Received unknown command {command_id} for \
+                tank {tank_id}."
+            )
+
+    def handle_scale_command(self, command_id: str):
+        scale = self.scale
+
+        if self.scale is None:
+            self.logger.warning(f"No scale for command {command_id} registered!")
+
+        if command_id == "open_connection":
+            scale.open_connection()
+        elif command_id == "close_connection":
+            scale.close_connection()
+        elif command_id == "start_measurement_thread":
+            scale.start_measurement_thread()
+        elif command_id == "stop_measurement_thread":
+            scale.stop_measurement_thread()
+        elif command_id == "print_diagnostics":
+            scale.print_diagnostics()
+        else:
+            self.logger.warning(
+                f"Received unknown command {command_id} for \
+                    scale."
+            )
+
+    async def handle_system_command(self, command_id: str, data: Dict[str, str]):
+        if command_id == "shutdown":
+            await self.shutdown()
+        elif command_id == "prepare_measuring":
+            self.prepare_measuring()
+        elif command_id == "start_run":
+            await self.testrun_controller.start_run()
+        elif command_id == "stop_current_run":
+            await self.testrun_controller.stop_current_run()
+        elif command_id == "pause_current_run":
+            self.testrun_controller.pause_current_run()
+        elif command_id == "empty_tanks":
+            await self.empty_tanks()
+        elif command_id == "state_overview":
+            self.state_overview()
+        elif command_id == "get_test_results":
+            run_id = data.get("run_id")
+            if run_id is None:
+                self.logger.warn("Got test result request without run id.")
+                return
+
+            data = self.testrun_controller.get_testresults(run_id=data.get("run_id"))
+            MQTTConnection.publish_message(DataMessage("test_results", run_id, data))
+        elif command_id == "get_current_run_infos":
+            self.testrun_controller.publish_current_run_infos()
+        else:
+            self.logger.warning(
+                f"Received unknown command {command_id} for \
+                    system."
+            )
 
 
 class NoGPIOControllerError(Exception):
