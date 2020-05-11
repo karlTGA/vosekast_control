@@ -36,6 +36,8 @@ from vosekast_control.utils.Constants import (
     MEASURING_TANK,
 )
 
+logger = logging.getLogger(LOGGER)
+
 
 class Vosekast:
     # Vosekast States
@@ -55,8 +57,8 @@ class Vosekast:
         super().__init__(*args, **kwargs)
 
         self.emulate = emulate
-        self.logger = logging.getLogger(LOGGER)
         self._app_control = app_control
+        self._event_loop = asyncio.get_event_loop()
 
         # set mqtt client, host
         MQTTConnection.on_command = self.handle_command
@@ -72,9 +74,7 @@ class Vosekast:
             self._init_level_sensors()
             self._init_pumps()
             self._init_tanks()
-            self.scale = Scale(
-                name=SCALE_MEASURING, vosekast=self, emulate=self.emulate
-            )
+            self.scale = Scale(name=SCALE_MEASURING, emulate=self.emulate)
 
             self.testrun_controller = TestrunController(vosekast=self)
 
@@ -82,7 +82,7 @@ class Vosekast:
             self._state = self.INITED
 
         except NoGPIOControllerError:
-            self.logger.error(
+            logger.error(
                 "You have to add a gpio controller to control or simulate the components."
             )
 
@@ -212,7 +212,7 @@ class Vosekast:
     @state.setter
     def state(self, new_state):
         self._state = new_state
-        self.logger.debug(f"New Vosekast state is: {new_state}")
+        logger.debug(f"New Vosekast state is: {new_state}")
 
     @property
     def ready_to_measure(self):
@@ -232,7 +232,7 @@ class Vosekast:
 
     async def empty_tanks(self):
         self._state = self.EMPTYING
-        self.logger.warning(
+        logger.warning(
             "Emptying Measuring and Constant Tank. Please be aware Stock Tank might overflow."
         )
         self.pumps[PUMP_MEASURING_TANK].start()
@@ -248,17 +248,17 @@ class Vosekast:
     async def shutdown(self):
 
         await self.clean()
-        self.logger.info("Shutting down.")
+        logger.info("Shutting down.")
 
         await MQTTConnection.disconnect()
-        self.logger.debug("MQTT client disconnected.")
+        logger.debug("MQTT client disconnected.")
 
         self._app_control.shutdown()
 
     async def clean(self):
         await self.testrun_controller.clean()
         self.tanks[MEASURING_TANK].drain_tank()
-        self.logger.debug("Draining measuring tank.")
+        logger.debug("Draining measuring tank.")
 
         # set fill countdown to False
         for tank in self.tanks.values():
@@ -268,32 +268,31 @@ class Vosekast:
         for pump in self.pumps.values():
             pump.stop()
 
-        self.logger.debug("All pumps switched off.")
+        logger.debug("All pumps switched off.")
 
         # stop scale
-        self.logger.debug("Now stopping measurement thread.")
-        self.scale.stop_measurement_thread()
-        self.scale.close_connection()
+        logger.debug("Now stopping scale.")
+        await self.scale.stop()
 
     async def run(self):
         if self.emulate:
-            self.logger.info("Start Vosekast in Debug Mode.")
+            logger.info("Start Vosekast in Debug Mode.")
 
         self.scale.start()
 
         await MQTTConnection.connect()
         self._state = self.RUNNING
-        self.logger.debug("Vosekast started ok.")
+        logger.debug("Vosekast started ok.")
 
         if self.emulate:
-            self.logger.info("Starting sequence in 7s.")
+            logger.info("Starting sequence in 7s.")
             await asyncio.sleep(7)
             await self.testrun_controller.start_run()
 
         while not self._app_control.is_terminating():
             await asyncio.sleep(1)
 
-        self.logger.debug("Vosekast stopped.")
+        logger.debug("Vosekast stopped.")
 
     # all devices publish their state via mqtt
     def state_overview(self):
@@ -323,13 +322,13 @@ class Vosekast:
         elif target == "system":
             await self.handle_system_command(command_id, data)
         else:
-            self.logger.warning(f"command target {target} unknown.")
+            logger.warning(f"command target {target} unknown.")
 
     def handle_valve_commands(self, valve_id: str, command_id: str):
         valve = self.valves.get(valve_id)
 
         if valve is None:
-            self.logger.warning(f"target_id {valve_id} unknown.")
+            logger.warning(f"target_id {valve_id} unknown.")
             return
 
         if command_id == "close":
@@ -339,7 +338,7 @@ class Vosekast:
             self.valve.open()
             return
         else:
-            self.logger.warning(
+            logger.warning(
                 f"Received unknown command {command_id} for \
                 target_id {valve_id}."
             )
@@ -350,7 +349,7 @@ class Vosekast:
         pump = self.pumps.get(pump_id)
 
         if pump is None:
-            self.logger.warning(f"Pump with id {pump_id} unknown.")
+            logger.warning(f"Pump with id {pump_id} unknown.")
             return
 
         if command_id == "start":
@@ -360,7 +359,7 @@ class Vosekast:
         elif command_id == "toggle":
             pump.toggle()
         else:
-            self.logger.warning(
+            logger.warning(
                 f"Received unknown command {command_id} for \
                 target_id {pump_id}."
             )
@@ -369,14 +368,14 @@ class Vosekast:
         tank = self.tanks.get(tank_id)
 
         if tank is None:
-            self.logger.warning(f"Tank with id {tank_id} unknown.")
+            logger.warning(f"Tank with id {tank_id} unknown.")
 
         if command_id == "drain_tank":
             tank.drain_tank()
         elif command_id == "prepare_to_fill":
             tank.prepare_to_fill()
         else:
-            self.logger.warning(
+            logger.warning(
                 f"Received unknown command {command_id} for \
                 tank {tank_id}."
             )
@@ -385,20 +384,20 @@ class Vosekast:
         scale = self.scale
 
         if self.scale is None:
-            self.logger.warning(f"No scale for command {command_id} registered!")
+            logger.warning(f"No scale for command {command_id} registered!")
 
-        if command_id == "open_connection":
-            scale.open_connection()
-        elif command_id == "close_connection":
-            scale.close_connection()
-        elif command_id == "start_measurement_thread":
-            scale.start_measurement_thread()
-        elif command_id == "stop_measurement_thread":
-            scale.stop_measurement_thread()
-        elif command_id == "print_diagnostics":
-            scale.print_diagnostics()
+        if command_id == "tare":
+            scale.tare()
+        elif command_id == "unlock_keys":
+            scale.unlock_keys()
+        elif command_id == "lock_keys":
+            scale.lock_keys()
+        elif command_id == "start":
+            scale.start()
+        elif command_id == "stop":
+            self._event_loop.create_task(scale.stop())
         else:
-            self.logger.warning(
+            logger.warning(
                 f"Received unknown command {command_id} for \
                     scale."
             )
@@ -421,7 +420,7 @@ class Vosekast:
         elif command_id == "get_test_results":
             run_id = data.get("run_id")
             if run_id is None:
-                self.logger.warn("Got test result request without run id.")
+                logger.warn("Got test result request without run id.")
                 return
 
             data = self.testrun_controller.get_testresults(run_id=data.get("run_id"))
@@ -429,7 +428,7 @@ class Vosekast:
         elif command_id == "get_current_run_infos":
             self.testrun_controller.publish_current_run_infos()
         else:
-            self.logger.warning(
+            logger.warning(
                 f"Received unknown command {command_id} for \
                     system."
             )
