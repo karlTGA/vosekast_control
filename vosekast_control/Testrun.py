@@ -36,7 +36,6 @@ class Testrun:
         self.vosekast = vosekast
         self.scale = vosekast.scale
         self.logger = logging.getLogger(LOGGER)
-        self.scale_nulled = 0
         self.state = self.INITED
         self.publish_infos()
 
@@ -45,10 +44,7 @@ class Testrun:
 
         try:
             # tare scale
-            # todo: to tare the scale should a method of the scale
-            if abs(self.scale.scale_history[0]) < 0.15:
-                self.scale_nulled = self.scale.scale_history[0]
-
+            self.scale.tare()
             self.state = self.MEASURING
             self.publish_infos()
 
@@ -96,12 +92,6 @@ class Testrun:
             InfoMessage("testrun_controller", self.get_infos())
         )
 
-    def _get_current_scale_value(self) -> float:
-        if self.emulate:
-            return round(self.scale.scale_history[0], 5)
-
-        return round(self.scale.scale_history[0] - self.scale_nulled, 5)
-
     def _publish_new_value(self, datapoint):
         MQTTConnection.publish_message(
             DataMessage(data_type="test_result", identifier=self.id, payload=datapoint)
@@ -111,14 +101,14 @@ class Testrun:
         # get the current value of the scale
         # todo: emulated or not should not interesting for the run class. the scale should
         # give a simple a value
-        current_scale_value = self._get_current_scale_value()
-        flow_average = self.scale.flow_average()
+        last_scale_values = self.scale.get_values(number=5)
+        # todo: calculate flow
 
         data = {
-            "timestamp": self.scale.scale_history[1],
-            "scale_value": current_scale_value,
-            "flow_current": self.scale.flow_history[0],
-            "flow_average": flow_average,
+            "timestamp": last_scale_values[-1].time,
+            "scale_value": last_scale_values[-1].value,
+            "flow_current": 0,
+            "flow_average": 0,
             "pump_constant_tank_state": self.vosekast.pumps[PUMP_CONSTANT_TANK].state,
             "pump_measuring_tank_state": self.vosekast.pumps[PUMP_MEASURING_TANK].state,
             "measuring_drain_valve_state": self.vosekast.valves[
@@ -133,7 +123,7 @@ class Testrun:
         DBConnection.insert_datapoint(data)
 
         self.logger.debug(
-            f"{current_scale_value} kg, flow rate (average) {flow_average} L/s"
+            f"{last_scale_values[-1].value} kg, flow rate (average) {0} L/s"
         )
 
     def get_infos(self):

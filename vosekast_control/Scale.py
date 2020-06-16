@@ -1,5 +1,6 @@
 import serial
-from typing import Tuple
+import itertools
+from typing import Tuple, List
 from collections import deque
 from threading import Thread, Event
 import time
@@ -145,8 +146,12 @@ class Scale:
 
         self._write_to_serial("\x1bA\r\n")
 
+    def get_values(self, number=5) -> List[Reading]:
+        first_index = max(len(self._value_history) - number, 0)
+        return list(itertools.islice(self._value_history, first_index, None))
+
     @property
-    def value(self) -> Reading:
+    def last_value(self) -> Reading:
         return self._value_history[-1]
 
     @property

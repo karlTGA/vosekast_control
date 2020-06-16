@@ -38,13 +38,6 @@ class DBConnector:
 
     def insert_datapoint(self, data):
         try:
-            # values = {
-            #     'timestamp': 0000,
-            #     'scale_actual': 0000,
-            #     'flow_current': 0000,
-            #     'flow_average': 0000}
-
-            # https://stackoverflow.com/questions/14108162/python-sqlite3-insert-into-table-valuedictionary-goes-here/16698310
             self._db_connection.execute(
                 "INSERT INTO run_values (timestamp,scale_value,flow_current,flow_average,pump_constant_tank_state,pump_measuring_tank_state,measuring_drain_valve_state,measuring_tank_switch_state,run_id) VALUES (:timestamp, :scale_value, :flow_current, :flow_average, :pump_constant_tank_state, :pump_measuring_tank_state, :measuring_drain_valve_state, :measuring_tank_switch_state, :run_id);",
                 data,
