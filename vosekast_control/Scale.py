@@ -202,6 +202,10 @@ class Scale:
         logger.debug("Closing connection to scale.")
 
     def _start_thread(self):
+        if self._measurement_thread.is_alive():
+            logger.debug("Scale already running. Skip starting of measurment thread.")
+            return
+
         self._measurement_thread.start()
 
     async def _stop_thread(self):
@@ -210,12 +214,12 @@ class Scale:
 
         while self._measurement_thread.is_alive():
             logger.debug("Wait that the measuremnt thread stops.")
-            sleep(1)
+            await sleep(1)
 
     def _loop(self):
         logger.debug("Start measuring loop.")
 
-        while not self._measurement_thread.stopped:
+        while not self._measurement_thread.stopped():
             self._read_value()
             time.sleep(self.reading_interval)
 

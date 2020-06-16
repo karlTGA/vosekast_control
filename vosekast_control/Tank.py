@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
@@ -59,6 +60,12 @@ class Tank:
         if drain_sensor is not None:
             self.drain_sensor.add_callback(self._low_position_changed)
 
+    def stop_filling(self):
+        if self.source_pump is not None:
+            self.source_pump.stop()
+
+        self.state = self.STOPPED
+
     def drain_tank(self):
         if self.drain_valve is None:
             self.logger.warning("No valve to drain the tank {}".format(self.name))
@@ -81,55 +88,57 @@ class Tank:
         else:
             self._on_draining()
 
-    async def fill(self):
+    async def fill(self, keep_source_active=False):
         if self._state == self.FILLED:
-            self.logger.info("{} already filled. Continuing.".format(self.name))
+            self.logger.info(f"{self.name} already filled. Continuing.")
+            return
+
+        if self.emulate:
+            self.logger.info(
+                f"Fill the tank {self.name} im emulate mode. Wait 10 seconds."
+            )
+            self.source_pump.start()
+            await asyncio.sleep(10)
+            self._on_full()
             return
 
         try:
             # get time
-            time_filling_t0 = datetime.now()
+            start_filling_time = datetime.now()
 
             # close valves, start pump
-            self.vosekast.prepare_measuring()
+            self.prepare_to_fill()
+            self.source_pump.start()
             self._state = self.IS_FILLING
 
             # check if constant_tank full
             while not self._state == self.FILLED and self._state == self.IS_FILLING:
-                time_filling_t1 = datetime.now()
-                time_filling_passed = time_filling_t1 - time_filling_t0
-                delta_time_filling = time_filling_passed.total_seconds()
+                delta_time_filling = (
+                    datetime.now() - start_filling_time
+                ).total_seconds()
 
                 # if filling takes longer than 90s
-                if delta_time_filling >= 10 and self.emulate:
-                    self._state = self.FILLED
-                elif delta_time_filling >= 75 and not self.emulate:
+                if delta_time_filling >= 75 and not self.emulate:
                     self.logger.error(
                         "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
                     )
                     raise TankFillingTimeout("Tank Filling Timeout.")
 
-                self.logger.info(
-                    "Measuring Tank state: "
-                    + str(self.vosekast.tanks[MEASURING_TANK].state)
-                )
-                self.logger.info(
-                    "Constant Tank state: "
-                    + str(self.vosekast.tanks[CONSTANT_TANK].state)
-                )
-                return
+                await asyncio.sleep(1)
+
+            self.logger.info(f"Filled the tank {self.name}.")
+
+            if not keep_source_active:
+                self.source_pump.stop()
+
+            return
 
         except Exception:
-            self._state = self.STOPPED
-            self.logger.warning("Filling {} aborted.".format(self.name))
-            raise
-
-        if self._state == self.FILLED:
-            self.logger.info("{} already filled. Continuing.".format(self.name))
-        else:
-            self.logger.warning(
-                "Something bad happened while filling {}.".format(self.name)
+            self.drain_tank()
+            self.logger.error(
+                f"Exception by filling the tank {self.name}. Aborted the process and init draining."
             )
+            raise
 
     def _on_draining(self):
         """

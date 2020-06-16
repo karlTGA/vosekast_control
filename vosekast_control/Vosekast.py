@@ -192,17 +192,18 @@ class Vosekast:
             MEASURING_TANK: measuring_tank,
         }
 
-    def prepare_measuring(self):
+    async def prepare_measuring(self):
         """
         before we can measure we have to prepare the station
         :return:
         """
         # close MDV,
-        # fill the constant tank
+        # fill the constant tank, start the measurement pumps.
         self.valves[MEASURING_DRAIN_VALVE].close()
-        self.tanks[CONSTANT_TANK].prepare_to_fill()
-        self.pumps[PUMP_CONSTANT_TANK].start()
+        await self.tanks[CONSTANT_TANK].fill(keep_source_active=True)
         self.pumps[PUMP_MEASURING_TANK].stop()
+        self.scale.start()
+
         self._state = self.PREPARING_MEASUREMENT
 
     @property
@@ -406,7 +407,7 @@ class Vosekast:
         if command_id == "shutdown":
             await self.shutdown()
         elif command_id == "prepare_measuring":
-            self.prepare_measuring()
+            await self.prepare_measuring()
         elif command_id == "start_run":
             await self.testrun_controller.start_run()
         elif command_id == "stop_current_run":

@@ -2,6 +2,7 @@
 
 import sys
 import os
+import traceback
 
 from vosekast_control.Log import setup_custom_logger
 from vosekast_control.AppControl import AppControl
@@ -36,6 +37,11 @@ async def main(emulate=False):
         DBConnection.connect()
 
         await vosekast.run()
+
+    except Exception:
+        logger.error(f"Problems with vosekast. Halt system.")
+        traceback.print_exc()
+        raise
 
     finally:
         app_control.shutdown()

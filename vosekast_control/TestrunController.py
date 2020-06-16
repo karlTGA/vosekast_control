@@ -48,35 +48,13 @@ class TestrunController:
             # change state
             self.state = self.WAITING
 
-            # check if already running
-            # remove the scale start. Scale should running. Testsequenze can test that, not more.
-            if not self.scale.state == self.scale.RUNNING:
-                self.scale.start()
-                self.logger.info(
-                    "Initialising scale connection & measurement thread. Please wait."
-                )
-                await asyncio.sleep(1)
-
-            # only fill if not already full
-            # todo: combine that to an test sequenze
-            # todo: test sequnce should not change state of tank
-            if (
-                not self.vosekast.tanks[CONSTANT_TANK].state
-                == self.vosekast.tanks[CONSTANT_TANK].FILLED
-            ):
-                self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
-                    CONSTANT_TANK
-                ].IS_FILLING
-                # await constant_tank full
-                await self.vosekast.tanks[CONSTANT_TANK].fill()
-            else:
-                self.vosekast.prepare_measuring()
+            # prepare the vosekast to measure
+            await self.vosekast.prepare_measuring()
 
             # check ready_to_measure
             # todo add to test sequence
             if not self.vosekast.ready_to_measure:
                 self.logger.debug("Vosekast not ready to measure.")
-                self.scale.print_diagnostics()
                 self.state = self.STOPPED
                 return
 
@@ -89,17 +67,18 @@ class TestrunController:
             # turn on measuring pump, start measuring
             await self._start_measurement()
 
+            # todo: change the state per method
             self.vosekast.state = self.vosekast.MEASURING
             self.state = self.MEASURING
 
             # write to file
             await self.current_run.start()
 
+        except Exception:
+            raise
         finally:
             await self.stop_current_run()
-            self.vosekast.tanks[CONSTANT_TANK].state = self.vosekast.tanks[
-                CONSTANT_TANK
-            ].STOPPED
+            self.vosekast.tanks[CONSTANT_TANK].stop_filling()
             self.vosekast.state = self.vosekast.RUNNING
 
     async def _start_measurement(self):
