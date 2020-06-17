@@ -67,6 +67,15 @@ class DBConnector:
         except sqlite3.Error as e:
             self.logger.error("Failed to read data from sqlite table", e)
 
+    def get_run_ids(self):
+        try:
+            self.logger.debug("Request for existing sequences.")
+            self.cursor.execute("SELECT DISTINCT run_id FROM run_values")
+            return self.cursor.fetchall()
+
+        except sqlite3.Error as e:
+            self.logger.error("Failed to get run_ids from sqlite table", e)
+
     def close(self):
         self._db_connection.close()
         self.logger.info("DB connection closed.")

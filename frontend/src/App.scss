@@ -70,6 +70,17 @@
       overflow: auto;
     }
 
+    .sequences-list {
+      display: flex;
+      flex-direction: column;
+      .sequenses-entry {
+        font-weight: bold;
+        margin: 5px;
+        border: solid 1px lightgrey;
+        padding: 5px 10px;
+      }
+    }
+
     .device-command-button {
       height: 180px;
       width: 180px;

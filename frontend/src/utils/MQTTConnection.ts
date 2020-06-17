@@ -14,7 +14,7 @@ import { TimeSeries, TimeEvent } from "pondjs";
 type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
 type InfoSystems = "testrun_controller";
-type DataSources = "test_results";
+type DataSources = "test_results" | "db";
 
 interface Message {
   type: MessageTypes;
@@ -66,11 +66,13 @@ interface Datapoint {
   run_id: string;
 }
 
+type RunIds = Array<Array<string>>;
+
 interface DataMessage extends Message {
   type: "data";
-  dataType?: "test_result" | "test_results";
+  dataType?: "test_result" | "test_results" | "run_ids";
   id?: DataSources;
-  payload?: Array<Datapoint> | Datapoint;
+  payload?: Array<Datapoint> | Datapoint | RunIds;
 }
 
 interface PumpStatusMessage extends StatusMessage {
@@ -272,11 +274,11 @@ class MQTTConnector {
   };
 
   handleDataMessage = (message: DataMessage) => {
-    const runId = message.id;
+    const sourceId = message.id;
     const data = message.payload;
     const dataType = message.dataType;
 
-    if (runId == null || data == null || dataType == null) {
+    if (sourceId == null || data == null || dataType == null) {
       console.warn("Got data message with invalid format!");
       return;
     }
@@ -284,7 +286,7 @@ class MQTTConnector {
     switch (dataType) {
       case "test_results":
         VosekastStore.update((s) => {
-          const testrun = s.testruns.get(runId);
+          const testrun = s.testruns.get(sourceId);
           if (testrun == null) return;
 
           testrun.results = new TimeSeries({
@@ -292,14 +294,14 @@ class MQTTConnector {
             columns: ["time", "sensor", "status"],
             points: data as any[],
           });
-          s.testruns.set(runId, testrun);
+          s.testruns.set(sourceId, testrun);
         });
         break;
 
       case "test_result":
         VosekastStore.update((s) => {
           const datapoint = data as Datapoint;
-          const testrun = s.testruns.get(runId);
+          const testrun = s.testruns.get(sourceId);
           if (testrun == null) return;
 
           if (testrun.results == null) {
@@ -324,7 +326,23 @@ class MQTTConnector {
             testrun.results = testrun.results.setCollection(collection, true);
           }
 
-          s.testruns.set(runId, testrun);
+          s.testruns.set(sourceId, testrun);
+        });
+        break;
+      case "run_ids":
+        const runIds = (data as RunIds).map((entry) => entry[0]);
+        VosekastStore.update((s) => {
+          for (const runId of runIds) {
+            if (!s.testruns.has(runId)) {
+              s.testruns.set(runId, {
+                id: runId,
+                startedAt: 0,
+                createdAt: 0,
+                state: "UNKNOWN",
+                emulated: null,
+              });
+            }
+          }
         });
         break;
     }

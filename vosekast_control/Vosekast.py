@@ -13,6 +13,7 @@ from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
 from vosekast_control.utils.Msg import DataMessage
+from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.utils.Constants import (
     SCALE_MEASURING,
     MEASURING_DRAIN_VALVE,
@@ -428,6 +429,9 @@ class Vosekast:
             MQTTConnection.publish_message(DataMessage("test_results", run_id, data))
         elif command_id == "get_current_run_infos":
             self.testrun_controller.publish_current_run_infos()
+        elif command_id == "get_run_ids":
+            runIds = DBConnection.get_run_ids()
+            MQTTConnection.publish_message(DataMessage("run_ids", "db", runIds))
         else:
             logger.warning(
                 f"Received unknown command {command_id} for \

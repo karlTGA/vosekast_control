@@ -35,7 +35,7 @@ export interface TestrunInfos {
   startedAt: number;
   createdAt: number;
   state: string;
-  emulated: boolean;
+  emulated: boolean | null;
   results?: TimeSeries;
 }
 
