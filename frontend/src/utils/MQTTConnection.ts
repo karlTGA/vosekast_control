@@ -369,5 +369,5 @@ class MQTTConnector {
 }
 
 // export singleton for reusing of the connection
-const MQTTConnection = new MQTTConnector("ws://localhost:9001");
+const MQTTConnection = new MQTTConnector(`ws://${window.location.hostname}:9001`);
 export default MQTTConnection;
