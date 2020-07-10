@@ -4,6 +4,10 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import MQTTConnection from "./utils/MQTTConnection";
+import { enableMapSet } from 'immer'
+
+// precalling this to enable map support in immer.js
+enableMapSet()
 
 MQTTConnection.connect();
 ReactDOM.render(<App />, document.getElementById("root"));
