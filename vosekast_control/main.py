@@ -54,7 +54,8 @@ async def main(emulate=False):
             GPIO.ui.close()
             sys.exit(0)
         else:
-            os.system("sudo shutdown -h now")
+            pass
+            # os.system("sudo shutdown -h now")
 
 
 if __name__ == "__main__":

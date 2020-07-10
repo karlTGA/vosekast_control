@@ -95,6 +95,7 @@ class Scale:
         self._bytesize = bytesize
         self._timeout = timeout
         self._serial_interface = None
+        self._serial_port = None
 
         self._value_history: Deque[Reading] = deque([], maxlen=1000)
         self._measurement_thread = MeasurementThread(target=self._loop)
@@ -163,14 +164,15 @@ class Scale:
         if self._emulate:
             return True
 
-        return self._serial_interface.is_open
+        return self._serial_port.is_open
 
     def _write_to_serial(self, message: str) -> int:
         if self._emulate:
             logger.debug(f"Send emulated message to serial device: {message}")
             return
 
-        return self._serial_interface.write(message)
+        self._serial_interface.write(message)
+        return self._serial_interface.flush()
 
     def _create_serial_interface(self):
         if self._emulate:
@@ -185,17 +187,18 @@ class Scale:
         self._serial_interface = io.TextIOWrapper(
             io.BufferedRWPair(ser, ser, 1), newline="\r\n", line_buffering=True
         )
+        self._serial_port = ser
 
     def _open_serial_connection(self):
         if self._emulate:
             logger.debug("Emulating serial connection to scale.")
             return
 
-        if self._serial_interface.is_open:
+        if self._serial_port.is_open:
             logger.info("Serial connection already open.")
             return
 
-        self._serial_interface.open()
+        self._serial_port.open()
         logger.debug("Opening serial connection to scale.")
 
     def _close_serial_connection(self):
@@ -203,7 +206,7 @@ class Scale:
             logger.debug("Close emulated connection to serial device.")
             return
 
-        self._serial_interface.close()
+        self._serial_port.close()
         logger.debug("Closing connection to scale.")
 
     def _start_thread(self):
