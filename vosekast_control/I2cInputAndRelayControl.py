@@ -6,7 +6,7 @@ class RelayControl():
     def __init__(self):
         self.address_relays = 0x38
         self.bus = smbus.SMBus(1)
-        self.state_list = []
+        self.state_dict = {}
         self.state_read = None
         self.binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
@@ -15,6 +15,8 @@ class RelayControl():
         
         for relay in relay_list:
             self.binary = self.binary & ~ 2**(relay-1)
+        
+        self._flash()
 
 
     def relays_off(self, relay_list):
@@ -22,15 +24,16 @@ class RelayControl():
         for relay in relay_list:
             self.binary = self.binary | 2**(relay-1)
 
+        self._flash()
+
     
     def get_state_list(self):
         n = 0
-        self.state_list = []
         bin_string = "{0:b}".format(self.binary)
         for n in range(8) :
-            self.state_list.append(bin_string[7-n])
+            self.state_dict[n]= bin_string[7-n]
 
-        return self.state_list
+        return self.state_dict
 
 
     def read_state(self):
@@ -41,13 +44,13 @@ class RelayControl():
 
     def all_off(self):
         self.binary = 255
-        self.switch()
+        self._flash()
 
 
     def all_on(self):
         self.binary = 0
-        self.switch()
+        self._flash()
 
 
-    def switch(self):
+    def _flash(self):
         self.bus.write_byte_data(self.address_relays, 0, self.binary)
