@@ -28,17 +28,18 @@ class RelayControl():
 
     
     def get_state_list(self):
-        n = 0
-        bin_string = "{0:b}".format(self.binary)
-        for n in range(8) :
-            self.state_dict[n]= bin_string[7-n]
+        bin_string = format(self.binary, '07b')
+        n = len(bin_string)
+        for digit in bin_string:
+            self.state_dict[n]= int(digit)
+            n -= 1
 
         return self.state_dict
 
 
-    def read_state(self):
+    def read_state(self): # Schaltet alles ein
         # return state as read from the bus
-        self.state_read = self.bus.read_byte_data(self.address_relays, 0)
+        self.state_read = self.bus.read_byte(self.address_relays)
         return self.state_read
 
 
