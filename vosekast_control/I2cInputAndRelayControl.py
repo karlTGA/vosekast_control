@@ -1,9 +1,5 @@
 import smbus
 import time
-bus = 
-address_relays = 0x38
-address_inputs = 0x39
-
 
 class RelayControl():
 
@@ -11,8 +7,9 @@ class RelayControl():
         self.address_relays = 0x38
         self.bus = smbus.SMBus(1)
         self.state_list = []
-        self.read_state = None
+        self.state_read = None
         self.binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
+
 
     def relays_on(self, relay_list):
         
@@ -33,20 +30,24 @@ class RelayControl():
         for n in range(8) :
             self.state_list.append(bin_string[7-n])
 
+        return self.state_list
+
 
     def read_state(self):
         # return state as read from the bus
-        self.read_state = self.bus.read_byte_data(self.address_relays, 0)
-        return self.read_state
+        self.state_read = self.bus.read_byte_data(self.address_relays, 0)
+        return self.state_read
 
 
     def all_off(self):
         self.binary = 255
         self.switch()
 
+
     def all_on(self):
         self.binary = 0
         self.switch()
 
-    def switch():
+
+    def switch(self):
         self.bus.write_byte_data(self.address_relays, 0, self.binary)
