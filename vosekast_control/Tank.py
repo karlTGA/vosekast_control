@@ -88,7 +88,7 @@ class Tank:
         else:
             self._on_draining()
 
-    async def fill(self, keep_source_active=False):
+    async def fill(self, keep_source_active=False, max_filling_time=75):
         if self._state == self.FILLED:
             self.logger.info(f"{self.name} already filled. Continuing.")
             return
@@ -117,8 +117,8 @@ class Tank:
                     datetime.now() - start_filling_time
                 ).total_seconds()
 
-                # if filling takes longer than 90s
-                if delta_time_filling >= 75 and not self.emulate:
+                # if filling takes longer than max_filling_time in sek
+                if delta_time_filling >= max_filling_time:
                     self.logger.error(
                         "Filling takes too long. Please make sure that all valves are closed and the pump is working. Aborting."
                     )
