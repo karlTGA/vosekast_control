@@ -12,6 +12,7 @@ import asyncio
 from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.connectors import AppControl
 from vosekast_control.utils.Msg import DataMessage
 from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.utils.Constants import (
@@ -54,11 +55,10 @@ class Vosekast:
     level_sensors: Dict[str, LevelSensor]
     scale: Scale
 
-    def __init__(self, app_control, gpio_controller, emulate=False, *args, **kwargs):
+    def __init__(self, gpio_controller, emulate=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.emulate = emulate
-        self._app_control = app_control
         self._event_loop = asyncio.get_event_loop()
 
         # set mqtt client, host
@@ -255,7 +255,7 @@ class Vosekast:
         await MQTTConnection.disconnect()
         logger.debug("MQTT client disconnected.")
 
-        self._app_control.shutdown()
+        AppControl.shutdown()
 
     async def clean(self):
         await self.testrun_controller.clean()
@@ -291,7 +291,7 @@ class Vosekast:
             await asyncio.sleep(7)
             await self.testrun_controller.start_run()
 
-        while not self._app_control.is_terminating():
+        while not AppControl.is_terminating():
             await asyncio.sleep(1)
 
         logger.debug("Vosekast stopped.")
@@ -326,7 +326,7 @@ class Vosekast:
         else:
             logger.warning(f"command target {target} unknown.")
 
-    def handle_valve_commands(self, valve_id: str, command_id: str):
+    def handle_valve_command(self, valve_id: str, command_id: str):
         valve = self.valves.get(valve_id)
 
         if valve is None:
@@ -334,10 +334,10 @@ class Vosekast:
             return
 
         if command_id == "close":
-            self.valve.close()
+            valve.close()
             return
         elif command_id == "open":
-            self.valve.open()
+            valve.open()
             return
         else:
             logger.warning(

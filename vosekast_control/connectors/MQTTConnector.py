@@ -1,4 +1,5 @@
 import json
+from typing import Coroutine
 from gmqtt import Client as MQTTClient
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
@@ -7,8 +8,8 @@ import asyncio
 import os
 
 
-def noop(*args, **kwargs):
-    pass
+async def noop(*args, **kwargs):
+    return None
 
 
 HOST = os.getenv("MQTT_HOST", "localhost")
