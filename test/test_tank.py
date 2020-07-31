@@ -1,3 +1,4 @@
+import asyncio
 from vosekast_control.Tank import Tank
 from unittest.mock import MagicMock
 import pytest
@@ -41,8 +42,13 @@ class TestTank:
 
     @pytest.mark.asyncio
     async def test_fill(self, tank: Tank):
-        await tank.fill()
-        assert tank.vosekast.prepare_measuring.called
+        async def wait():
+            await asyncio.sleep(1)
+            tank._state = tank.FILLED
+
+        await asyncio.gather(tank.fill(), wait())
+
+        assert tank.source_pump.stop.called
 
     def test__on_draining(self, tank: Tank):
         tank._on_draining()
