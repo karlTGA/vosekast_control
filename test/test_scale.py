@@ -12,12 +12,8 @@ class TestScale:
     def test_init(self, scale):
         assert isinstance(scale, Scale)
 
-    def test_start(self, scale):
-        scale.start()
-        assert scale.state == scale.RUNNING
-
     @pytest.mark.asyncio
-    async def test_stop(self, scale):
+    async def test_start_and_stop(self, scale):
         scale.start()
         assert scale.state == scale.RUNNING
 
