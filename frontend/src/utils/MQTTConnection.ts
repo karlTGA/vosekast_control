@@ -212,6 +212,7 @@ class MQTTConnector {
             s.isHealthy = message.new_state === "OK";
             s.lastHealthUpdate = moment();
           });
+          break;
         }
 
         if (message.device_id === "testrun_controller") {
@@ -225,6 +226,13 @@ class MQTTConnector {
               state: message.new_state,
               ...testrun,
             });
+          });
+          break;
+        }
+
+        if (message.device_id === "app_control") {
+          VosekastStore.update((s) => {
+            s.appControlState = message.new_state;
           });
         }
         break;

@@ -1,6 +1,12 @@
 import React from "react";
 import { Tag } from "antd";
+import { useStoreState } from "pullstate";
+import { VosekastStore } from "../Store";
 
 export default function VosekastStateTag() {
-  return <Tag>Active</Tag>;
+  const appControlState = useStoreState(
+    VosekastStore,
+    (s) => s.appControlState
+  );
+  return <Tag>{appControlState}</Tag>;
 }

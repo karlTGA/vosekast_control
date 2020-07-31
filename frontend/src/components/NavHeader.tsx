@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout, Menu, Tag } from "antd";
+import { Layout, Menu } from "antd";
 import { Link } from "react-router-dom";
 import { MQTTOnlineIndicator, VosekastOnlineIndicator } from "./Indicators";
 import VosekastStateTag from "./VosekastStateTag";
