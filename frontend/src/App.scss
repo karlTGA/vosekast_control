@@ -56,8 +56,17 @@
       }
     }
 
-    .account-submenu {
+    .state-menu-item {
       float: right;
+
+      .ant-tag {
+        font-weight: bold;
+        font-size: larger;
+        background-color: transparent;
+        color: white;
+        border-color: white;
+        padding: 5px 12px;
+      }
     }
   }
 
