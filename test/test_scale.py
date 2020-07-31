@@ -1,5 +1,4 @@
 from vosekast_control.Scale import Scale
-from unittest.mock import MagicMock
 import pytest
 
 

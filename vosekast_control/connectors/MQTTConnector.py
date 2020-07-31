@@ -1,5 +1,4 @@
 import json
-from typing import Coroutine
 from gmqtt import Client as MQTTClient
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
