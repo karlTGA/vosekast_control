@@ -3,62 +3,59 @@ from typing import Dict, List
 
 
 class RelayControl:
-    def __init__(self):
-        self.address_relays = 0x38
+    def __init__(self, address=0x38):
+        self.address = address
         self.bus = smbus.SMBus(1)
-        self.state_dict = {}
         self.state_reading = None
-        self.binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
+        self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
     def relays_on(self, relay_list: List[int]):
 
         for relay in relay_list:
-            self.binary = self.binary & ~(2 ** (relay - 1))
+            self.state_binary = self.state_binary & ~(2 ** (relay - 1))
 
         self._flash()
 
     def relays_off(self, relay_list: List[int]):
 
         for relay in relay_list:
-            self.binary = self.binary | 2 ** (relay - 1)
+            self.state_binary = self.state_binary | 2 ** (relay - 1)
 
         self._flash()
 
     def get_state_dict(self) -> Dict[int, int]:
-        bin_state = format(self.binary, "07b")
-        n = len(bin_state)
-        for digit in bin_state:
-            self.state_dict[n] = 1 ^ int(digit)
-            n -= 1
+        state_dict = {}
 
-        return self.state_dict
+        for i in range(8):
+            state_dict[i] = (self.state_binary >> i) & 1
+
+        return state_dict
 
     def read_state(self):
         # return state as read from the bus
-        self.state_reading = self.bus.read_byte(self.address_relays)
+        self.state_reading = self.bus.read_byte(self.address)
         return self.state_reading
 
     def all_off(self):
-        self.binary = 255
+        self.state_binary = 255
         self._flash()
 
     def all_on(self):
-        self.binary = 0
+        self.state_binary = 0
         self._flash()
 
     def _flash(self):
-        self.bus.write_byte_data(self.address_relays, 0, self.binary)
+        self.bus.write_byte_data(self.address, 0, self.state_binary)
 
 
 class I2CInput:
-    def __init__(self):
-        self.address_input = 0x39
+    def __init__(self, address=0x39):
+        self.address = address
         self.bus = smbus.SMBus(1)
-        self.state_reading = None
 
     def _read_state(self) -> int:
-        self.state_reading = self.bus.read_byte(self.address_input)
-        return self.state_reading
+        state_reading = self.bus.read_byte(self.address)
+        return state_reading
 
     def digitalRead(self, pin: int) -> int:
         bin_state = self._read_state()
