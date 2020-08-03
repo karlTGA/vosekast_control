@@ -6,7 +6,6 @@ class RelayControl:
     def __init__(self, address=0x38):
         self.address = address
         self.bus = smbus.SMBus(1)
-        self.state_reading = None
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
     def relays_on(self, relay_list: List[int]):
@@ -33,8 +32,7 @@ class RelayControl:
 
     def read_state(self):
         # return state as read from the bus
-        self.state_reading = self.bus.read_byte(self.address)
-        return self.state_reading
+        return self.bus.read_byte(self.address)
 
     def all_off(self):
         self.state_binary = 255
@@ -48,7 +46,7 @@ class RelayControl:
         self.bus.write_byte_data(self.address, 0, self.state_binary)
 
 
-class I2CInput:
+class ReadDigitalInput:
     def __init__(self, address=0x39):
         self.address = address
         self.bus = smbus.SMBus(1)
