@@ -31,7 +31,7 @@ class _AppControl:
         return self.state in [self.STOPPED, self.SHUTDOWN, self.RESTART]
 
     @property
-    async def state(self):
+    async def state(self) -> str:
         return self._state
 
     @state.setter

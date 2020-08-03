@@ -13,7 +13,7 @@ from vosekast_control.Log import LOGGER, add_mqtt_logger_handler
 
 from vosekast_control.connectors import MQTTConnection
 from vosekast_control.connectors import AppControl
-from vosekast_control.utils.Msg import DataMessage
+from vosekast_control.utils.Msg import DataMessage, StatusMessage
 from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.utils.Constants import (
     SCALE_MEASURING,
@@ -404,7 +404,7 @@ class Vosekast:
                     scale."
             )
 
-    async def handle_system_command(self, command_id: str, data: Dict[str, str]):
+    async def handle_system_command(self, command_id: str, data: Dict[str, str] = {}):
         if command_id == "shutdown":
             await self.shutdown()
         elif command_id == "prepare_measuring":
@@ -432,6 +432,10 @@ class Vosekast:
         elif command_id == "get_run_ids":
             runIds = DBConnection.get_run_ids()
             MQTTConnection.publish_message(DataMessage("run_ids", "db", runIds))
+        elif command_id == "request_current_app_state":
+            MQTTConnection.publish_message(
+                StatusMessage("system", "app_control", await AppControl.state)
+            )
         else:
             logger.warning(
                 f"Received unknown command {command_id} for \
