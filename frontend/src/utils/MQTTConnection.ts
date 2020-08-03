@@ -10,6 +10,7 @@ import { message } from "antd";
 import moment from "moment";
 // @ts-ignore
 import { TimeSeries, TimeEvent } from "pondjs";
+import { debug } from "console";
 
 type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
@@ -26,6 +27,7 @@ interface CommandMessage extends Message {
   target: Targets;
   target_id: string;
   command: string;
+  data?: Record<string, any>;
 }
 
 interface StatusMessage extends Message {
@@ -65,6 +67,17 @@ interface Datapoint {
   measuring_tank_switch_state: string;
   run_id: string;
 }
+
+type ResultEntry = [
+  number,
+  number,
+  number,
+  number,
+  string,
+  string,
+  string,
+  string
+];
 
 type RunIds = Array<Array<string>>;
 
@@ -108,12 +121,18 @@ class MQTTConnector {
     this.client.on("offline", this.handleOffline);
   };
 
-  publishCommand = (target: Targets, targetId: string, command: string) => {
+  publishCommand = (
+    target: Targets,
+    targetId: string,
+    command: string,
+    data: Record<string, any> = {}
+  ) => {
     this.publishMessage("vosekast/commands", {
       type: "command",
       target,
       target_id: targetId, // eslint-disable-line @typescript-eslint/camelcase
       command,
+      data,
     });
   };
 
@@ -296,11 +315,16 @@ class MQTTConnector {
         VosekastStore.update((s) => {
           const testrun = s.testruns.get(sourceId);
           if (testrun == null) return;
+          const points = (data as ResultEntry[]).map((entry) => [
+            Math.round(entry[0]),
+            entry[1],
+            entry[2],
+          ]);
 
           testrun.results = new TimeSeries({
             name: "sensor_data",
-            columns: ["time", "sensor", "status"],
-            points: data as any[],
+            columns: ["time", "scaleValue", "flowValue"],
+            points: points,
           });
           s.testruns.set(sourceId, testrun);
         });
