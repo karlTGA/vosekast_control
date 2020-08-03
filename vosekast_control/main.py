@@ -3,12 +3,9 @@
 import sys
 import os
 import traceback
+import asyncio
 
 from vosekast_control.Log import setup_custom_logger
-from vosekast_control.AppControl import AppControl
-
-# add mqtt resources
-import asyncio
 
 # add logger
 logger = setup_custom_logger()
@@ -18,20 +15,21 @@ async def main(emulate=False):
     # overwrite the emulate param with the env if exist
     emulate = os.getenv("EMULATE", str(emulate)) == "True"
 
+    # init vosekast variable
+    vosekast = None
+
     # import the rpi module at event start to prevent the early opening of the emulator gui
     import RPi.GPIO as GPIO
 
     # import vosekast at runtime to prevent different event loops
     from vosekast_control.connectors import DBConnection
     from vosekast_control.Vosekast import Vosekast
+    from vosekast_control.connectors import AppControl
 
     try:
-        # process state
-        app_control = AppControl()
-
         # initialise vosekast
-        vosekast = Vosekast(app_control, GPIO, emulate=emulate)
-        app_control.start()
+        vosekast = Vosekast(GPIO, emulate=emulate)
+        AppControl.start()
 
         # connect db
         DBConnection.connect()
@@ -44,8 +42,9 @@ async def main(emulate=False):
         raise
 
     finally:
-        app_control.shutdown()
-        await vosekast.clean()
+        AppControl.shutdown()
+        if vosekast is not None:
+            await vosekast.clean()
         DBConnection.close()
         GPIO.cleanup()
 

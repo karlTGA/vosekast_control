@@ -17,7 +17,9 @@ const SequencesList = () => {
   return (
     <div className="sequences-list">
       {Array.from(runIds).map(([runId, runInfos]) => (
-        <div className="sequenses-entry">{runId}</div>
+        <div className="sequenses-entry" key={runId}>
+          {runId}
+        </div>
       ))}
     </div>
   );

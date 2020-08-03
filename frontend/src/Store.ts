@@ -50,6 +50,7 @@ export interface VosekastState {
   lastHealthUpdate?: moment.Moment;
   isRunning: boolean;
   isMeasuring: boolean;
+  appControlState: string;
   pumpStates: Map<string, PumpState>;
   valveStates: Map<string, ValveState>;
   tankStates: Map<string, TankState>;
@@ -67,6 +68,7 @@ export const VosekastStore = new Store<VosekastState>({
   isRunning: false,
   isMeasuring: false,
   isHealthy: false,
+  appControlState: "UNKNOWN",
   pumpStates: new Map(),
   valveStates: new Map(),
   tankStates: new Map(),

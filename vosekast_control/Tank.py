@@ -5,7 +5,6 @@ from vosekast_control.utils.Msg import StatusMessage
 from datetime import datetime
 
 from vosekast_control.connectors import MQTTConnection
-from vosekast_control.utils.Constants import MEASURING_TANK, CONSTANT_TANK
 
 
 class TankFillingTimeout(Exception):

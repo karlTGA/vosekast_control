@@ -212,6 +212,7 @@ class MQTTConnector {
             s.isHealthy = message.new_state === "OK";
             s.lastHealthUpdate = moment();
           });
+          break;
         }
 
         if (message.device_id === "testrun_controller") {
@@ -225,6 +226,13 @@ class MQTTConnector {
               state: message.new_state,
               ...testrun,
             });
+          });
+          break;
+        }
+
+        if (message.device_id === "app_control") {
+          VosekastStore.update((s) => {
+            s.appControlState = message.new_state;
           });
         }
         break;
@@ -329,7 +337,7 @@ class MQTTConnector {
           s.testruns.set(sourceId, testrun);
         });
         break;
-      case "run_ids":
+      case "run_ids": {
         const runIds = (data as RunIds).map((entry) => entry[0]);
         VosekastStore.update((s) => {
           for (const runId of runIds) {
@@ -345,6 +353,7 @@ class MQTTConnector {
           }
         });
         break;
+      }
     }
   };
 
@@ -369,5 +378,7 @@ class MQTTConnector {
 }
 
 // export singleton for reusing of the connection
-const MQTTConnection = new MQTTConnector(`ws://${window.location.hostname}:9001`);
+const MQTTConnection = new MQTTConnector(
+  `ws://${window.location.hostname}:9001`
+);
 export default MQTTConnection;

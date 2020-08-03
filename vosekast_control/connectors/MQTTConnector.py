@@ -7,8 +7,8 @@ import asyncio
 import os
 
 
-def noop(*args, **kwargs):
-    pass
+async def noop(*args, **kwargs):
+    return None
 
 
 HOST = os.getenv("MQTT_HOST", "localhost")

@@ -12,7 +12,9 @@ class TestValve:
         valve_type = Valve.TWO_WAY
         regulation = Valve.BINARY
 
-        valve = Valve(vosekast, "test_valve", control_pin, valve_type, regulation, gpio_controller)
+        valve = Valve(
+            vosekast, "test_valve", control_pin, valve_type, regulation, gpio_controller
+        )
 
         return valve
 

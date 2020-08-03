@@ -2,6 +2,7 @@ import React from "react";
 import { Layout, Menu } from "antd";
 import { Link } from "react-router-dom";
 import { MQTTOnlineIndicator, VosekastOnlineIndicator } from "./Indicators";
+import VosekastStateTag from "./VosekastStateTag";
 
 const { Header } = Layout;
 
@@ -32,6 +33,9 @@ export default function NavHeader() {
           disabled
         >
           <VosekastOnlineIndicator />
+        </Menu.Item>
+        <Menu.Item key="vosekast_state" className="state-menu-item" disabled>
+          <VosekastStateTag />
         </Menu.Item>
       </Menu>
     </Header>
