@@ -14,12 +14,14 @@ uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
 rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "platform_machine != 'armv7l'"}
 pendulum = "^2.0.5"
 pytest-asyncio = "^0.10.0"
+smbus = "^1.1.post2"
 
 [tool.poetry.dev-dependencies]
 rope = "^0.16.0"
 black = {version = "^19.10b0", allow-prereleases = true}
 flake8 = "^3.7.9"
 pytest = "^5.4.1"
+mypy = "^0.782"
 
 [tool.poetry.scripts]
 dev = 'vosekast_control.scripts:dev'

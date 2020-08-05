@@ -13,7 +13,7 @@ from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
 import io
 
-from typing import Deque
+from typing import Deque, Union
 
 logger = logging.getLogger(LOGGER)
 
@@ -49,9 +49,11 @@ class WrongUnitOnScaleError(Exception):
 def parse_serial_output(line) -> Tuple[float, bool]:
     splitted_line = line.split()
 
-    if 1 < len(splitted_line) < 4:
-        logger.warning("Read line on scale with wrong format.")
-        return
+    if len(splitted_line) < 2 and len(splitted_line) > 3:
+        logger.warning(
+            f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
+        )
+        return (None, False)
 
     sign = splitted_line[0]
     number = float(splitted_line[1])
@@ -244,17 +246,18 @@ class Scale:
             self._value_history.append(Reading(time=now, value=0.0 + uniform(0.0, 0.2)))
             return
 
-        lines = self._serial_interface.readlines()
+        line = self._serial_interface.readline()
 
-        if len(lines) == 0:
+        if len(line) == 0:
             logger.debug("Read no lines from serial device.")
             return
 
-        (value, is_stable) = parse_serial_output(lines[-1])
+        (value, is_stable) = parse_serial_output(line)
 
-        self._value_history.append(
-            Reading(time=now, value=parse_serial_output(lines[-1]))
-        )
+        if value is None:
+            return
+
+        self._value_history.append(Reading(time=now, value=value))
         self._is_stable = is_stable
 
         # publish this infos to the frontend
