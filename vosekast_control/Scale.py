@@ -46,27 +46,28 @@ class WrongUnitOnScaleError(Exception):
     pass
 
 
-def parse_serial_output(line) -> Tuple[float, bool]:
+def parse_serial_output(line) -> Union[float, None]:
     splitted_line = line.split()
 
     if len(splitted_line) < 2 and len(splitted_line) > 3:
         logger.warning(
             f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
         )
-        return (None, False)
-
-    sign = splitted_line[0]
-    number = float(splitted_line[1])
-    if sign == "-":
-        number = number * -1
+        return None
 
     if len(splitted_line) == 3:
-        if splitted_line[2] != "g":
-            raise WrongUnitOnScaleError()
+        number = float(splitted_line[1]) * 1000
+        if splitted_line[0] == "-":
+            number = number * -1
+        unit = splitted_line[2]
+    else:
+        number = float(splitted_line[0]) * 1000
+        unit = splitted_line[1]
 
-        return (number, True)
+    if unit != "kg":
+        raise WrongUnitOnScaleError()
 
-    return (number, False)
+    return number
 
 
 class Scale:
@@ -127,7 +128,10 @@ class Scale:
             logger.warning("Cannt tare scale if not connected.")
             return
 
-        self._write_to_serial("\x1bT\r\n")
+        cmd = b"\x1bT\r\n"
+        logger.debug(f"Write to serial [{cmd}]")
+
+        self._write_to_serial(cmd)
         logger.debug("Send tare command to scale.")
 
     def lock_keys(self):
@@ -135,27 +139,32 @@ class Scale:
             logger.warning("Cannt lock keys of scale if not connected.")
             return
 
-        self._write_to_serial("\x1bO\r\n")
+        self._write_to_serial(b"\x1bO\r\n")
 
     def unlock_keys(self):
         if not self.connected:
             logger.warning("Cannot unlock keys of scale if not connected.")
 
-        self._write_to_serial("\x1bR\r\n")
+        self._write_to_serial(b"\x1bR\r\n")
 
     def set_gramm_on_scale(self):
         if not self.connected:
             logger.warning("Cannot set gramm on scale if not connected.")
 
-        self._write_to_serial("\x1bA\r\n")
+        cmd = b"\033A\r\n"
+        logger.debug(f"Write to serial [{cmd}]")
+        self._write_to_serial(cmd)
 
     def get_values(self, number=5) -> List[Reading]:
         first_index = max(len(self._value_history) - number, 0)
         return list(itertools.islice(self._value_history, first_index, None))
 
     @property
-    def last_value(self) -> Reading:
-        return self._value_history[-1]
+    def last_reading(self) -> Reading:
+        if len(self._value_history) >= 1:
+            return self._value_history[-1]
+
+        return None
 
     @property
     def state(self):
@@ -168,12 +177,12 @@ class Scale:
 
         return self._serial_port.is_open
 
-    def _write_to_serial(self, message: str) -> int:
+    def _write_to_serial(self, message: bytearray) -> int:
         if self._emulate:
             logger.debug(f"Send emulated message to serial device: {message}")
-            return
+            return 1
 
-        self._serial_interface.write(message)
+        self._serial_interface.write(message.decode("utf-8"))
         return self._serial_interface.flush()
 
     def _create_serial_interface(self):
@@ -185,6 +194,7 @@ class Scale:
         ser.baudrate = self._baudrate
         ser.bytesize = self._bytesize
         ser.timeout = self._timeout
+        ser.timeout = 0.1
 
         self._serial_interface = io.TextIOWrapper(
             io.BufferedRWPair(ser, ser, 1), newline="\r\n", line_buffering=True
@@ -246,24 +256,25 @@ class Scale:
             self._value_history.append(Reading(time=now, value=0.0 + uniform(0.0, 0.2)))
             return
 
-        line = self._serial_interface.readline()
+        lines = self._serial_interface.readlines()
+        logger.debug(f"Read: {repr(lines)}")
 
-        if len(line) == 0:
+        if len(lines) == 0:
             logger.debug("Read no lines from serial device.")
             return
 
-        (value, is_stable) = parse_serial_output(line)
+        if lines[-1].find("C.E") > 0:
+            logger.warning("Scale is in calibration mode. Wait...")
+            return
+
+        value = parse_serial_output(lines[-1])
 
         if value is None:
             return
 
         self._value_history.append(Reading(time=now, value=value))
-        self._is_stable = is_stable
 
         # publish this infos to the frontend
-        MQTTConnection.publish_message(
-            StatusMessage("scale", "stability", str(self._is_stable))
-        )
         MQTTConnection.publish_message(StatusMessage("scale", "weight", f"{value} g"))
 
     # def add_new_value(self, new_value):
@@ -311,13 +322,13 @@ class Scale:
     #             StatusMessage("scale", self.name, f"{new_value} Kg")
     #         )
 
-    #         if len(self.last_values) == 10:
+    #         if len(self.last_readings) == 10:
     #             # calculate square mean error
     #             diffs = 0
-    #             for value in list(islice(self.last_values, 0, 9)):
+    #             for value in list(islice(self.last_readings, 0, 9)):
     #                 diffs += abs(value - new_value)
 
-    #             mean_diff = diffs / len(self.last_values)
+    #             mean_diff = diffs / len(self.last_readings)
 
     #             if mean_diff < 0.1:
     #                 self.stable = True
