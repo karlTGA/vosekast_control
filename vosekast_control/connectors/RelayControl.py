@@ -5,7 +5,7 @@ from typing import Dict, List
 class RelayControl:
     def __init__(self, address=0x38):
         self.address = address
-        self.bus = smbus.SMBus(1)
+        self.bus = smbus.SMBus(1)  # could
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
     def relays_on(self, relay_list: List[int]):
@@ -44,22 +44,3 @@ class RelayControl:
 
     def _flash(self):
         self.bus.write_byte_data(self.address, 0, self.state_binary)
-
-
-class ReadDigitalInput:
-    def __init__(self, address=0x39):
-        self.address = address
-        self.bus = smbus.SMBus(1)
-
-    def _read_state(self) -> int:
-        state_reading = self.bus.read_byte(self.address)
-        return state_reading
-
-    def digitalRead(self, pin: int) -> int:
-        bin_state = self._read_state()
-
-        if pin >= 9 or pin <= 0:
-            raise Exception("Pin is out of Range. Valid Pins are 1-8")
-
-        pin_state = 1 ^ (1 & (bin_state >> (pin - 1)))
-        return pin_state

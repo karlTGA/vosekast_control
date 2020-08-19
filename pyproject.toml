@@ -14,7 +14,7 @@ uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
 rpi = {git = "https://github.com/nosix/raspberry-gpio-emulator/", markers = "platform_machine != 'armv7l'"}
 pendulum = "^2.0.5"
 pytest-asyncio = "^0.10.0"
-smbus = "^1.1.post2"
+smbus = { version = "^1.1.post2", markers = "platform_machine == 'armv7l'" } 
 
 [tool.poetry.dev-dependencies]
 rope = "^0.16.0"
