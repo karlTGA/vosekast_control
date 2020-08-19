@@ -14,7 +14,7 @@ class Message:
     def get_json(self):
         return json.dumps(self.get_message_object())
 
-    def get_message_object(self):
+    def get_message_object(self) -> Dict:
         return {"type": self.type, "time": self.timestamp}
 
 

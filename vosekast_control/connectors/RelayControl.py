@@ -1,11 +1,23 @@
-import smbus
 from typing import Dict, List
 
 
 class RelayControl:
-    def __init__(self, address=0x38):
+    def __init__(self, address=0x38, emulated=False, bus=None):
         self.address = address
-        self.bus = smbus.SMBus(1)  # could
+        self.emulated = emulated
+
+        if bus is not None:
+            self._bus = bus
+
+        elif self.emulated:
+            from .SMBusMock import SMBus
+
+            self._bus = SMBus()
+        else:
+            import smbus
+
+            self._bus = smbus.SMBus(1)
+
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
     def relays_on(self, relay_list: List[int]):
@@ -30,9 +42,9 @@ class RelayControl:
 
         return state_dict
 
-    def read_state(self):
+    def read_state(self) -> int:
         # return state as read from the bus
-        return self.bus.read_byte(self.address)
+        return self._bus.read_byte(self.address)
 
     def all_off(self):
         self.state_binary = 255
@@ -43,4 +55,4 @@ class RelayControl:
         self._flash()
 
     def _flash(self):
-        self.bus.write_byte_data(self.address, 0, self.state_binary)
+        self._bus.write_byte_data(self.address, 0, self.state_binary)
