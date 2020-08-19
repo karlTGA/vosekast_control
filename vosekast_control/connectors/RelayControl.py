@@ -1,22 +1,12 @@
 from typing import Dict, List
+from vosekast_control.connectors import SMBusConnection
 
 
 class RelayControl:
-    def __init__(self, address=0x38, emulated=False, bus=None):
+    def __init__(self, address=0x38, emulated=False):
         self.address = address
         self.emulated = emulated
-
-        if bus is not None:
-            self._bus = bus
-
-        elif self.emulated:
-            from .SMBusMock import SMBus
-
-            self._bus = SMBus()
-        else:
-            import smbus
-
-            self._bus = smbus.SMBus(1)
+        self._bus = SMBusConnection.smbus
 
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 

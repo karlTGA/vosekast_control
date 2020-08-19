@@ -25,8 +25,12 @@ async def main(emulate=False):
     from vosekast_control.connectors import DBConnection
     from vosekast_control.Vosekast import Vosekast
     from vosekast_control.connectors import AppControl
+    from vosekast_control.connectors import SMBusConnection
 
     try:
+        # init smbus
+        SMBusConnection.init_bus(emulate=emulate)
+
         # initialise vosekast
         vosekast = Vosekast(GPIO, emulate=emulate)
         AppControl.start()

@@ -1,19 +1,11 @@
+from vosekast_control.connectors import SMBusConnection
+
+
 class ReadDigitalInput:
     def __init__(self, address=0x39, emulated=False, bus=None):
         self.address = address
         self.emulated = emulated
-
-        if bus is not None:
-            self._bus = bus
-
-        elif self.emulated:
-            from .SMBusMock import SMBus
-
-            self._bus = SMBus()
-        else:
-            import smbus
-
-            self._bus = smbus.SMBus(1)
+        self._bus = SMBusConnection.smbus
 
     def _read_state(self) -> int:
         state_reading = self._bus.read_byte(self.address)
