@@ -1,10 +1,9 @@
 from vosekast_control.connectors import SMBusConnection
 
 
-class ReadDigitalInput:
-    def __init__(self, address=0x39, emulated=False, bus=None):
+class DigitalInputReaderConnector:
+    def __init__(self, address=0x39):
         self.address = address
-        self.emulated = emulated
         self._bus = SMBusConnection.smbus
 
     def _read_state(self) -> int:
@@ -19,3 +18,6 @@ class ReadDigitalInput:
 
         pin_state = 1 ^ (1 & (bin_state >> (pin - 1)))
         return pin_state
+
+
+DigitalInputReader = DigitalInputReaderConnector()

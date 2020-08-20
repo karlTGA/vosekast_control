@@ -2,10 +2,9 @@ from typing import Dict, List
 from vosekast_control.connectors import SMBusConnection
 
 
-class RelayControl:
-    def __init__(self, address=0x38, emulated=False):
+class RelayControlConnector:
+    def __init__(self, address=0x38):
         self.address = address
-        self.emulated = emulated
         self._bus = SMBusConnection.smbus
 
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
@@ -46,3 +45,6 @@ class RelayControl:
 
     def _flash(self):
         self._bus.write_byte_data(self.address, 0, self.state_binary)
+
+
+RelayControl = RelayControlConnector()
