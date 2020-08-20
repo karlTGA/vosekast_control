@@ -31,8 +31,8 @@ from vosekast_control.utils.Constants import (
     PIN_LEVEL_CONSTANT_LOW,
     PUMP_CONSTANT_TANK,
     PUMP_MEASURING_TANK,
-    PIN_PUMP_CONSTANT,
-    PIN_PUMP_MEASURING,
+    RELAY_PORT_PUMP_CONSTANT,
+    RELAY_PORT_PUMP_MEASURING,
     CONSTANT_TANK,
     STOCK_TANK,
     MEASURING_TANK,
@@ -147,11 +147,9 @@ class Vosekast:
         }
 
     def _init_pumps(self):
-        pump_constant_tank = Pump(
-            self, PUMP_CONSTANT_TANK, PIN_PUMP_CONSTANT, self._gpio_controller,
-        )
+        pump_constant_tank = Pump(self, PUMP_CONSTANT_TANK, RELAY_PORT_PUMP_CONSTANT,)
         pump_measuring_tank = Pump(
-            self, PUMP_MEASURING_TANK, PIN_PUMP_MEASURING, self._gpio_controller,
+            self, PUMP_MEASURING_TANK, RELAY_PORT_PUMP_MEASURING,
         )
         self.pumps = {
             PUMP_CONSTANT_TANK: pump_constant_tank,

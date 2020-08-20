@@ -2,7 +2,6 @@ import React from "react";
 import { VosekastStore } from "../Store";
 import { useStoreState } from "pullstate";
 import MQTTConnection from "../utils/MQTTConnection";
-// @ts-ignore
 import useInterval from "react-useinterval";
 
 const SequencesList = () => {

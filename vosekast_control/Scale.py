@@ -1,6 +1,6 @@
 import serial
 import itertools
-from typing import Tuple, List
+from typing import List
 from collections import deque
 from threading import Thread, Event
 import time
