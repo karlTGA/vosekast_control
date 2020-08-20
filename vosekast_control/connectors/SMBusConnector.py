@@ -1,4 +1,8 @@
 from typing import Optional, Any
+import logging
+from vosekast_control.Log import LOGGER
+
+logger = logging.getLogger(LOGGER)
 
 
 class SMBusConnector:
@@ -11,7 +15,7 @@ class SMBusConnector:
 
     def init_bus(self, emulate=False):
         if self.smbus is not None:
-            raise Exception("SMBus already inited. A second init is not possible.")
+            logger.warning("SMBus already inited. A second init is not possible.")
 
         self.emulate = emulate
 

@@ -1,16 +1,18 @@
 from vosekast_control.Pump import Pump
 from unittest.mock import MagicMock
+from vosekast_control.connectors import SMBusConnection
 import pytest
 
 
 class TestPump:
     @pytest.fixture
     def pump(self):
+        SMBusConnection.init_bus(emulate=True)
         vosekast = MagicMock()
-        gpio_controller = MagicMock()
+
         control_pin = 12
 
-        pump = Pump(vosekast, "test_pump", control_pin, gpio_controller)
+        pump = Pump(vosekast, "test_pump", control_pin)
 
         return pump
 

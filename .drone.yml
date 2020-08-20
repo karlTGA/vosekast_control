@@ -41,7 +41,7 @@ steps:
       - name: poetry_bin
         path: /root/.poetry/
     commands:
-      - /root/.poetry/bin/poetry run flake8 vosekast_control
+      - /root/.poetry/bin/poetry run flake8 vosekast_control test
 
   - name: Python Testing
     image: python

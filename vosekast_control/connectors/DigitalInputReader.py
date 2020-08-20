@@ -9,7 +9,7 @@ class DigitalInputReaderConnector:
         state_reading = SMBusConnection.smbus.read_byte(self.address)
         return state_reading
 
-    def digitalRead(self, pin: int) -> int:
+    def digital_read(self, pin: int) -> int:
         bin_state = self._read_state()
 
         if pin >= 9 or pin <= 0:

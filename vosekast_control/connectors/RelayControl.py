@@ -35,11 +35,11 @@ class RelayControlConnector:
 
         self._flash()
 
-    def get_state_dict(self) -> Dict[int, int]:
+    def get_state_dict(self) -> Dict[int, bool]:
         state_dict = {}
 
-        for i in range(8):
-            state_dict[i] = (self.state_binary >> i) & 1
+        for i in range(1, 9):
+            state_dict[i] = (self.state_binary >> (i - 1)) & 1 != 1
 
         return state_dict
 
@@ -56,7 +56,7 @@ class RelayControlConnector:
         self._flash()
 
     def _flash(self):
-        SMBusConnection.smbus.write_byte_data(self.address, 0, self.state_binary)
+        SMBusConnection.smbus.write_byte_data(self.address, 1, self.state_binary)
 
 
 RelayControl = RelayControlConnector()
