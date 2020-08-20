@@ -1,6 +1,4 @@
-import asyncio
 from vosekast_control.connectors.RelayControl import RelayControlConnector
-from unittest.mock import MagicMock
 import pytest
 from vosekast_control.connectors import SMBusConnection
 

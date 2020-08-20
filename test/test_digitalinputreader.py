@@ -1,6 +1,4 @@
-import asyncio
 from vosekast_control.connectors.DigitalInputReader import DigitalInputReaderConnector
-from unittest.mock import MagicMock
 import pytest
 from vosekast_control.connectors import SMBusConnection
 
