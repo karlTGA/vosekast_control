@@ -48,4 +48,3 @@ class TestPump:
 
     def test_publish_state(self, pump: Pump):
         pump.publish_state()
-

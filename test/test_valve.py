@@ -46,4 +46,3 @@ class TestValve:
 
     def test_publish_state(self, valve: Valve):
         valve.publish_state()
-
