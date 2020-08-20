@@ -2,6 +2,7 @@ import logging
 from vosekast_control.Log import LOGGER
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
+from vosekast_control.connectors import RelayControl
 
 
 class Pump:
@@ -9,18 +10,14 @@ class Pump:
     STOPPED = "STOPPED"
     UNKNOWN = "UNKNOWN"
 
-    def __init__(self, vosekast, name, control_pin, gpio_controller):
+    def __init__(self, vosekast, name, relay_port):
         super().__init__()
 
         self.vosekast = vosekast
         self.name = name
-        self._pin = control_pin
-        self._gpio_controller = gpio_controller
+        self._relay_port = relay_port
         self.logger = logging.getLogger(LOGGER)
         self._state = self.UNKNOWN
-
-        # init the gpio pin
-        self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
     def stop(self):
         """
@@ -28,7 +25,7 @@ class Pump:
         :return:
         """
         self.logger.info("Stopping {}".format(self.name))
-        self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
+        RelayControl.relays_off([self._relay_port])
         self.state = self.STOPPED
 
     def start(self):
@@ -37,7 +34,7 @@ class Pump:
         :return:
         """
         self.logger.info("Starting {}".format(self.name))
-        self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
+        RelayControl.relays_on([self._relay_port])
         self.state = self.RUNNING
 
     def toggle(self):

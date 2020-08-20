@@ -1,24 +1,36 @@
 from typing import Dict, List
 from vosekast_control.connectors import SMBusConnection
+import logging
+from vosekast_control.Log import LOGGER
+
+logger = logging.getLogger(LOGGER)
 
 
 class RelayControlConnector:
     def __init__(self, address=0x38):
         self.address = address
-        self._bus = SMBusConnection.smbus
 
         self.state_binary = 255  # Represents relay address and inverted state in binary e.g. 0b11110101 -> relay 2 and 4 are "on"
 
     def relays_on(self, relay_list: List[int]):
 
         for relay in relay_list:
+            if relay < 1:
+                raise WrongRelayPort(
+                    "The request relay port to toggle is 0 or lower. That is not possible."
+                )
+
             self.state_binary = self.state_binary & ~(2 ** (relay - 1))
 
         self._flash()
 
     def relays_off(self, relay_list: List[int]):
-
         for relay in relay_list:
+            if relay < 1:
+                raise WrongRelayPort(
+                    "The request relay port to toggle is 0 or lower. That is not possible."
+                )
+
             self.state_binary = self.state_binary | 2 ** (relay - 1)
 
         self._flash()
@@ -33,7 +45,7 @@ class RelayControlConnector:
 
     def read_state(self) -> int:
         # return state as read from the bus
-        return self._bus.read_byte(self.address)
+        return SMBusConnection.smbus.read_byte(self.address)
 
     def all_off(self):
         self.state_binary = 255
@@ -44,7 +56,11 @@ class RelayControlConnector:
         self._flash()
 
     def _flash(self):
-        self._bus.write_byte_data(self.address, 0, self.state_binary)
+        SMBusConnection.smbus.write_byte_data(self.address, 0, self.state_binary)
 
 
 RelayControl = RelayControlConnector()
+
+
+class WrongRelayPort(Exception):
+    pass
