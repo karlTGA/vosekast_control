@@ -8,7 +8,6 @@ import {
   LineChart,
   Resizable,
   styler,
-  // @ts-ignore
 } from "react-timeseries-charts";
 import { Card } from "antd";
 
@@ -36,7 +35,6 @@ export default function TestrunChart({
     <Card title="Results" className="testrun_chart">
       <Resizable>
         <ChartContainer
-          // @ts-ignore
           timeRange={series.range()}
           showGrid={true}
           format="%H:%m:%S"
@@ -45,7 +43,6 @@ export default function TestrunChart({
             <YAxis
               id="scaleValue"
               label="Scale Value in kg"
-              // @ts-ignore
               min={series.min("scaleValue")}
               max={series.max("scaleValue")}
               width="60"

@@ -8,9 +8,7 @@ import {
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
-// @ts-ignore
 import { TimeSeries, TimeEvent } from "pondjs";
-import { debug } from "console";
 
 type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
@@ -27,7 +25,7 @@ interface CommandMessage extends Message {
   target: Targets;
   target_id: string;
   command: string;
-  data?: Record<string, any>;
+  data?: Record<string, string | number | null | undefined | Date>;
 }
 
 interface StatusMessage extends Message {
@@ -125,7 +123,7 @@ class MQTTConnector {
     target: Targets,
     targetId: string,
     command: string,
-    data: Record<string, any> = {}
+    data: Record<string, string | number | null | undefined | Date> = {}
   ) => {
     this.publishMessage("vosekast/commands", {
       type: "command",
