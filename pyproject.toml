@@ -6,7 +6,7 @@ authors = ["Karl Wolffgang <karl_eugen.wolffgang@tu-dresden.de>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.7, <4.0"
 pyserial = "^3.4"
 gmqtt = "^0.6.3"
 uvloop = {version = "^0.14.0",  markers = "sys_platform == 'linux'" }
@@ -22,6 +22,8 @@ black = {version = "^19.10b0", allow-prereleases = true}
 flake8 = "^3.7.9"
 pytest = "^5.4.1"
 mypy = "^0.782"
+python-semantic-release = "^7.2.2"
+commitizen = "^2.1.0"
 
 [tool.poetry.scripts]
 dev = 'vosekast_control.scripts:dev'
@@ -32,3 +34,10 @@ test = 'vosekast_control.scripts:test'
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.semantic_release]
+version_variable = "vosekast_control/__init__.py:__version__"
+upload_to_pypi = false
+upload_to_release = false
+build_command = ":"
+version_source = "commit"

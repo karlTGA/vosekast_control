@@ -53,6 +53,24 @@ steps:
     commands:
       - /root/.poetry/bin/poetry run pytest test
 
+  - name: make release
+    image: python
+    volumes:
+      - name: cache_poetry
+        path: /root/.cache/pypoetry
+      - name: poetry_bin
+        path: /root/.poetry/
+    environment:
+      GH_TOKEN:
+        from_secret: GITHUB_TOKEN
+    commands:
+      - mkdir dist
+      - /root/.poetry/bin/poetry run semantic-release publish
+    when:
+      branch:
+        include:
+          - master
+
 volumes:
   - name: cache_yarn
     host:
