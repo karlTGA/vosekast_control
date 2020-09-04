@@ -240,8 +240,8 @@ class MQTTConnector {
             if (testrun == null) return;
 
             s.testruns.set(runId, {
-              state: message.new_state,
               ...testrun,
+              state: message.new_state,
             });
           });
           break;
