@@ -35,7 +35,7 @@ export default function TestrunChart({
     <Card title="Results" className="testrun_chart">
       <Resizable>
         <ChartContainer
-          timeRange={series.range()}
+          timeRange={series.timerange()}
           showGrid={true}
           format="%H:%m:%S"
         >
@@ -43,6 +43,8 @@ export default function TestrunChart({
             <YAxis
               id="scaleValue"
               label="Scale Value in kg"
+              // TODO: remove ts ignore with new pond version
+              // @ts-ignore
               min={series.min("scaleValue")}
               max={series.max("scaleValue")}
               width="60"

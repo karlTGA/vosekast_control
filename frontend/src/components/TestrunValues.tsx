@@ -1,6 +1,6 @@
 import React from "react";
 import { TestrunInfos } from "../Store";
-import { TimeEvent } from "pondjs";
+import { Event } from "pondjs";
 import { Card } from "antd";
 
 interface ValueProps {
@@ -24,7 +24,7 @@ function TestrunValueCard({
   timeEvent,
 }: {
   valueKey: string;
-  timeEvent: TimeEvent;
+  timeEvent: Event;
 }) {
   const valueProps = valueMapping[valueKey];
   const value = Math.round(timeEvent.get(valueKey) * 1000) / 1000;
@@ -49,7 +49,7 @@ export default function TestrunValues({
 }) {
   if (testrun == null || testrun.results == null) return <></>;
   const keys = Object.keys(valueMapping);
-  const timeEvent = testrun.results.atLast();
+  const timeEvent = testrun.results.atLast() as Event;
 
   return (
     <div className="testrun_value_cards_container">

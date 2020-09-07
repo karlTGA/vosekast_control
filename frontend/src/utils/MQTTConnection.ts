@@ -8,7 +8,7 @@ import {
 } from "../Store";
 import { message } from "antd";
 import moment from "moment";
-import { TimeSeries, TimeEvent } from "pondjs";
+import { TimeSeries, TimeEvent, Event } from "pondjs";
 
 type MessageTypes = "status" | "log" | "message" | "command" | "info" | "data";
 type Targets = "system" | "pump" | "valve";
@@ -348,10 +348,11 @@ class MQTTConnector {
             });
           } else {
             const collection = testrun.results.collection().addEvent(
+              // TODO: remove `as Event` if new pond version is possible
               new TimeEvent(Math.round(datapoint.timestamp), {
                 scaleValue: datapoint.scale_value,
                 flowValue: datapoint.flow_current,
-              })
+              }) as Event
             );
             testrun.results = testrun.results.setCollection(collection, true);
           }

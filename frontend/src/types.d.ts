@@ -87,7 +87,7 @@ declare module "pondjs" {
 
   export type TimeRange = Any;
 
-  export declare class TimeEvent {
+  export declare class Event {
     constructor(timestamp: number, value: Record<string, number>);
     get(arg0: string): number;
   }
@@ -106,6 +106,10 @@ declare module "pondjs" {
     range(): TimeRange;
     min(serie: string): number;
     max(serie: string): number;
-    atLast(): TimeEvent;
+    atLast(): Event;
+  }
+
+  export declare class TimeEvent {
+    constructor(time: number, values: Record<string, number>);
   }
 }
