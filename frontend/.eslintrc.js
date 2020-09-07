@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint", "react"],
+  plugins: ["@typescript-eslint", "react", "react-hooks"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -17,6 +17,7 @@ module.exports = {
   rules: {
     "linebreak-style": "off",
     "react/prefer-stateless-function": 1,
+    "react-hooks/exhaustive-deps": 0,
     "require-jsdoc": 0,
     "valid-jsdoc": 0,
     "no-invalid-this": 0,
