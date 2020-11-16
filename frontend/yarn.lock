@@ -171,6 +171,14 @@
     "@babel/helper-annotate-as-pure" "^7.10.4"
     "@babel/types" "^7.10.4"
 
+"@babel/helper-call-delegate@^7.11.4":
+  version "7.11.4"
+  resolved "https://registry.yarnpkg.com/@babel/helper-call-delegate/-/helper-call-delegate-7.11.4.tgz#c9c63196f0eebabe592dc684e3f17c48a7554db7"
+  integrity sha512-JionsxeZH+NQPj7Z2xZiJj/b5Duo9m3qz7SjTgQS4T/p2QDbzWXjG15DbmAogbnE3CMCi9UeeplaB5UY4gUejg==
+  dependencies:
+    "@babel/helper-hoist-variables" "^7.10.4"
+    "@babel/types" "^7.10.4"
+
 "@babel/helper-compilation-targets@^7.10.4", "@babel/helper-compilation-targets@^7.8.7":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/helper-compilation-targets/-/helper-compilation-targets-7.10.4.tgz#804ae8e3f04376607cc791b9d47d540276332bd2"
@@ -973,9 +981,9 @@
     "@babel/helper-plugin-utils" "^7.10.4"
 
 "@babel/polyfill@^7.7.0":
-  version "7.10.4"
-  resolved "https://registry.yarnpkg.com/@babel/polyfill/-/polyfill-7.10.4.tgz#915e5bfe61490ac0199008e35ca9d7d151a8e45a"
-  integrity sha512-8BYcnVqQ5kMD2HXoHInBH7H1b/uP3KdnwCYXOqFnXqguOyuu443WXusbIUbWEfY3Z0Txk0M1uG/8YuAMhNl6zg==
+  version "7.11.5"
+  resolved "https://registry.yarnpkg.com/@babel/polyfill/-/polyfill-7.11.5.tgz#df550b2ec53abbc2ed599367ec59e64c7a707bb5"
+  integrity sha512-FunXnE0Sgpd61pKSj2OSOs1D44rKTD3pGOfGilZ6LGrrIH0QEtJlTjqOqdF8Bs98JmjfGhni2BBkTfv9KcKJ9g==
   dependencies:
     core-js "^2.6.5"
     regenerator-runtime "^0.13.4"
@@ -8719,7 +8727,7 @@ pnp-webpack-plugin@1.6.0:
   dependencies:
     ts-pnp "^1.1.2"
 
-pondjs@^0.9.0:
+pondjs@0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/pondjs/-/pondjs-0.9.0.tgz#5c931233f8ef56852914eb669506eaac62b0f13b"
   integrity sha512-fXgEYrWhgC/N3CVuXarG+/q54jar35Mqf7QPdl7z+mX5RkMyyjLfj9fMgY3oHv2hzMo9zkNx2kK62DrZuG3LXg==
@@ -11899,10 +11907,15 @@ unc-path-regex@^0.1.2:
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
   integrity sha1-5z3T17DXxe2G+6xrCufYxqadUPo=
 
-underscore@^1.8.3, underscore@^1.9.1:
+underscore@^1.8.3:
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.10.2.tgz#73d6aa3668f3188e4adb0f1943bd12cfd7efaaaf"
   integrity sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
+
+underscore@^1.9.1:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.11.0.tgz#dd7c23a195db34267186044649870ff1bab5929e"
+  integrity sha512-xY96SsN3NA461qIRKZ/+qox37YXPtSBswMGfiNptr+wrt6ds4HaMw23TP612fEyGekRE6LNRiLYr/aqbHXNedw==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"

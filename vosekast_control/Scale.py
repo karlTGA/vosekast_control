@@ -1,6 +1,6 @@
 import serial
 import itertools
-from typing import List
+from typing import List, Tuple
 from collections import deque
 from threading import Thread, Event
 import time
@@ -46,28 +46,34 @@ class WrongUnitOnScaleError(Exception):
     pass
 
 
-def parse_serial_output(line) -> Union[float, None]:
+def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
 
     if len(splitted_line) < 2 and len(splitted_line) > 3:
         logger.warning(
             f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
         )
-        return None
+        return None, False
 
-    if len(splitted_line) == 3:
+    if len(splitted_line) == 2:
+        # readed value is without unit -> not stable value
+        # example: '+    0.015    \r\n'
         number = float(splitted_line[1]) * 1000
-        if splitted_line[0] == "-":
-            number = number * -1
-        unit = splitted_line[2]
+        unit = None
     else:
-        number = float(splitted_line[0]) * 1000
-        unit = splitted_line[1]
+        # readed value is with unit -> stable value
+        # example: '+    0.009 kg \r\n'
+        number = float(splitted_line[1]) * 1000
+        unit = splitted_line[2]
 
-    if unit != "kg":
+    # inverse value if measure negative value
+    if splitted_line[0] == "-":
+        number = number * -1
+
+    if unit is not None and unit != "kg":
         raise WrongUnitOnScaleError()
 
-    return number
+    return number, unit is not None
 
 
 class Scale:
@@ -257,8 +263,6 @@ class Scale:
             return
 
         lines = self._serial_interface.readlines()
-        logger.debug(f"Read: {repr(lines)}")
-
         if len(lines) == 0:
             logger.debug("Read no lines from serial device.")
             return
@@ -267,7 +271,7 @@ class Scale:
             logger.warning("Scale is in calibration mode. Wait...")
             return
 
-        value = parse_serial_output(lines[-1])
+        value, stable = parse_serial_output(lines[-1])
 
         if value is None:
             return
