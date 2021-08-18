@@ -48,32 +48,35 @@ class WrongUnitOnScaleError(Exception):
 
 def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
+    stable = False
 
     if len(splitted_line) < 2 and len(splitted_line) > 3:
         logger.warning(
             f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
         )
-        return None, False
+        return None, stable
 
     if len(splitted_line) == 2:
-        # readed value is without unit -> not stable value
-        # example: '+    0.015    \r\n'
-        number = float(splitted_line[1]) * 1000
-        unit = None
+        # readed value is without +/- -> not stable value
+        # example: '0.015 kg \r\n'
+        number = float(splitted_line[0]) * 1000
+        unit = splitted_line[1]
+
     else:
-        # readed value is with unit -> stable value
+        # readed value is with +/- -> stable value
         # example: '+    0.009 kg \r\n'
         number = float(splitted_line[1]) * 1000
         unit = splitted_line[2]
+        stable = True
 
-    # inverse value if measure negative value
-    if splitted_line[0] == "-":
-        number = number * -1
+        # inverse value if measure negative value
+        if splitted_line[0] == "-":
+            number = number * -1
 
     if unit is not None and unit != "kg":
         raise WrongUnitOnScaleError()
 
-    return number, unit is not None
+    return number, stable
 
 
 class Scale:
