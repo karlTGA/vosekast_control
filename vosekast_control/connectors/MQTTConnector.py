@@ -40,6 +40,10 @@ class MQTTConnector:
         try:
             await self.client.connect(self.host)
 
+        except OSError:
+            self.logger.error("Failed to connect to MQTT broker. Seems no broker to exist.")
+            raise
+
         except ConnectionRefusedError:
             await self.connection_refused()
 
