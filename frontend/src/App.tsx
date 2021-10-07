@@ -1,5 +1,5 @@
 import React from "react";
-import "./App.scss";
+import "./App.css";
 import MainView from "./components/views/MainView";
 import { BrowserRouter as Router } from "react-router-dom";
 
