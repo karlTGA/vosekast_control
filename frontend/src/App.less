@@ -1,4 +1,4 @@
-@import "~antd/dist/antd.css";
+@import '~antd/dist/antd.css';
 
 #root {
   height: 100%;
@@ -8,8 +8,15 @@
   height: 100%;
 }
 
+.vl {
+  background: lightgray;
+  width: 1px;
+  height: 80%;
+  margin: 0 5px;
+}
+
 .App {
-  font-family: "Open Sans", Arial, Helvetica, sans-serif;
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif;
   text-align: center;
   height: 100%;
 
@@ -130,8 +137,9 @@
       align-items: center;
       margin: 0px 10px;
       border-bottom: solid 1px lightgray;
+      height: 47px;
 
-      .current-sequence-info {
+      .info-tag {
         margin: 7px;
         background: white;
         height: 32px;
@@ -139,6 +147,14 @@
         border: solid 1px #d9d9d9;
         box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
         padding: 4px 15px;
+      }
+
+      .info-tag--success {
+        color: rgb(0, 124, 0);
+      }
+
+      .info-tag--danger {
+        color: rgb(160, 39, 39);
       }
 
       button {

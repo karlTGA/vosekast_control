@@ -28,6 +28,8 @@ export type Commands =
 
 export interface ScaleState {
   value: string;
+  unit: string;
+  stable: boolean;
 }
 
 export interface TestrunInfos {
@@ -74,6 +76,8 @@ export const VosekastStore = new Store<VosekastState>({
   tankStates: new Map(),
   scaleState: {
     value: "",
+    unit: "",
+    stable: false
   },
   testruns: new Map(),
 });

@@ -1,11 +1,21 @@
-import React from "react";
-import { Tag } from "antd";
-import { VosekastStore } from "../Store";
-import { useStoreState } from "pullstate";
+import React from 'react';
+import { VosekastStore } from '../Store';
+import { useStoreState } from 'pullstate';
+import classNames from 'classnames';
 
 export function ScaleTag() {
-  const scaleState = useStoreState(VosekastStore, s => s.scaleState);
+  const scaleState = useStoreState(VosekastStore, (s) => s.scaleState);
   if (scaleState == null) return <></>;
 
-  return <Tag>Scale: {scaleState.value}</Tag>;
+  const value = parseFloat(scaleState.value).toFixed(2);
+  return (
+    <div
+      className={classNames('info-tag', {
+        'info-tag--success': scaleState.stable,
+        'info-tag--danger': !scaleState.stable,
+      })}
+    >
+      Scale: {value} {scaleState.unit}
+    </div>
+  );
 }

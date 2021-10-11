@@ -269,7 +269,12 @@ class Scale:
             self._stable = True
             self._value_history.append(Reading(time=now, value=value))
             MQTTConnection.publish_message(
-                StatusMessage("scale", "weight", str(value), {"unit": "g"})
+                StatusMessage(
+                    "scale",
+                    "weight",
+                    str(value),
+                    {"scaleUnit": "g", "scaleStable": True},
+                )
             )
             return
 
@@ -294,7 +299,9 @@ class Scale:
 
         # publish this infos to the frontend
         MQTTConnection.publish_message(
-            StatusMessage("scale", "weight", str(value), {"unit": "g"})
+            StatusMessage(
+                "scale", "weight", str(value), {"scaleUnit": "g", "scaleStable": stable}
+            )
         )
 
     # def add_new_value(self, new_value):

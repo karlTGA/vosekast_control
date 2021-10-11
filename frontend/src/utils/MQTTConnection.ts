@@ -34,6 +34,8 @@ interface StatusMessage extends Message {
   device_id: string;
   new_state: string;
   run_id?: string;
+  scaleUnit?: string;
+  scaleStable?: boolean;
 }
 
 interface LogMessage extends Message {
@@ -220,6 +222,8 @@ class MQTTConnector {
       case "scale": {
         VosekastStore.update((s) => {
           s.scaleState.value = message.new_state;
+          s.scaleState.unit = message.scaleUnit || "";
+          s.scaleState.stable = !!message.scaleStable
         });
         break;
       }

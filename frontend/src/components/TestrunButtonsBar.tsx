@@ -7,6 +7,9 @@ import {
 } from "@ant-design/icons";
 import { TestrunInfos } from "../Store";
 import MQTTConnection from "../utils/MQTTConnection";
+import { ScaleTag } from "./Scale";
+
+
 
 function startRun() {
   MQTTConnection.publishCommand("system", "testrun_controller", "start_run");
@@ -39,7 +42,7 @@ export default function TestrunButtonsBar({
 }) {
   return (
     <div className="sequence-buttons-bar">
-      <div className="current-sequence-info">
+      <div className="info-tag">
         {testrun != null
           ? `Current Testrun: ${testrun.id}`
           : "No testrun running."}
@@ -69,6 +72,8 @@ export default function TestrunButtonsBar({
         Pause
       </Button>
       <Button onClick={shutdownVosekast}>Shutdown</Button>
+      <div className="vl" />
+      <ScaleTag />
     </div>
   );
 }
