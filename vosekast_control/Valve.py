@@ -1,5 +1,6 @@
 import logging
 from vosekast_control.Log import LOGGER
+from vosekast_control.connectors.RelayControl import RelayControl
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
 
@@ -20,22 +21,18 @@ class Valve:
     CLOSED = "CLOSED"
 
     def __init__(
-        self, vosekast, name, control_pin, valve_type, regulation, gpio_controller,
+        self, vosekast, name, relay_port, valve_type, regulation,
     ):
         super().__init__()
 
         self.vosekast = vosekast
         self.name = name
-        self._pin = control_pin
+        self._relay_port = relay_port
         self.valve_type = valve_type
         self.regulation = regulation
-        self._gpio_controller = gpio_controller
         self._state = self.UNKNOWN
         self.logger = logging.getLogger(LOGGER)
         self.state = self.UNKNOWN
-
-        # init the gpio pin
-        self._gpio_controller.setup(self._pin, self._gpio_controller.OUT)
 
     # todo fix bounce
     def close(self):
@@ -44,10 +41,7 @@ class Valve:
         :return:
         """
         self.logger.info("Closing {}".format(self.name))
-
-        # todo this triggers bounce
-        self._gpio_controller.output(self._pin, self._gpio_controller.LOW)
-
+        RelayControl.relays_off([self._relay_port])
         self.state = self.CLOSED
 
     def open(self):
@@ -56,10 +50,7 @@ class Valve:
         :return:
         """
         self.logger.info("Opening {}".format(self.name))
-
-        # todo this triggers bounce
-        self._gpio_controller.output(self._pin, self._gpio_controller.HIGH)
-
+        RelayControl.relays_on([self._relay_port])
         self.state = self.OPEN
 
     @property

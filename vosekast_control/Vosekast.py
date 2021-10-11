@@ -16,10 +16,12 @@ from vosekast_control.connectors import AppControl
 from vosekast_control.utils.Msg import DataMessage, StatusMessage
 from vosekast_control.connectors.DBConnector import DBConnection
 from vosekast_control.utils.Constants import (
+    MEASURING_BYPASS_VALVE,
+    RELAY_PORT_VALVE_MEASURING_BYPASS,
     SCALE_MEASURING,
     MEASURING_DRAIN_VALVE,
-    PIN_VALVE_MEASURING_SWITCH,
-    PIN_VALVE_MEASURING_DRAIN,
+    RELAY_PORT_VALVE_MEASURING_FILL,
+    RELAY_PORT_VALVE_MEASURING_DRAIN,
     MEASURING_TANK_SWITCH,
     LEVEL_MEASURING_TOP,
     LEVEL_MEASURING_BOTTOM,
@@ -91,21 +93,28 @@ class Vosekast:
         measuring_drain_valve = Valve(
             self,
             MEASURING_DRAIN_VALVE,
-            PIN_VALVE_MEASURING_DRAIN,
-            Valve.TWO_WAY,
+            RELAY_PORT_VALVE_MEASURING_DRAIN,
+            Valve.SWITCH,
             Valve.BINARY,
-            self._gpio_controller,
         )
         measuring_tank_switch = Valve(
             self,
             MEASURING_TANK_SWITCH,
-            PIN_VALVE_MEASURING_SWITCH,
+            RELAY_PORT_VALVE_MEASURING_FILL,
             Valve.SWITCH,
             Valve.BINARY,
-            self._gpio_controller,
         )
+        measuring_bypass_valve = Valve(
+            self,
+            MEASURING_BYPASS_VALVE,
+            RELAY_PORT_VALVE_MEASURING_BYPASS,
+            Valve.SWITCH,
+            Valve.BINARY,
+        )
+        
         self.valves = {
             MEASURING_DRAIN_VALVE: measuring_drain_valve,
+            MEASURING_BYPASS_VALVE: measuring_bypass_valve,
             MEASURING_TANK_SWITCH: measuring_tank_switch,
         }
 

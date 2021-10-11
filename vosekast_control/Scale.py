@@ -1,6 +1,6 @@
 import serial
 import itertools
-from typing import List, Tuple
+from typing import List, Tuple, Union, Deque
 from collections import deque
 from threading import Thread, Event
 import time
@@ -12,8 +12,6 @@ from random import uniform
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors import MQTTConnection
 import io
-
-from typing import Deque, Union
 
 logger = logging.getLogger(LOGGER)
 
@@ -63,7 +61,9 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
 
     if splitted_line[0] == '0.000':
         number = 0.0
-        unit = splitted_line[1]
+        if splitted_line[1] is not None:
+            unit = splitted_line[1]
+            
     elif len(splitted_line) == 2:
         # readed value is without unit -> not stable value
         # example: '+   0.015 \r\n'
@@ -176,7 +176,7 @@ class Scale:
         return list(itertools.islice(self._value_history, first_index, None))
 
     @property
-    def last_reading(self) -> Reading:
+    def last_reading(self) -> Union[Reading, None]:
         if len(self._value_history) >= 1:
             return self._value_history[-1]
 
