@@ -46,6 +46,10 @@ class WrongUnitOnScaleError(Exception):
     pass
 
 
+class NoSerialConnectionError(Exception):
+    pass
+
+
 def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
     stable = False
@@ -261,9 +265,16 @@ class Scale:
             raise NoConnectionError
 
         if self._emulate:
+            value = 0.0 + uniform(0.0, 0.2)
             self._stable = True
-            self._value_history.append(Reading(time=now, value=0.0 + uniform(0.0, 0.2)))
+            self._value_history.append(Reading(time=now, value=value))
+            MQTTConnection.publish_message(
+                StatusMessage("scale", "weight", str(value), {"unit": "g"})
+            )
             return
+
+        if self._serial_interface is None:
+            raise NoSerialConnectionError
 
         lines = self._serial_interface.readlines()
         if len(lines) == 0:
@@ -282,7 +293,9 @@ class Scale:
         self._value_history.append(Reading(time=now, value=value))
 
         # publish this infos to the frontend
-        MQTTConnection.publish_message(StatusMessage("scale", "weight", f"{value} g"))
+        MQTTConnection.publish_message(
+            StatusMessage("scale", "weight", str(value), {"unit": "g"})
+        )
 
     # def add_new_value(self, new_value):
 

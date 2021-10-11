@@ -76,13 +76,10 @@ class StatusMessage(Message):
         return f"vosekast/status/{self.device_type}/{self.device_id}"
 
     def get_message_object(self):
-        message_object = super().get_message_object()
+        message_object = {**super().get_message_object(), **self.properties}
         message_object["device_type"] = self.device_type
         message_object["device_id"] = self.device_id
         message_object["new_state"] = self.new_state
-
-        if "run_id" in self.properties:
-            message_object["run_id"] = self.properties["run_id"]
 
         return message_object
 

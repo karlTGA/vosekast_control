@@ -284,11 +284,6 @@ class Vosekast:
         self._state = self.RUNNING
         logger.debug("Vosekast started ok.")
 
-        if self.emulate:
-            logger.info("Starting sequence in 7s.")
-            await asyncio.sleep(7)
-            await self.testrun_controller.start_run()
-
         while not AppControl.is_terminating():
             await asyncio.sleep(1)
 
