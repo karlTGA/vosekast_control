@@ -53,6 +53,7 @@ class NoSerialConnectionError(Exception):
 def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
     stable = False
+    unit = None
 
     if len(splitted_line) < 2 and len(splitted_line) > 3:
         logger.warning(
@@ -60,25 +61,27 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
         )
         return None, stable
 
-    if len(splitted_line) == 2:
-        # readed value is without +/- -> not stable value
-        # example: '0.015 kg \r\n'
-        number = float(splitted_line[0]) * 1000
+    if splitted_line[0] == '0.000':
+        number = 0.0
         unit = splitted_line[1]
-
+    elif len(splitted_line) == 2:
+        # readed value is without unit -> not stable value
+        # example: '+   0.015 \r\n'
+        number = float(splitted_line[1]) * 1000
+        
     else:
-        # readed value is with +/- -> stable value
+        # readed value is with unit -> stable value
         # example: '+    0.009 kg \r\n'
         number = float(splitted_line[1]) * 1000
         unit = splitted_line[2]
         stable = True
 
-        # inverse value if measure negative value
-        if splitted_line[0] == "-":
-            number = number * -1
+    # inverse value if measure negative value
+    if splitted_line[0] == "-":
+        number = number * -1
 
     if unit is not None and unit != "kg":
-        raise WrongUnitOnScaleError()
+        raise WrongUnitOnScaleError
 
     return number, stable
 
@@ -253,8 +256,17 @@ class Scale:
         logger.debug("Start measuring loop.")
 
         while not self._measurement_thread.stopped():
-            self._read_value()
-            time.sleep(self.reading_interval)
+            try:
+                self._read_value()
+                time.sleep(self.reading_interval)
+            except ValueError:
+                logger.warning('Failed to parse signal from scale!')
+            except NoConnectionError:
+                logger.warning('Not connected to scale. Cant read value.')
+            except NoSerialConnectionError:
+                logger.warning('No serial connection to scale.')
+            except WrongUnitOnScaleError:
+                logger.error('Scale is configured with the wrong unit!')
 
         logger.info("Stopped measuring with scale.")
 
