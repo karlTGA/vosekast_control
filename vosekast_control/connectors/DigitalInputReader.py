@@ -9,14 +9,14 @@ class DigitalInputReaderConnector:
         state_reading = SMBusConnection.smbus.read_byte(self.address)
         return state_reading
 
-    def digital_read(self, pin: int) -> int:
+    def digital_read(self, pin: int) -> bool:
         bin_state = self._read_state()
 
         if pin >= 9 or pin <= 0:
             raise Exception("Pin is out of Range. Valid Pins are 1-8")
 
         pin_state = 1 ^ (1 & (bin_state >> (pin - 1)))
-        return pin_state
+        return pin_state == 1
 
 
 DigitalInputReader = DigitalInputReaderConnector()

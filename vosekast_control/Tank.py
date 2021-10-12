@@ -52,12 +52,12 @@ class Tank:
         self.protect_overflow = protect_overflow
         self.emulate = emulate
 
-        # register callback for overfill if necessary
-        if overflow_sensor is not None:
-            self.overflow_sensor.add_callback(self._up_state_changed)
+        # TODO: register callback for overfill if necessary
+        # if overflow_sensor is not None:
+        #     self.overflow_sensor.add_callback(self._up_state_changed)
 
-        if drain_sensor is not None:
-            self.drain_sensor.add_callback(self._low_position_changed)
+        # if drain_sensor is not None:
+        #     self.drain_sensor.add_callback(self._low_position_changed)
 
     def stop_filling(self):
         if self.source_pump is not None:

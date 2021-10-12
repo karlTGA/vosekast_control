@@ -18,9 +18,6 @@ async def main(emulate=False):
     # init vosekast variable
     vosekast = None
 
-    # import the rpi module at event start to prevent the early opening of the emulator gui
-    import RPi.GPIO as GPIO
-
     # import vosekast at runtime to prevent different event loops
     from vosekast_control.connectors import DBConnection
     from vosekast_control.Vosekast import Vosekast
@@ -32,7 +29,7 @@ async def main(emulate=False):
         SMBusConnection.init_bus(emulate=emulate)
 
         # initialise vosekast
-        vosekast = Vosekast(GPIO, emulate=emulate)
+        vosekast = Vosekast(emulate=emulate)
         AppControl.start()
 
         # connect db
@@ -46,16 +43,12 @@ async def main(emulate=False):
         raise
 
     finally:
-        AppControl.shutdown()
         if vosekast is not None:
-            await vosekast.clean()
+            await vosekast.shutdown()
         DBConnection.close()
-        GPIO.cleanup()
 
         if emulate:
             print("system exit")
-            GPIO.ui.close()
-            sys.exit(0)
         else:
             pass
             # os.system("sudo shutdown -h now")

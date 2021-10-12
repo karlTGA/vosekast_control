@@ -27,10 +27,10 @@ from vosekast_control.utils.Constants import (
     LEVEL_MEASURING_BOTTOM,
     LEVEL_CONSTANT_TOP,
     LEVEL_CONSTANT_BOTTOM,
-    PIN_LEVEL_MEASURING_HIGH,
-    PIN_LEVEL_MEASURING_LOW,
-    PIN_LEVEL_CONSTANT_HIGH,
-    PIN_LEVEL_CONSTANT_LOW,
+    INPUT_PORT_LEVEL_MEASURING_HIGH,
+    INPUT_PORT_LEVEL_MEASURING_LOW,
+    INPUT_PORT_LEVEL_CONSTANT_HIGH,
+    INPUT_PORT_LEVEL_CONSTANT_LOW,
     PUMP_CONSTANT_TANK,
     PUMP_MEASURING_TANK,
     RELAY_PORT_PUMP_CONSTANT,
@@ -57,7 +57,7 @@ class Vosekast:
     level_sensors: Dict[str, LevelSensor]
     scale: Scale
 
-    def __init__(self, gpio_controller, emulate=False, *args, **kwargs):
+    def __init__(self, emulate=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.emulate = emulate
@@ -67,27 +67,17 @@ class Vosekast:
         MQTTConnection.on_command = self.handle_command
         add_mqtt_logger_handler(MQTTConnection)
 
-        try:
-            self._gpio_controller = gpio_controller
-            # define how the pins are numbered on the board
-            self._gpio_controller.setmode(self._gpio_controller.BCM)
+        # init devices
+        self._init_valves()
+        self._init_level_sensors()
+        self._init_pumps()
+        self._init_tanks()
+        self.scale = Scale(name=SCALE_MEASURING, emulate=self.emulate)
 
-            # init devices
-            self._init_valves()
-            self._init_level_sensors()
-            self._init_pumps()
-            self._init_tanks()
-            self.scale = Scale(name=SCALE_MEASURING, emulate=self.emulate)
+        self.testrun_controller = TestrunController(vosekast=self)
 
-            self.testrun_controller = TestrunController(vosekast=self)
-
-            # change state if ok
-            self._state = self.INITED
-
-        except NoGPIOControllerError:
-            logger.error(
-                "You have to add a gpio controller to control or simulate the components."
-            )
+        # change state if ok
+        self._state = self.INITED
 
     def _init_valves(self):
         measuring_drain_valve = Valve(
@@ -111,7 +101,7 @@ class Vosekast:
             Valve.SWITCH,
             Valve.BINARY,
         )
-        
+
         self.valves = {
             MEASURING_DRAIN_VALVE: measuring_drain_valve,
             MEASURING_BYPASS_VALVE: measuring_bypass_valve,
@@ -121,31 +111,21 @@ class Vosekast:
     def _init_level_sensors(self):
         level_measuring_top = LevelSensor(
             LEVEL_MEASURING_TOP,
-            PIN_LEVEL_MEASURING_HIGH,
+            INPUT_PORT_LEVEL_MEASURING_HIGH,
             bool,
             LevelSensor.HIGH,
-            self._gpio_controller,
         )
         level_measuring_bottom = LevelSensor(
             LEVEL_MEASURING_BOTTOM,
-            PIN_LEVEL_MEASURING_LOW,
+            INPUT_PORT_LEVEL_MEASURING_LOW,
             bool,
             LevelSensor.LOW,
-            self._gpio_controller,
         )
         level_constant_top = LevelSensor(
-            LEVEL_CONSTANT_TOP,
-            PIN_LEVEL_CONSTANT_HIGH,
-            bool,
-            LevelSensor.HIGH,
-            self._gpio_controller,
+            LEVEL_CONSTANT_TOP, INPUT_PORT_LEVEL_CONSTANT_HIGH, bool, LevelSensor.HIGH,
         )
         level_constant_bottom = LevelSensor(
-            LEVEL_CONSTANT_BOTTOM,
-            PIN_LEVEL_CONSTANT_LOW,
-            bool,
-            LevelSensor.LOW,
-            self._gpio_controller,
+            LEVEL_CONSTANT_BOTTOM, INPUT_PORT_LEVEL_CONSTANT_LOW, bool, LevelSensor.LOW,
         )
 
         self.level_sensors = {
@@ -373,6 +353,7 @@ class Vosekast:
 
         if tank is None:
             logger.warning(f"Tank with id {tank_id} unknown.")
+            return
 
         if command_id == "drain_tank":
             tank.drain_tank()
