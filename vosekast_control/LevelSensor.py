@@ -1,12 +1,22 @@
+from typing import Callable, Optional
 from vosekast_control.connectors import MQTTConnection
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors.DigitalInputReader import DigitalInputReader
+import logging
+
+from vosekast_control.Log import LOGGER
+
+logger = logging.getLogger(LOGGER)
 
 
 class LevelSensor:
     # Positions
     HIGH = "HIGH"
     LOW = "LOW"
+    name: str
+    sensor_type: str
+    position: str
+    _input_pin: int
 
     def __init__(self, name, input_pin, sensor_type, position):
         self.name = name
@@ -23,3 +33,13 @@ class LevelSensor:
         MQTTConnection.publish_message(
             StatusMessage("level_sensor", self.name, new_state)
         )
+
+    def add_callback(self, callback: Callable[[bool], None]):
+        if self._input_pin in DigitalInputReader.callbacks:
+            logger.warning("It is not possible to add two callbacks for a levelsensor.")
+
+        DigitalInputReader.add_callback(self._input_pin, callback)
+
+    def clear_callback(self):
+        DigitalInputReader.clear_callback(self._input_pin)
+        self._callback_id = None

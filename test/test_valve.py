@@ -7,14 +7,11 @@ class TestValve:
     @pytest.fixture
     def valve(self):
         vosekast = MagicMock()
-        gpio_controller = MagicMock()
         control_pin = 13
         valve_type = Valve.TWO_WAY
         regulation = Valve.BINARY
 
-        valve = Valve(
-            vosekast, "test_valve", control_pin, valve_type, regulation, gpio_controller
-        )
+        valve = Valve(vosekast, "test_valve", control_pin, valve_type, regulation)
 
         return valve
 
