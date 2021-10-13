@@ -15,6 +15,8 @@ from vosekast_control.connectors import MQTTConnection
 from vosekast_control.connectors import AppControl
 from vosekast_control.utils.Msg import DataMessage, StatusMessage
 from vosekast_control.connectors.DBConnector import DBConnection
+from vosekast_control.connectors.DigitalInputReader import DigitalInputReader
+
 from vosekast_control.utils.Constants import (
     MEASURING_BYPASS_VALVE,
     RELAY_PORT_VALVE_MEASURING_BYPASS,
@@ -268,6 +270,7 @@ class Vosekast:
             logger.info("Start Vosekast in Debug Mode.")
 
         self.scale.start()
+        DigitalInputReader.start()
 
         await MQTTConnection.connect()
         self._state = self.RUNNING

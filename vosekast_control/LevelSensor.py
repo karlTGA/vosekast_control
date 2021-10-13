@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable
 from vosekast_control.connectors import MQTTConnection
 from vosekast_control.utils.Msg import StatusMessage
 from vosekast_control.connectors.DigitalInputReader import DigitalInputReader

@@ -1,8 +1,13 @@
 from typing import Callable, Dict, List
 from vosekast_control.connectors import SMBusConnection
 import threading
+import logging
+from vosekast_control.Log import LOGGER
+
 from time import sleep
 from vosekast_control.connectors.AppControl import AppControl
+
+logger = logging.getLogger(LOGGER)
 
 
 class Callback:
@@ -27,18 +32,21 @@ class DigitalInputReaderConnector:
         self._thread = threading.Thread(target=self._loop)
 
     def start(self):
+        logger.info("Start background thread for DigitalInputs.")
         self._thread.start()
 
     def _loop(self):
         while not AppControl.is_terminating():
             new_state = self._read_state()
 
-            if new_state != self.old_state:
+            if self.old_state is not None and new_state != self.old_state:
                 self._trigger_callbacks(new_state)
 
             self.old_state = new_state
 
             sleep(0.1)
+
+        logger.info("Stopped background thread for DigitalInputs.")
 
     def _trigger_callbacks(self, new_state):
         for i in range(1, 8):
