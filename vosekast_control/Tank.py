@@ -52,12 +52,12 @@ class Tank:
         self.protect_overflow = protect_overflow
         self.emulate = emulate
 
-        # TODO: register callback for overfill if necessary
-        # if overflow_sensor is not None:
-        #     self.overflow_sensor.add_callback(self._up_state_changed)
+        # register callback for overfill if necessary
+        if overflow_sensor is not None:
+            self.overflow_sensor.add_callback(self._up_state_changed)
 
-        # if drain_sensor is not None:
-        #     self.drain_sensor.add_callback(self._low_position_changed)
+        if drain_sensor is not None:
+            self.drain_sensor.add_callback(self._low_position_changed)
 
     def stop_filling(self):
         if self.source_pump is not None:
@@ -80,12 +80,6 @@ class Tank:
 
         self.drain_valve.close()
         self.logger.info("Ready to fill the tank {}".format(self.name))
-
-    async def _up_state_changed(self, pin, alert):
-        if alert:
-            self._on_full()
-        else:
-            self._on_draining()
 
     async def fill(self, keep_source_active=False, max_filling_time=75):
         if self._state == self.FILLED:
@@ -139,6 +133,18 @@ class Tank:
             )
             raise
 
+    async def _up_state_changed(self, triggered):
+        if triggered:
+            self._on_full()
+        else:
+            self._on_draining()
+
+    async def _low_position_changed(self, triggered):
+        if triggered:
+            self._handle_drained()
+        else:
+            self._handle_filling()
+
     def _on_draining(self):
         """
         internal function to register that the tank gets drained from highest position
@@ -155,12 +161,6 @@ class Tank:
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
-
-    async def _low_position_changed(self, pin, alert):
-        if alert:
-            self._handle_drained()
-        else:
-            self._handle_filling()
 
     def _handle_filling(self):
         """
