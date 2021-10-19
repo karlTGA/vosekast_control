@@ -54,10 +54,10 @@ class Tank:
 
         # register callback for overfill if necessary
         if overflow_sensor is not None:
-            self.overflow_sensor.add_callback(self._up_state_changed)
+            self.overflow_sensor.on_change = self._up_state_changed
 
         if drain_sensor is not None:
-            self.drain_sensor.add_callback(self._low_position_changed)
+            self.drain_sensor.on_change = self._low_position_changed
 
     def stop_filling(self):
         if self.source_pump is not None:
@@ -150,14 +150,14 @@ class Tank:
         internal function to register that the tank gets drained from highest position
         :return:
         """
-        self._state = self.IS_DRAINING
+        self.state = self.IS_DRAINING
 
     def _on_full(self):
         """
         internal function to register that the tank is filled
         :return:
         """
-        self._state = self.FILLED
+        self.state = self.FILLED
 
         if self.source_pump is not None and self.protect_overflow:
             self.source_pump.stop()
@@ -167,14 +167,14 @@ class Tank:
         internal function to register that the tank gets filled
         :return:
         """
-        self._state = self.IS_FILLING
+        self.state = self.IS_FILLING
 
     def _handle_drained(self):
         """
         internal function to register that the tank is drained
         :return:
         """
-        self._state = self.DRAINED
+        self.state = self.DRAINED
 
         if self.drain_valve is not None and self.protect_draining:
             self.drain_valve.close()

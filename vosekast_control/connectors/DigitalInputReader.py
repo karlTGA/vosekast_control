@@ -1,8 +1,10 @@
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 from vosekast_control.connectors import SMBusConnection
 import threading
 import logging
 from vosekast_control.Log import LOGGER
+from inspect import iscoroutinefunction
+from asyncio import create_task, BaseEventLoop
 
 from time import sleep
 from vosekast_control.connectors.AppControl import AppControl
@@ -23,6 +25,7 @@ class DigitalInputReaderConnector:
     callbacks: Dict[int, Callback]
     address: int
     counter: int
+    event_loop: Optional[BaseEventLoop]
 
     def __init__(self, address=0x39):
         self.address = address
@@ -30,6 +33,7 @@ class DigitalInputReaderConnector:
         self.callbacks = {}
         self.old_state = None
         self._thread = threading.Thread(target=self._loop)
+        self.event_loop = None
 
     def start(self):
         logger.info("Start background thread for DigitalInputs.")
@@ -37,14 +41,17 @@ class DigitalInputReaderConnector:
 
     def _loop(self):
         while not AppControl.is_terminating():
-            new_state = self._read_state()
+            try:
+                new_state = self._read_state()
 
-            if self.old_state is not None and new_state != self.old_state:
-                self._trigger_callbacks(new_state)
+                if self.old_state is not None and new_state != self.old_state:
+                    self._trigger_callbacks(new_state)
 
-            self.old_state = new_state
+                self.old_state = new_state
 
-            sleep(0.1)
+                sleep(0.1)
+            except Exception as err:
+                logger.warning(f'Error in digital input loop: {err}')
 
         logger.info("Stopped background thread for DigitalInputs.")
 
@@ -55,7 +62,13 @@ class DigitalInputReaderConnector:
                 callback = self.callbacks.get(i)
 
                 if callback is not None:
-                    callback.callback(pin_state)
+                    if (iscoroutinefunction(callback.callback)):
+                        if self.event_loop is None:
+                            logger.warning('DigitalInputReader tries to run a async task, but has no event loop reference.')
+                    
+                        self.event_loop.create_task(callback.callback(pin_state))
+                    else:
+                        callback.callback(pin_state)
 
     def _get_pin_state(self, pin, bin_state):
         pin_state = 1 ^ (1 & (bin_state >> (pin - 1)))

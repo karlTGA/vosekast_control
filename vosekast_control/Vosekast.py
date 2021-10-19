@@ -65,6 +65,9 @@ class Vosekast:
         self.emulate = emulate
         self._event_loop = asyncio.get_event_loop()
 
+        # reference the event loop in singletons
+        DigitalInputReader.event_loop = self._event_loop
+
         # set mqtt client, host
         MQTTConnection.on_command = self.handle_command
         add_mqtt_logger_handler(MQTTConnection)
