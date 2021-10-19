@@ -31,8 +31,11 @@ async def main(emulate=False):
 
         await vosekast.run()
 
+    except asyncio.CancelledError:
+        logger.info('Stopp signal for vosekast per keyboard interrupt.')
+
     except Exception:
-        logger.error(f"Problems with vosekast. Halt system.")
+        logger.error(f"Unknown problems with vosekast. Halt system.")
         traceback.print_exc()
         raise
 
@@ -49,4 +52,8 @@ async def main(emulate=False):
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info('Stopped vosekast per keyboard interrupt.')
+

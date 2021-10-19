@@ -81,13 +81,16 @@ class MQTTConnector:
         runs = 0
 
         while self.connected:
-            if runs == 3:
-                msg = StatusMessage("system", "health", "OK")
-                self.publish_message(msg)
-                runs = 0
+            try:
+                if runs == 3:
+                    msg = StatusMessage("system", "health", "OK")
+                    self.publish_message(msg)
+                    runs = 0
 
-            runs += 1
-            await asyncio.sleep(1)
+                runs += 1
+                await asyncio.sleep(1)
+            except asyncio.CancelledError:
+                return
 
     async def on_message(self, client, topic, payload, qos, properties):
         message = payload
