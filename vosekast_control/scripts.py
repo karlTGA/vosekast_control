@@ -24,12 +24,12 @@ def start():
 def dev():
     print("Start vosekast in dev mode:")
     frontend()
-    backend(emulate=True)
+    backend(emulate=False)
 
 
 def dev_backend():
     print("Start the backend alone:")
-    backend(emulate=True)
+    backend(emulate=False)
 
 
 def dev_frontend():

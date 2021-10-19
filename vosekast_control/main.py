@@ -9,10 +9,6 @@ logger = setup_custom_logger()
 
 
 async def main(emulate=False):
-    # overwrite the emulate param with the env if exist
-    # emulate = os.getenv("EMULATE", str(emulate)) == "True"
-    emulate = False
-
     # init vosekast variable
     vosekast = None
 
