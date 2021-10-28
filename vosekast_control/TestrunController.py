@@ -92,7 +92,7 @@ class TestrunController:
 
             self.vosekast.valves[MEASURING_TANK_SWITCH].open()
             await self.current_run.start()
-            self.logger.debug("Measuring started.")
+            self.logger.debug("Measuring ended.")
 
         except Exception:
             self.logger.debug("Measuring aborted.")

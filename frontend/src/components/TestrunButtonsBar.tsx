@@ -69,7 +69,7 @@ export default function TestrunButtonsBar({
         disabled={testrun == null || testrun.state === "STOPPED"}
       >
         <PauseOutlined />
-        Pause
+        Pause!
       </Button>
       <Button onClick={shutdownVosekast}>Shutdown</Button>
       <div className="vl" />

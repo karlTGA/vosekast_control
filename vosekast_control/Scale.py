@@ -259,7 +259,7 @@ class Scale:
             try:
                 self._read_value()
                 time.sleep(self.reading_interval)
-            except ValueError:
+            except ValueError or IndexError:
                 logger.warning('Failed to parse signal from scale!')
             except NoConnectionError:
                 logger.warning('Not connected to scale. Cant read value.')
