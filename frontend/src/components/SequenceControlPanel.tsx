@@ -4,12 +4,14 @@ import { useStoreState } from "pullstate";
 import { VosekastStore } from "../Store";
 import MQTTConnection from "../utils/MQTTConnection";
 import {  Button } from 'antd';
-import {  DownloadOutlined } from '@ant-design/icons';
+import { CSVLink } from "react-csv"
 
 export default function SequenceControlPanel(){
   const [foundActiveRun, setFoundActiveRun] = useState(false);
   const [inputValue, setNewId] = useState("");
   const [queryId, setQueryId] = useState("");
+  const [csvData, setCsvData] = useState([{}]);
+  const [bolleanDownload, setBolleanDownload] = useState(true)
   
   const changeId = (e) => {
     setNewId(e.target.value);
@@ -18,9 +20,8 @@ export default function SequenceControlPanel(){
   const getId = () => {
     setNewId("");
     setQueryId(inputValue);
-    setFoundActiveRun(false)
+    setFoundActiveRun(false);
   };
- 
   const oldRuns = useStoreState(VosekastStore, (s) => s.testruns);
   
   const queryRun = Array.from(oldRuns.values()).find(
@@ -28,10 +29,13 @@ export default function SequenceControlPanel(){
   );
   
   useEffect(() => {
-    console.log(queryRun != null)
-    console.log(!foundActiveRun)
+    if (queryRun?.results != null) {
+      setCsvData(queryRun.results.toJSON().points)
+      setBolleanDownload(false)
+    };
+
     if (queryRun != null && !foundActiveRun) {
-      console.log("TEST")
+      
       const requestOldData = async () => {
         MQTTConnection.publishCommand(
           "system",
@@ -40,13 +44,18 @@ export default function SequenceControlPanel(){
           { run_id: queryRun.id}
         );
       };
-
+      
       setFoundActiveRun(true);
       requestOldData();
-    }
+      
+          };
+     
   }, [queryRun]);
-
   
+  const disableDownload = () => {
+    setBolleanDownload(true)
+  };
+   
   return(
     <>
     <div className="sequence-buttons-bar">
@@ -55,9 +64,21 @@ export default function SequenceControlPanel(){
       <Button 
         onClick={getId}
         >Get Data</Button>
-      <Button icon={<DownloadOutlined />}>
-        Download
+      <Button  disabled={bolleanDownload} onClick={disableDownload}>
+        <CSVLink
+          data={csvData} 
+          separator={";"}
+          headers = {[
+            "time", "messaure", "flow" ]
+            } 
+          filename={"Download"}
+          className="btn btn-primary"
+          target="_blank"                
+        >
+        Download 
+        </CSVLink>
       </Button>
+      
       <div className="vl" />
       
     </div>
