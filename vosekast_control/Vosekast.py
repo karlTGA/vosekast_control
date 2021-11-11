@@ -264,10 +264,6 @@ class Vosekast:
 
         logger.debug("All pumps switched off.")
 
-        # stop scale
-        logger.debug("Now stopping scale.")
-        await self.scale.stop()
-
     async def run(self):
         if self.emulate:
             logger.info("Start Vosekast in Debug Mode.")

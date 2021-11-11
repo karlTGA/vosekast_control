@@ -66,14 +66,9 @@ class TestrunController:
             self.logger.debug("Vosekast ready to measure.")
             # turn on measuring pump, start measuring
             await self._start_measurement()
-
-            # todo: change the state per method
-            self.vosekast.state = self.vosekast.MEASURING
-            self.state = self.MEASURING
-
             # write to file
-            await self.current_run.start()
-
+            await self.stop_current_run()
+            
         except Exception:
             raise
         finally:
@@ -89,11 +84,11 @@ class TestrunController:
             self.logger.debug("Measuring Pump spin up. Please wait.")
 
             await asyncio.sleep(2)
-
-            self.vosekast.valves[MEASURING_TANK_SWITCH].open()
-            await self.current_run.start()
+            
+            self.vosekast.valves[MEASURING_TANK_SWITCH].open()            
+            await self.current_run.start()   
             self.logger.debug("Measuring ended.")
-
+            
         except Exception:
             self.logger.debug("Measuring aborted.")
             self.vosekast.pumps[PUMP_MEASURING_TANK].stop()
@@ -113,7 +108,7 @@ class TestrunController:
             self.vosekast.state = self.vosekast.RUNNING
             self.current_run.stop()
             del self.current_run
-
+            
             await self.vosekast.clean()
         else:
             self.logger.info("Sequence has not yet been started.")
