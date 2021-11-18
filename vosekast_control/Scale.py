@@ -63,12 +63,12 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
         number = 0.0
         if splitted_line[1] is not None:
             unit = splitted_line[1]
-            
+
     elif len(splitted_line) == 2:
         # readed value is without unit -> not stable value
         # example: '+   0.015 \r\n'
         number = float(splitted_line[1]) * 1000
-        
+         
     else:
         # readed value is with unit -> stable value
         # example: '+    0.009 kg \r\n'
@@ -292,8 +292,10 @@ class Scale:
 
         if self._serial_interface is None:
             raise NoSerialConnectionError
-
-        lines = self._serial_interface.readlines()
+        
+        lines = self._serial_interface.readlines(80)
+        #readlines function argument -> Limitation to avoid errors when reading
+        
         if len(lines) == 0:
             logger.debug("Read no lines from serial device.")
             return
