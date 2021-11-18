@@ -52,7 +52,7 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
     stable = False
     unit = None
-
+    
     if len(splitted_line) < 2 and len(splitted_line) > 3:
         logger.warning(
             f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
@@ -67,12 +67,12 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     elif len(splitted_line) == 2:
         # readed value is without unit -> not stable value
         # example: '+   0.015 \r\n'
-        number = float(splitted_line[1]) * 1000
-         
+        number = float(splitted_line[1])
+
     else:
         # readed value is with unit -> stable value
         # example: '+    0.009 kg \r\n'
-        number = float(splitted_line[1]) * 1000
+        number = float(splitted_line[1])
         unit = splitted_line[2]
         stable = True
 
@@ -285,7 +285,7 @@ class Scale:
                     "scale",
                     "weight",
                     str(value),
-                    {"scaleUnit": "g", "scaleStable": True},
+                    {"scaleUnit": "kg", "scaleStable": True},
                 )
             )
             return
@@ -314,7 +314,7 @@ class Scale:
         # publish this infos to the frontend
         MQTTConnection.publish_message(
             StatusMessage(
-                "scale", "weight", str(value), {"scaleUnit": "g", "scaleStable": stable}
+                "scale", "weight", str(value), {"scaleUnit": "kg", "scaleStable": stable}
             )
         )
 
