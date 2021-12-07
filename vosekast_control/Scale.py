@@ -7,6 +7,7 @@ import time
 from asyncio import sleep
 import logging
 from datetime import datetime
+from serial.serialutil import PARITY_EVEN
 from vosekast_control.Log import LOGGER
 from random import uniform
 from vosekast_control.utils.Msg import StatusMessage
@@ -17,12 +18,12 @@ logger = logging.getLogger(LOGGER)
 
 
 class Reading:
-    __slots__ = ("time", "value")
+    __slots__ = ("time", "value", "flow")
 
-    def __init__(self, time: float, value: float):
+    def __init__(self, time: float, value: float, flow: float):
         self.time = time
         self.value = value
-
+        self.flow = flow
 
 class MeasurementThread(Thread):
     def __init__(self, *args, **kwargs):
@@ -52,8 +53,8 @@ def parse_serial_output(line) -> Tuple[Union[float, None], bool]:
     splitted_line = line.split()
     stable = False
     unit = None
-    
-    if len(splitted_line) < 2 and len(splitted_line) > 3:
+
+    if len(splitted_line) < 2 or len(splitted_line) > 3:
         logger.warning(
             f"Read line on scale with wrong format. [{line}] len({len(splitted_line)})"
         )
@@ -117,10 +118,11 @@ class Scale:
         self._serial_port = None
 
         self._value_history: Deque[Reading] = deque([], maxlen=1000)
+        self._flow_history: Deque[Reading] = deque([], maxlen=1000)
         self._measurement_thread = MeasurementThread(target=self._loop)
         self._is_stable = False
 
-        self._state = self.INITED
+        self._state = self.INITED       
 
     def start(self):
         if self._serial_interface is None:
@@ -129,7 +131,7 @@ class Scale:
         self._open_serial_connection()
         self.lock_keys()
         self.tare()
-        self.set_gramm_on_scale()
+        self.set_kilogramm_on_scale()
         self._start_thread()
         self._state = self.RUNNING
 
@@ -163,11 +165,11 @@ class Scale:
 
         self._write_to_serial(b"\x1bR\r\n")
 
-    def set_gramm_on_scale(self):
+    def set_kilogramm_on_scale(self):
         if not self.connected:
-            logger.warning("Cannot set gramm on scale if not connected.")
+            logger.warning("Cannot set kilogramm on scale if not connected.")
 
-        cmd = b"\033A\r\n"
+        cmd = b"\033B\r\n"
         logger.debug(f"Write to serial [{cmd}]")
         self._write_to_serial(cmd)
 
@@ -210,6 +212,7 @@ class Scale:
         ser.baudrate = self._baudrate
         ser.bytesize = self._bytesize
         ser.timeout = self._timeout
+        ser.parity = PARITY_EVEN
         ser.timeout = 0.1
 
         self._serial_interface = io.TextIOWrapper(
@@ -308,81 +311,42 @@ class Scale:
 
         if value is None:
             return
-
-        self._value_history.append(Reading(time=now, value=value))
-
+        volume_flow = self.calculate_volume_flow(now, value)
+        self._value_history.append(Reading(time=now, value=value, flow=volume_flow))
+        
         # publish this infos to the frontend
         MQTTConnection.publish_message(
             StatusMessage(
                 "scale", "weight", str(value), {"scaleUnit": "kg", "scaleStable": stable}
             )
         )
+        # publish this infos to the frontend
+        MQTTConnection.publish_message(
+            StatusMessage(
+                "flow", "volume_flow", str(volume_flow), {"scaleUnit": "l/s", "scaleStable": stable}
+            )
+        )
+    def calculate_volume_flow(self, time, value):
+            
+        #calculate volume flow:
+        # density of water at normal pressure:
+        # 10°C: 0.999702 kg/l
+        # 15°C: 0.999103 kg/l    
+        # 20°C: 0.998207 kg/l
+        # 25°C: 0.997048 kg/l
+        density = 0.999103
+        
 
-    # def add_new_value(self, new_value):
+        if len(self._value_history) > 0:
+            
+            time_delta = time - self._value_history[-1].time
+            weight_delta = value - self._value_history[-1].value
+            volume_flow = abs(weight_delta) / (time_delta * density)
+            
+        else:
+            logger.debug("Erster Wert")
+            volume_flow = 0
+        return volume_flow
 
-    #     timestamp = time.time() * 1000
 
-    #     # deque scale history
-    #     self.scale_history.appendleft(timestamp)
-    #     self.scale_history.appendleft(new_value)
-
-    #     # calculate volume flow
-    #     if len(self.scale_history) > 2:
-
-    #         try:
-    #             # todo dictionary: value, timestamp
-    #             delta = self.scale_history[0] - self.scale_history[2]
-    #             delta_weight = abs(delta)
-
-    #             duration = self.scale_history[1] - self.scale_history[3]
-    #             delta_time = abs(duration)
-
-    #             weight_per_time = (delta_weight / delta_time) * 1000
-
-    #             # density of water at normal pressure:
-    #             # 10°C: 0.999702
-    #             # 15°C: 0.999103
-    #             # 20°C: 0.998207
-
-    #             # weight_per_time divided by density gives volume flow
-    #             volume_flow = round(weight_per_time / 0.999103, 10)
-
-    #             self.flow_history.appendleft(volume_flow)
-    #             self.flow_history_average.appendleft(volume_flow)
-
-    #         except ZeroDivisionError:
-    #             logger.warning("Division by zero.")
-
-    #     # publish via mqtt
-    #     # new_value = weight measured by scale
-
-    #     if not self.scale_publish:
-    #         return
-    #     else:
-    #         MQTTConnection.publish_message(
-    #             StatusMessage("scale", self.name, f"{new_value} Kg")
-    #         )
-
-    #         if len(self.last_readings) == 10:
-    #             # calculate square mean error
-    #             diffs = 0
-    #             for value in list(islice(self.last_readings, 0, 9)):
-    #                 diffs += abs(value - new_value)
-
-    #             mean_diff = diffs / len(self.last_readings)
-
-    #             if mean_diff < 0.1:
-    #                 self.stable = True
-    #                 self.state = self.RUNNING
-    #                 return
-
-    #         self.stable = False
-    #         self.state = self.PAUSED
-
-    # def flow_average(self):
-    #     if len(self.flow_history_average) == 5:
-    #         volume_flow_average = mean(self.flow_history_average)
-    #         flow_average = round(volume_flow_average, 5)
-    #         return flow_average
-    #     else:
-    #         return 0
+    

@@ -32,6 +32,12 @@ export interface ScaleState {
   stable: boolean;
 }
 
+export interface FlowState {
+  value: string;
+  unit: string;
+  stable: boolean;
+}
+
 export interface TestrunInfos {
   id: string;
   startedAt: number;
@@ -57,6 +63,7 @@ export interface VosekastState {
   valveStates: Map<string, ValveState>;
   tankStates: Map<string, TankState>;
   scaleState: ScaleState;
+  flowState: FlowState;
   testruns: Map<string, TestrunInfos>;
 }
 
@@ -75,6 +82,11 @@ export const VosekastStore = new Store<VosekastState>({
   valveStates: new Map(),
   tankStates: new Map(),
   scaleState: {
+    value: "",
+    unit: "",
+    stable: false
+  },
+  flowState: {
     value: "",
     unit: "",
     stable: false

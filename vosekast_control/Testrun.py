@@ -102,12 +102,11 @@ class Testrun:
         # todo: emulated or not should not interesting for the run class. the scale should
         # give a simple a value
         last_scale_values = self.scale.get_values(number=5)
-        # todo: calculate flow
-
+        
         data = {
             "timestamp": last_scale_values[-1].time,
             "scale_value": last_scale_values[-1].value,
-            "flow_current": 0,
+            "flow_current": last_scale_values[-1].flow,
             "flow_average": 0,
             "pump_constant_tank_state": self.vosekast.pumps[PUMP_CONSTANT_TANK].state,
             "pump_measuring_tank_state": self.vosekast.pumps[PUMP_MEASURING_TANK].state,
@@ -123,7 +122,7 @@ class Testrun:
         DBConnection.insert_datapoint(data)
 
         self.logger.debug(
-            f"{last_scale_values[-1].value} kg, flow rate (average) {0} L/s"
+            f"{last_scale_values[-1].value} kg, {last_scale_values[-1]} L/s"
         )
 
     def get_infos(self):

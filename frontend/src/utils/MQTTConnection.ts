@@ -30,7 +30,7 @@ interface CommandMessage extends Message {
 
 interface StatusMessage extends Message {
   type: "status";
-  device_type: "scale" | "system" | "pump" | "valve" | "tank";
+  device_type: "scale" | "system" | "pump" | "valve" | "tank" | "flow";
   device_id: string;
   new_state: string;
   run_id?: string;
@@ -224,6 +224,14 @@ class MQTTConnector {
           s.scaleState.value = message.new_state;
           s.scaleState.unit = message.scaleUnit || "";
           s.scaleState.stable = !!message.scaleStable
+        });
+        break;
+      }  
+      case "flow": {
+        VosekastStore.update((s) => {
+          s.flowState.value = message.new_state;
+          s.flowState.unit = message.scaleUnit || "";
+          s.flowState.stable = !!message.scaleStable
         });
         break;
       }

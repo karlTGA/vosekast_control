@@ -8,7 +8,7 @@ import {
 import { TestrunInfos } from "../Store";
 import MQTTConnection from "../utils/MQTTConnection";
 import { ScaleTag } from "./Scale";
-
+import { FlowTag } from "./VolumeFlow"
 
 
 function startRun() {
@@ -74,6 +74,7 @@ export default function TestrunButtonsBar({
       <Button onClick={shutdownVosekast}>Shutdown</Button>
       <div className="vl" />
       <ScaleTag />
+      <FlowTag />
     </div>
   );
 }
